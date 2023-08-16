@@ -40,10 +40,6 @@ UTM10N_plotcoords <- data.frame(subplot_centers_sp$SUBPLOT, st_coordinates(subpl
 
 subplot_centers_sp_UTM10N <- full_join(subplot_centers_sp_UTM10N, UTM10N_plotcoords, by="SUBPLOT")
 
-#### give trees ID numbers ####
-
-site14_trees = site14_trees %>% mutate(tree_id = 1:nrow(site14_trees))
-
 #### Get the coordinates of each tree in Site 14 ####
 
 # add new columns to the Site 14 dataframe so that each individual tree has a populated plot center easting and northing
@@ -56,6 +52,10 @@ site14_trees = trees_locations %>%
   mutate(TreeEasting = as.numeric(EastingUTM10N) + sin(deg2rad(AZIMUTH)) * `DIST (m)`,
          TreeNorthing = as.numeric(NorthingUTM10N) + cos(deg2rad(AZIMUTH)) * `DIST (m)`)
 
+#### give trees ID numbers ####
+
+site14_trees = site14_trees %>% mutate(tree_id = 1:nrow(site14_trees))
+
 #### convert to spatial data and export ####
 
 trees_sp <- st_as_sf(site14_trees, coords = c("TreeEasting","TreeNorthing"), crs = 32610)
@@ -66,13 +66,13 @@ st_write(trees_sp %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\fie
 
 #### Load and inspect data ####
 
-# Import sheet 1
+# Import sheet 2
 site15 = read_excel(data("stem_data.xls"),sheet=2,col_names = TRUE,skip=2)
 
 # Remove trees with NA distance and/or azimuth
 site15 <- site15 %>% drop_na (AZIMUTH) %>% drop_na (`DIST (m)`)
 
-#create a dataframe of subplot centers-- doing this manually is not ideal but I'm unsure of how to extract random cells to make them into a new table
+#create a dataframe of subplot centers
 subplot_centers_site15 <- matrix(c('S2', -122, -24.0664, 43, 35.8758, 'E1', -122, -24.0618, 43, 35.8983, 'W4', -122, -24.0853, 43, 35.8865, 'N3', -122, -24.0726, 43, 35.8902, '6', -122, -24.0992, 43, 35.8932, '5', -122, -24.0931, 43, 35.8992), ncol=5, byrow=TRUE)
 
 colnames(subplot_centers_site15) <- c('SUBPLOT','PlotCenterEastingDegrees', 'PlotCenterEastingMinutes', 'PlotCenterNorthingDegrees', 'PlotCenterNorthingMinutes')
@@ -119,5 +119,142 @@ trees_site15_sp <- st_as_sf(site15_trees, coords = c("TreeEasting","TreeNorthing
 
 st_write(trees_site15_sp %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site15trees.geojson"),delete_dsn=TRUE)
 
+#### sheet 3 / site 11 ####
+
+#### Load and inspect data ####
+
+# Import sheet 3
+site11 = read_excel(data("stem_data.xls"),sheet=3,col_names = TRUE,skip=2)
+
+# Remove trees with NA distance and/or azimuth
+site11 <- site11 %>% drop_na (AZIMUTH) %>% drop_na (`DIST (m)`)
+
+#create a dataframe of subplot centers
+subplot_centers_site11 <- matrix(c('SW2', -122, -23.5526, 43, 33.8795, 'SE1', -122, -23.5373, 43, 33.8782, 'NW4', -122, -23.5600, 43, 33.8777, 'NE3', -122, -23.5377, 43, 33.8937, '6', -122, -23.5545, 43, 33.9010, '5', -122, -23.5342, 43, 33.8985), ncol=5, byrow=TRUE)
+
+colnames(subplot_centers_site11) <- c('SUBPLOT','PlotCenterEastingDegrees', 'PlotCenterEastingMinutes', 'PlotCenterNorthingDegrees', 'PlotCenterNorthingMinutes')
+
+subplot_centers_site11 <- as.data.frame.matrix(subplot_centers_site11)
+
+subplot_centers_site11$PlotCenterEasting = (as.numeric(subplot_centers_site11$PlotCenterEastingDegrees)) + ((as.numeric(subplot_centers_site11$PlotCenterEastingMinutes))/60)
+
+subplot_centers_site11$PlotCenterNorthing = (as.numeric(subplot_centers_site11$PlotCenterNorthingDegrees)) + ((as.numeric(subplot_centers_site11$PlotCenterNorthingMinutes))/60)
+
+#### Map plot centers and save them ####
+subplot_centers_site11_sp <- st_as_sf(subplot_centers_site11, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
+
+# Transforming spatial data points into EPSG 3857 so it's compatible with default qgis OpenStreetMaps projection
+st_write (st_transform (subplot_centers_site11_sp, 3857), "C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site11plotcenters.geojson", delete_dsn=TRUE)
+
+# convert the plot center coordinates to UTM10N format so the calculations in the next step work
+
+subplot_centers_site11_sp_UTM10N <- st_transform (subplot_centers_site11_sp, 32610)
+
+UTM10N_plotcoords_site11 <- data.frame(subplot_centers_site11_sp$SUBPLOT, st_coordinates(subplot_centers_site11_sp_UTM10N[,1], st_coordinates(subplot_centers_site11_sp_UTM10N[,2]))) %>% rename (SUBPLOT=subplot_centers_site11_sp.SUBPLOT, EastingUTM10N=X, NorthingUTM10N=Y)
+
+subplot_centers_site11_sp_UTM10N <- full_join(subplot_centers_site11_sp_UTM10N, UTM10N_plotcoords_site11, by="SUBPLOT")
+
+#### Get the coordinates of each tree in Site 11 ####
+
+# add new columns to the Site 11 dataframe so that each individual tree has a populated plot center easting and northing
+
+trees_locations_site11 = full_join(site11,st_drop_geometry(subplot_centers_site11_sp_UTM10N),by="SUBPLOT")
+
+# calculate the coordinates of each tree using the plot center, distance, and azimuth
+
+site11_trees = trees_locations_site11 %>%
+  mutate(TreeEasting = as.numeric(EastingUTM10N) + sin(deg2rad(AZIMUTH)) * `DIST (m)`,
+         TreeNorthing = as.numeric(NorthingUTM10N) + cos(deg2rad(AZIMUTH)) * `DIST (m)`)
+
+#### Give trees ID numbers ####
+
+site11_trees = site11_trees %>% mutate(tree_id = site11_trees$SERIES)
+
+#### convert to spatial data and export ####
+
+trees_site11_sp <- st_as_sf(site11_trees, coords = c("TreeEasting","TreeNorthing"), crs = 32610)
+
+st_write(trees_site11_sp %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site11trees.geojson"),delete_dsn=TRUE)
+
+#### sheet 4 / site 10 ####
+
+#### Load and inspect data ####
+
+# Import sheet 4
+site10 = read_excel(data("stem_data.xls"),sheet=4,col_names = TRUE,skip=2)
+
+# Remove trees with NA distance and/or azimuth
+site10 <- site10 %>% drop_na (AZIMUTH) %>% drop_na (`DIST (m)`)
+
+#create a dataframe of subplot centers-- doing this manually is not ideal but I'm unsure of how to extract random cells to make them into a new table
+subplot_centers_site10 <- matrix(c('NW1', -122, -26.9530, 43, 33.6189, 'NE2', -122, -26.9322, 43, 33.6183, 'SE4', -122, -26.9307, 43, 33.6112, 'SW3', -122, -26.9527, 43, 33.6072, '5', -122, -26.9485, 43, 33.5955, '6', -122, -26.9319, 43, 33.5941), ncol=5, byrow=TRUE)
+
+colnames(subplot_centers_site10) <- c('SUBPLOT','PlotCenterEastingDegrees', 'PlotCenterEastingMinutes', 'PlotCenterNorthingDegrees', 'PlotCenterNorthingMinutes')
+
+subplot_centers_site10 <- as.data.frame.matrix(subplot_centers_site10)
+
+subplot_centers_site10$PlotCenterEasting = (as.numeric(subplot_centers_site10$PlotCenterEastingDegrees)) + ((as.numeric(subplot_centers_site10$PlotCenterEastingMinutes))/60)
+
+subplot_centers_site10$PlotCenterNorthing = (as.numeric(subplot_centers_site10$PlotCenterNorthingDegrees)) + ((as.numeric(subplot_centers_site10$PlotCenterNorthingMinutes))/60)
+
+#### Map plot centers and save them ####
+subplot_centers_site10_sp <- st_as_sf(subplot_centers_site10, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
+
+# Transforming spatial data points into EPSG 3857 so it's compatible with default qgis OpenStreetMaps projection
+st_write (st_transform (subplot_centers_site10_sp, 3857), "C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site10plotcenters.geojson", delete_dsn=TRUE)
+
+# convert the plot center coordinates to UTM10N format so the calculations in the next step work
+
+subplot_centers_site10_sp_UTM10N <- st_transform (subplot_centers_site10_sp, 32610)
+
+UTM10N_plotcoords_site10 <- data.frame(subplot_centers_site10_sp$SUBPLOT, st_coordinates(subplot_centers_site10_sp_UTM10N[,1], st_coordinates(subplot_centers_site10_sp_UTM10N[,2]))) %>% rename (SUBPLOT=subplot_centers_site10_sp.SUBPLOT, EastingUTM10N=X, NorthingUTM10N=Y)
+
+subplot_centers_site10_sp_UTM10N <- full_join(subplot_centers_site10_sp_UTM10N, UTM10N_plotcoords_site10, by="SUBPLOT")
+
+#### Get the coordinates of each tree in Site 10 ####
+
+# add new columns to the Site 10 dataframe so that each individual tree has a populated plot center easting and northing
+
+trees_locations_site10 = full_join(site10,st_drop_geometry(subplot_centers_site10_sp_UTM10N),by="SUBPLOT")
+
+# calculate the coordinates of each tree using the plot center, distance, and azimuth
+
+site10_trees = trees_locations_site10 %>%
+  mutate(TreeEasting = as.numeric(EastingUTM10N) + sin(deg2rad(AZIMUTH)) * `DIST (m)`,
+         TreeNorthing = as.numeric(NorthingUTM10N) + cos(deg2rad(AZIMUTH)) * `DIST (m)`)
+
+#### Give trees ID numbers ####
+
+site10_trees = site10_trees %>% mutate(tree_id = site10_trees$SERIES)
+
+#### convert to spatial data and export ####
+
+trees_site10_sp <- st_as_sf(site10_trees, coords = c("TreeEasting","TreeNorthing"), crs = 32610)
+
+st_write(trees_site10_sp %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site10trees.geojson"),delete_dsn=TRUE)
+
 #### FOR ALL SITES: make another file that drops duplicate trees ####
 
+# site 10
+
+site10_trees$duplicated = duplicated(site10_trees %>%  select( SPECIES, TreeEasting, TreeNorthing))
+
+# no duplicates....
+
+# site 11
+
+site11_trees$duplicated = duplicated(site11_trees %>%  select( SPECIES, TreeEasting, TreeNorthing))
+
+# no duplicates
+
+# site 15
+
+site15_trees$duplicated = duplicated(site15_trees %>%  select(SPECIES, TreeEasting, TreeNorthing))
+
+# the one found pair of duplicates appears to be different trees-- they are in the same subplot, same spp and condition but different DBHs. I don't think the crew would duplicate within the same plot, the different DBHs is enough to confirm this is not a true duplicate
+
+# site 14
+
+site14_trees$duplicated = duplicated(site14_trees %>%  select(SPECIES, TreeEasting, TreeNorthing))
+
+# the one found pair of duplicates appears to be different trees-- they are in the same subplot, same spp but different DBHs and different conditions. I don't think the crew would duplicate within the same plot, the different DBHs/conditions is enough to confirm this is not a true duplicate
