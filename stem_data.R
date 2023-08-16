@@ -258,3 +258,66 @@ site15_trees$duplicated = duplicated(site15_trees %>%  select(SPECIES, TreeEasti
 site14_trees$duplicated = duplicated(site14_trees %>%  select(SPECIES, TreeEasting, TreeNorthing))
 
 # the one found pair of duplicates appears to be different trees-- they are in the same subplot, same spp but different DBHs and different conditions. I don't think the crew would duplicate within the same plot, the different DBHs/conditions is enough to confirm this is not a true duplicate
+
+#### create more condensed spatial output files ####
+
+#### all trees ####
+
+# rename bark fissure depth columns-- there are four and only the first one retained column headings; make sure all matching columns have the same titles (not the same in the original data sheet) and same format
+
+trees_sp <- trees_sp %>% rename("BARK FISSURE DEPTH 2 (mm)" = "...13", "BARK FISSURE DEPTH 3 (mm)" = "...14", "BARK FISSURE DEPTH 4 (mm)" = "...15")
+trees_sp$PlotCenterEasting = as.numeric(as.character(trees_sp$PlotCenterEasting))
+trees_sp$PlotCenterNorthing = as.numeric(as.character(trees_sp$PlotCenterNorthing))
+
+trees_site15_sp <- trees_site15_sp %>% rename("BARK FISSURE DEPTH 2 (mm)" = "...13", "BARK FISSURE DEPTH 3 (mm)" = "...14", "BARK FISSURE DEPTH 4 (mm)" = "...15")
+trees_site15_sp <- trees_site15_sp %>% rename ("DBH (cm)" = "DBH", "TREE HEIGHT (m)" = "TREE HEIGHT", "HEIGHT TO LIVE FOLIAGE (m)" = "HEIGHT TO LIVE FOLIAGE", "HEIGHT TO DEAD BRANCH (m)" = "HEIGHT TO DEAD BRANCH", "BARK FISSURE DEPTH (mm)" = "BARK FISSURE DEPTH", "CROWN TO BASE HEIGHT (m)" = "CROWN TO BASE HEIGHT")
+
+trees_site11_sp <- trees_site11_sp %>% rename("BARK FISSURE DEPTH 2 (mm)" = "...13", "BARK FISSURE DEPTH 3 (mm)" = "...14", "BARK FISSURE DEPTH 4 (mm)" = "...15")
+trees_site11_sp <- trees_site11_sp %>% rename ("DBH (cm)" = "DBH", "TREE HEIGHT (m)" = "TREE HEIGHT", "HEIGHT TO LIVE FOLIAGE (m)" = "HEIGHT TO LIVE FOLIAGE", "HEIGHT TO DEAD BRANCH (m)" = "HEIGHT TO DEAD BRANCH", "BARK FISSURE DEPTH (mm)" = "BARK FISSURE DEPTH", "CROWN TO BASE HEIGHT (m)" = "CROWN TO BASE HEIGHT")
+
+trees_site10_sp <- trees_site10_sp %>% rename("BARK FISSURE DEPTH 2 (mm)" = "...13", "BARK FISSURE DEPTH 3 (mm)" = "...14", "BARK FISSURE DEPTH 4 (mm)" = "...15")
+trees_site10_sp <- trees_site10_sp %>% rename ("DBH (cm)" = "DBH", "TREE HEIGHT (m)" = "TREE HEIGHT", "HEIGHT TO LIVE FOLIAGE (m)" = "HEIGHT TO LIVE FOLIAGE", "HEIGHT TO DEAD BRANCH (m)" = "HEIGHT TO DEAD BRANCH", "BARK FISSURE DEPTH (mm)" = "BARK FISSURE DEPTH", "CROWN TO BASE HEIGHT (m)" = "CROWN TO BASE HEIGHT")
+
+# make sure all the trees data sets have the same columns-- one above I did in decimal degrees and one I did in degrees decimal minutes...a lesson in consistency 
+
+treeskeep <- c("SUBPLOT", "SPECIES", "CONDITION        (LI, ST, SN, LO)", "DECAY CLASS (ST, SN only)", "DBH (cm)", "TREE HEIGHT (m)", "HEIGHT TO LIVE FOLIAGE (m)", "HEIGHT TO DEAD BRANCH (m)", "BARK FISSURE DEPTH (mm)", "BARK FISSURE DEPTH 2 (mm)", "BARK FISSURE DEPTH 3 (mm)", "BARK FISSURE DEPTH 4 (mm)", "DIST (m)", "AZIMUTH", "CROWN TO BASE HEIGHT (m)", "NOTES", "PlotCenterEasting", "PlotCenterNorthing","EastingUTM10N", "NorthingUTM10N", "tree_id", "geometry" )
+
+trees_sp <- trees_sp[treeskeep]
+trees_site15_sp <- trees_site15_sp[treeskeep]
+trees_site11_sp <- trees_site11_sp[treeskeep]
+trees_site10_sp <- trees_site10_sp[treeskeep]
+
+# create a spatial dataframe of all the trees and export it in ESPG 3857
+
+alltrees <- bind_rows (trees_site10_sp, trees_site11_sp, trees_site15_sp, trees_sp)
+
+st_write(alltrees %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_alltrees.geojson"),delete_dsn=TRUE)
+
+#### all plots ####
+
+# add a column with the site number to all the spatial dataframes
+
+subplot_centers_sp$SITE = 14
+subplot_centers_site15_sp$SITE = 15
+subplot_centers_site11_sp$SITE = 11
+subplot_centers_site10_sp$SITE = 10
+
+# make sure all the columns have the same format between dataframes
+
+subplot_centers_sp$PlotCenterEasting = as.numeric(as.character(subplot_centers_sp$PlotCenterEasting))
+subplot_centers_sp$PlotCenterNorthing = as.numeric(as.character(subplot_centers_sp$PlotCenterNorthing))
+
+# make sure all the dataframes have the same columns
+
+plotskeep <- c("SUBPLOT", "PlotCenterEasting", "PlotCenterNorthing", "geometry", "SITE")
+
+subplot_centers_sp <- subplot_centers_sp[plotskeep]
+subplot_centers_site15_sp <- subplot_centers_site15_sp[plotskeep]
+subplot_centers_site11_sp <- subplot_centers_site11_sp[plotskeep]
+subplot_centers_site10_sp <- subplot_centers_site10_sp[plotskeep]
+
+# create a spatial dataframe of all the subplot centers and export it in ESPG 3857
+
+allplots <- bind_rows (subplot_centers_sp, subplot_centers_site15_sp, subplot_centers_site11_sp, subplot_centers_site10_sp)
+
+st_write(allplots %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_allplots.geojson"),delete_dsn=TRUE)
