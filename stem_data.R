@@ -1,6 +1,6 @@
 # Author: Emily Marie Purvis
 # Date: 8.13.2023
-# Goal: convert stem_data.xls individual tree coordinates from distance/azimuth to easting/northing
+# Goal: convert stem_data.xls (Johnston, Oregon State University) individual tree coordinates from distance/azimuth to easting/northing
 
 # What we're working with: stem_data.xls has four sheets with different sites: Site 14, Site 15, Site 11, and Site 10. Each sheet has multiple subplots. Each subplot has it's own plot center with unique easting/northing. Each individual tree within each subplot has a distance (in meters) and azimuth (in degrees) from plot center.
 
