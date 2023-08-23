@@ -96,5 +96,4 @@ trees_sp <- st_as_sf(trees_calcs, coords = c("TreeEasting","TreeNorthing"), crs 
 
 # exporting the tree spatial data in the same format as the plot data came in, 4326
 
-st_write(trees_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Stem_Batch_1\\Stem_Batch_1_treecoordinates.geojson"),delete_dsn=TRUE)
-
+st_write(trees_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Stem_Batch_1\\Stem_Batch_1_treecoordinates.gpkg"),delete_dsn=TRUE)
