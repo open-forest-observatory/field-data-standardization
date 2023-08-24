@@ -12,14 +12,14 @@ library(pracma)
 library(dplyr)
 
 #### Set working directory ####
-setwd("C:\\Users\\emily\\Box\\FOCAL\\field data standardization")
+setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data")
 
 #### Going to begin with sheet 1 ####
 
 #### Load and inspect data ####
 
 # Import sheet 1
-site14 = read_excel(data("stem_data.xls"),sheet=1,col_names = TRUE,skip=2)
+site14 = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data.xls"),sheet=1,col_names = TRUE,skip=2)
 
 #create a dataframe of subplot centers-- doing this manually is not ideal but I'm unsure of how to extract random cells to make them into a new table
 subplot_centers <- matrix(c('NW4', -122.447291, 43.597599, 'NE3', -122.446917, 43.597579, 'SW2', -122.444723, 43.597352, 'SE1', -122.446992, 43.597423, 'NW2', -122.447283, 43.59783, 'NE1', -122.44688, 43.597892), ncol=3, byrow=TRUE)
@@ -30,7 +30,7 @@ subplot_centers <- as.data.frame.matrix(subplot_centers)
 subplot_centers_sp <- st_as_sf(subplot_centers, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
 
 # Transforming spatial data points into EPSG 3857 so it's compatible with default qgis OpenStreetMaps projection
-st_write (st_transform (subplot_centers_sp, 3857), "C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site14plotcenters.geojson", delete_dsn=TRUE)
+st_write (st_transform (subplot_centers_sp, 4326), "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site14plotcenters.gpkg", delete_dsn=TRUE)
 
 # convert the plot center coordinates to UTM10N format so the calculations in the next step work
 
@@ -60,7 +60,7 @@ site14_trees = site14_trees %>% mutate(tree_id = 1:nrow(site14_trees))
 
 trees_sp <- st_as_sf(site14_trees, coords = c("TreeEasting","TreeNorthing"), crs = 32610)
 
-st_write(trees_sp %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site14trees.geojson"),delete_dsn=TRUE)
+st_write(trees_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site14trees.gpkg"),delete_dsn=TRUE)
 
 #### sheet 2 / site 15 ####
 
@@ -87,7 +87,7 @@ subplot_centers_site15$PlotCenterNorthing = (as.numeric(subplot_centers_site15$P
 subplot_centers_site15_sp <- st_as_sf(subplot_centers_site15, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
 
 # Transforming spatial data points into EPSG 3857 so it's compatible with default qgis OpenStreetMaps projection
-st_write (st_transform (subplot_centers_site15_sp, 3857), "C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site15plotcenters.geojson", delete_dsn=TRUE)
+st_write (st_transform (subplot_centers_site15_sp, 4326), "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site15plotcenters.gpkg", delete_dsn=TRUE)
 
 # convert the plot center coordinates to UTM10N format so the calculations in the next step work
 
@@ -117,7 +117,7 @@ site15_trees = site15_trees %>% mutate(tree_id = site15_trees$SERIES)
 
 trees_site15_sp <- st_as_sf(site15_trees, coords = c("TreeEasting","TreeNorthing"), crs = 32610)
 
-st_write(trees_site15_sp %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site15trees.geojson"),delete_dsn=TRUE)
+st_write(trees_site15_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site15trees.gpkg"),delete_dsn=TRUE)
 
 #### sheet 3 / site 11 ####
 
@@ -143,8 +143,7 @@ subplot_centers_site11$PlotCenterNorthing = (as.numeric(subplot_centers_site11$P
 #### Map plot centers and save them ####
 subplot_centers_site11_sp <- st_as_sf(subplot_centers_site11, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
 
-# Transforming spatial data points into EPSG 3857 so it's compatible with default qgis OpenStreetMaps projection
-st_write (st_transform (subplot_centers_site11_sp, 3857), "C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site11plotcenters.geojson", delete_dsn=TRUE)
+st_write (st_transform (subplot_centers_site11_sp, 4326), "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site11plotcenters.gpkg", delete_dsn=TRUE)
 
 # convert the plot center coordinates to UTM10N format so the calculations in the next step work
 
@@ -174,7 +173,7 @@ site11_trees = site11_trees %>% mutate(tree_id = site11_trees$SERIES)
 
 trees_site11_sp <- st_as_sf(site11_trees, coords = c("TreeEasting","TreeNorthing"), crs = 32610)
 
-st_write(trees_site11_sp %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site11trees.geojson"),delete_dsn=TRUE)
+st_write(trees_site11_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site11trees.gpkg"),delete_dsn=TRUE)
 
 #### sheet 4 / site 10 ####
 
@@ -201,7 +200,7 @@ subplot_centers_site10$PlotCenterNorthing = (as.numeric(subplot_centers_site10$P
 subplot_centers_site10_sp <- st_as_sf(subplot_centers_site10, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
 
 # Transforming spatial data points into EPSG 3857 so it's compatible with default qgis OpenStreetMaps projection
-st_write (st_transform (subplot_centers_site10_sp, 3857), "C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site10plotcenters.geojson", delete_dsn=TRUE)
+st_write (st_transform (subplot_centers_site10_sp, 4326), "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site10plotcenters.gpkg", delete_dsn=TRUE)
 
 # convert the plot center coordinates to UTM10N format so the calculations in the next step work
 
@@ -231,7 +230,7 @@ site10_trees = site10_trees %>% mutate(tree_id = site10_trees$SERIES)
 
 trees_site10_sp <- st_as_sf(site10_trees, coords = c("TreeEasting","TreeNorthing"), crs = 32610)
 
-st_write(trees_site10_sp %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_site10trees.geojson"),delete_dsn=TRUE)
+st_write(trees_site10_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site10trees.gpkg"),delete_dsn=TRUE)
 
 #### FOR ALL SITES: make another file that drops duplicate trees ####
 
@@ -291,7 +290,7 @@ trees_site10_sp <- trees_site10_sp[treeskeep]
 
 alltrees <- bind_rows (trees_site10_sp, trees_site11_sp, trees_site15_sp, trees_sp)
 
-st_write(alltrees %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_alltrees.geojson"),delete_dsn=TRUE)
+st_write(alltrees %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_alltrees.gpkg"),delete_dsn=TRUE)
 
 #### all plots ####
 
@@ -320,4 +319,4 @@ subplot_centers_site10_sp <- subplot_centers_site10_sp[plotskeep]
 
 allplots <- bind_rows (subplot_centers_sp, subplot_centers_site15_sp, subplot_centers_site11_sp, subplot_centers_site10_sp)
 
-st_write(allplots %>% st_transform(3857),data("C:\\Users\\emily\\Box\\FOCAL\\field data standardization\\stem_data_allplots.geojson"),delete_dsn=TRUE)
+st_write(allplots %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_allplots.gpkg"),delete_dsn=TRUE)
