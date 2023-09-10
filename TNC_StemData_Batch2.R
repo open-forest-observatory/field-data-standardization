@@ -9,7 +9,6 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_
 library(tidyverse)
 library(readxl)
 library(sf)
-library(dplyr)
 library(pracma)
 library(ggrepel)
 
@@ -17,9 +16,79 @@ library(ggrepel)
 
 treedata = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Plot_Data\\StemData_Batch2.xlsx"),sheet=1,col_names = TRUE)
 
-largeplotdata = st_read("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\large-plots_for-iri.kml")
+# largeplotdata = st_read("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\large-plots_for-iri.kml")
 
-smallplotdata = st_read("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\small-plots_for-iri_v2.kml")
+# smallplotdata = st_read("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\small-plots_for-iri_v2.kml")
+
+# just kidding there are updated GPS coordinates of plot centers....
+
+L502 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\L-502_g\\L-502.shp') 
+
+L502 = L502 %>% mutate(`Plot#` = 'L502')
+
+# st_crs(L502)
+# EPSG 4326
+
+L504 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\L-504_g\\L-504.shp') 
+
+L504 = L504 %>% mutate(`Plot#` = 'L504')
+
+L504 = L504 %>% st_set_crs(4326)
+
+# not all shapefiles have a crs, so I'm checking manually and adding if necessary
+# st_crs(L504)
+
+L505 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\L-505_g\\L-505.shp') 
+
+L505 = L505 %>% mutate(`Plot#` = 'L505')
+
+L505 = L505 %>% st_set_crs(4326)
+
+# st_crs(L505)
+
+L507 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\L-507_g\\L-507.shp') 
+
+L507 = L507 %>% mutate(`Plot#` = 'L507')
+
+# st_crs(L507)
+
+L508 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\L-508_g\\L-508.shp') 
+
+L508 = L508 %>% mutate(`Plot#` = 'L508')
+
+# st_crs(L508)
+
+L521 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\L-521_g\\L-521.shp') 
+
+L521 = L521 %>% mutate(`Plot#` = 'L521')
+
+L521 = L521 %>% st_set_crs(4326)
+
+# st_crs(L521)
+
+L529 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\L-529_g\\L-529.shp') 
+
+L529 = L529 %>% mutate(`Plot#` = 'L529')
+
+# st_crs(L529)
+
+L536 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\L-536_g\\L-536.shp') 
+
+L536 = L536 %>% mutate(`Plot#` = 'L536')
+
+# st_crs(L536)
+
+S038 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\S-038_g\\S-038.shp') 
+
+S038 = S038 %>% mutate(`Plot#` = 'S038')
+
+# st_crs(S038)
+
+S313 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Post_Processed_GPS\\S-313_g\\S-313.shp') 
+
+S313 = S313 %>% mutate(`Plot#` = 'S313')
+
+# st_crs(S313)
 
 # need to reformat the plot numbers in treedata so they match the plot data 
 
@@ -63,11 +132,39 @@ for(i in 1:nrow(treedata)) {
 # st_crs (smallplotdata)
 # EPSG of the plot data is 4326
 
-# convert the plot center coordinates to UTM10N format so the calculations in the next step work. first, merge smallplotdata and largeplotdata into 1 spatial dataframe
+# convert the plot center coordinates to UTM10N format so the calculations in the next step work. first, merge all plot centers into 1 spatial dataframe
 
-allplots <- rbind(largeplotdata, smallplotdata)
+# allplots <- rbind(largeplotdata, smallplotdata)
 
-allplots_UTM10N <- st_transform (allplots, 32610) %>% rename('Plot#'='Name')
+# plot center sf objects all have different columns bc of course they do, first need to reformat them so they all have the same columns
+
+L502 <- L502[,-1:-19]
+
+L504 <- L504[,-1:-18]
+
+L505 <- L505[,-1:-18]
+
+L507 <- L507[,-1:-19]
+
+L508 <- L508[,-1:-19]
+
+L521 <- L521[,-1:-18]
+
+L529 <- L529[,-1:-18]
+
+L536 <- L536[,-1:-19]
+
+S038 <- S038[,-1:-19]
+
+S313 <- S313[,-1:-18]
+
+allplots <- rbind(L502, L504, L505, L507, L508, L521, L529, L536, S038, S313) 
+
+allplots_UTM10N <- st_transform (allplots, 32610) 
+
+# save the plot centers together in one spatial data file just in case it's useful later
+
+st_write(allplots, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Stem_Batch_2_updatedplotcenters.gpkg"),delete_dsn=TRUE)
 
 # extract the geometry features into columns of lat and long, then merge back into the spatial data frame
 
@@ -97,7 +194,7 @@ trees_sp <- st_as_sf(trees_calcs, coords = c("TreeEasting","TreeNorthing"), crs 
 
 # exporting the tree spatial data in the same format as the plot data came in, 4326
 
-st_write(trees_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Stem_Batch_2_treecoordinates.gpkg"),delete_dsn=TRUE)
+st_write(trees_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\Stem_Batch_2_treecoordinates_updatedplotcenters.gpkg"),delete_dsn=TRUE)
 
 #### ggplots ####
 
@@ -128,13 +225,15 @@ trees_calcs$`Species`[trees_calcs$`Species` == '64'] <- 'JUOC'
 
 # want to extract WSG84 coordinates for each tree into x and y columns. do this by writing the dataframe back into a spatial dataframe, changing the coordinate system, and extracting the new coordinates
 
-trees_sp_ggplot <- st_as_sf(trees_calcs, coords = c("TreeEasting","TreeNorthing"), crs = 32610) %>% st_transform(4326)
+# just kidding I did it in UTM so the plots look like circles! keeping this code because it worked well though
 
-trees_ggplot <- data.frame(trees_sp_ggplot, st_coordinates(trees_sp_ggplot[,1], st_coordinates(trees_sp_ggplot[,2]))) %>% rename (Easting=X, Northing=Y)
+# trees_sp_ggplot <- st_as_sf(trees_calcs, coords = c("TreeEasting","TreeNorthing"), crs = 32610) %>% st_transform(4326)
 
-# futzing around with plot L521
+# trees_ggplot <- data.frame(trees_sp_ggplot, st_coordinates(trees_sp_ggplot[,1], st_coordinates(trees_sp_ggplot[,2]))) %>% rename (Easting=X, Northing=Y)
 
-ggplot(subset(trees_ggplot,`Plot.`=="L521"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 4)) + coord_equal(expand=FALSE) + theme_classic() + geom_text(color="black", size=3, vjust="top", hjust ="right") + xlim(-120.82525,-120.82225) + ylim (39.5045, 39.507) + ggtitle ("Plot L521") + theme(plot.title = element_text(hjust = 0.5)) 
+# futzing around with WSG84 plot L521
+
+# ggplot(subset(trees_ggplot,`Plot.`=="L521"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 4)) + coord_equal(expand=FALSE) + theme_classic() + geom_text(color="black", size=3, vjust="top", hjust ="right") + xlim(-120.82525,-120.82225) + ylim (39.5045, 39.507) + ggtitle ("Plot L521") + theme(plot.title = element_text(hjust = 0.5)) 
 
 # futzing around with UTM plot L521
 
@@ -142,65 +241,55 @@ ggplot(subset(trees_ggplot,`Plot.`=="L521"), aes(Easting, Northing, color=Specie
 
 trees_calcs <- trees_calcs %>% rename (Easting=TreeEasting, Northing=TreeNorthing) %>% arrange(desc(DBH))
 
-ggplot(subset(trees_calcs,`Plot#`=="L521"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + xlim(686975, 687225) + ylim (4375050, 4375275) + ggtitle ("Plot L521") + theme(plot.title = element_text(hjust = 0.5)) -> plot_L521
+ggplot(subset(trees_calcs,`Plot#`=="L521"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + ggtitle ("Plot L521") + theme(plot.title = element_text(hjust = 0.5)) + xlim(686950, 687190) + ylim (4375050, 4375265) -> plot_L521
 
 # trying to add plot center, need to keep working on this
 
 # + geom_point (data=subset(allplots_UTM10N,`Plot#`=="L521"), aes(x=PlotEastingUTM10N, y=PlotNorthingUTM10N), color="black")
 
-# also want to make the labels not overlap-- when I use the built in "check overlap" ggplot2 function it just makes some of the labels disappear!
-
 # want to streamline the process quite a lot to write a function that does all the plots, but I'm struggling to do so because the automatically generated x and y axis limits are weirdly bad and exclude data points around the margins. This means manually adjusting the x and y limits for each graph seems like the way to go. In the future, dig deeper to figure out how to automatically add a certain amount of area around all the points!
 
 # plot L505
 
-ggplot(subset(trees_calcs,`Plot#`=="L505"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L505") + theme(plot.title = element_text(hjust = 0.5)) + xlim(682250, 682475) + ylim (4390425, 4390650) -> plot_L505
-
-# oh dear the labels on L505 are so bad
+ggplot(subset(trees_calcs,`Plot#`=="L505"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L505") + theme(plot.title = element_text(hjust = 0.5)) + xlim(682250, 682465) + ylim (4390425, 4390640) -> plot_L505
 
 # plot L504
 
-ggplot(subset(trees_calcs,`Plot#`=="L504"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L504") + theme(plot.title = element_text(hjust = 0.5)) + xlim(683175, 683400) + ylim (4390575, 4390800) -> plot_L504
-
-# the label situation is getting worse with every plot...
+ggplot(subset(trees_calcs,`Plot#`=="L504"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L504") + theme(plot.title = element_text(hjust = 0.5)) + xlim(683185, 683400) + ylim (4390585, 4390800) -> plot_L504
 
 # plot L536
 
-ggplot(subset(trees_calcs,`Plot#`=="L536"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L536") + theme(plot.title = element_text(hjust = 0.5)) + xlim(679775, 680025) + ylim (4386425, 4386650) -> plot_L536
+ggplot(subset(trees_calcs,`Plot#`=="L536"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L536") + theme(plot.title = element_text(hjust = 0.5)) + xlim(679755, 679975) + ylim (4386445, 4386660) -> plot_L536
 
-# the label situation is now comically bad
+# okay THIS label situation needs to be improved, what is going on in the lower left corner
 
 # plot L507
 
-ggplot(subset(trees_calcs,`Plot#`=="L507"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L507") + theme(plot.title = element_text(hjust = 0.5)) + xlim(680525, 680750) + ylim (4385800, 4386025) -> plot_L507
+ggplot(subset(trees_calcs,`Plot#`=="L507"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L507") + theme(plot.title = element_text(hjust = 0.5)) + xlim(680525, 680750) + ylim (4385820, 4386010) -> plot_L507
 
 # plot L502
 
-ggplot(subset(trees_calcs,`Plot#`=="L502"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + ggtitle ("Plot L502") + theme(plot.title = element_text(hjust = 0.5)) + xlim(679500, 679725) + ylim (4385500, 4385725) -> plot_L502
+ggplot(subset(trees_calcs,`Plot#`=="L502"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L502") + theme(plot.title = element_text(hjust = 0.5)) + xlim(679475, 679700) + ylim (4385500, 4385715) -> plot_L502
 
 # plot S038
 
-ggplot(subset(trees_calcs,`Plot#`=="S038"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + ggtitle ("Plot S038") + theme(plot.title = element_text(hjust = 0.5)) + xlim(674650, 674775) + ylim (4380925, 4381025) -> plot_S038
-
-# finally one that looks okay! all hail small plot
+ggplot(subset(trees_calcs,`Plot#`=="S038"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + ggtitle ("Plot S038") + theme(plot.title = element_text(hjust = 0.5)) + xlim(674680, 674790) + ylim (4380915, 4381020) -> plot_S038
 
 # plot L529
 
-ggplot(subset(trees_calcs,`Plot#`=="L529"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + ggtitle ("Plot L529") + theme(plot.title = element_text(hjust = 0.5)) + xlim(669950, 670175) + ylim (4376810, 4377025) -> plot_L529
+ggplot(subset(trees_calcs,`Plot#`=="L529"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + ggtitle ("Plot L529") + theme(plot.title = element_text(hjust = 0.5)) + xlim(669950, 670165) + ylim (4376810, 4377005) -> plot_L529
 
 # plot L508
 
-ggplot(subset(trees_calcs,`Plot#`=="L508"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L508") + theme(plot.title = element_text(hjust = 0.5)) + xlim(672810, 673040) + ylim (4379100, 4379315) -> plot_L508
-
-# another terrible label priority
+ggplot(subset(trees_calcs,`Plot#`=="L508"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L508") + theme(plot.title = element_text(hjust = 0.5)) + xlim(672780, 673000) + ylim (4379140, 4379340) -> plot_L508
 
 # plot S313
 
-ggplot(subset(trees_calcs,`Plot#`=="S313"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + ggtitle ("Plot S313") + theme(plot.title = element_text(hjust = 0.5)) + xlim(670190, 670300) + ylim (4378510, 4378630) -> plot_S313
+ggplot(subset(trees_calcs,`Plot#`=="S313"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=3, vjust="outward", hjust ="right") + ggtitle ("Plot S313") + theme(plot.title = element_text(hjust = 0.5)) + xlim(670200, 670305) + ylim (4378510, 4378625) -> plot_S313
 
 # export plots to pdf
 
-pdf(file="C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\StemMap_ggplots.pdf",height = 8, width = 8)
+pdf(file="C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\StemMap_ggplots_updatedplotcenters.pdf",height = 8, width = 8)
 plot(plot_L521)
 plot(plot_L505)
 plot(plot_L504)
