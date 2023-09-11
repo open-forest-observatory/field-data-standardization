@@ -255,10 +255,25 @@ trees_calcs$`Species`[trees_calcs$`Species` == '21'] <- 'ABMA'
 
 trees_calcs <- trees_calcs %>% rename (Easting=TreeEasting, Northing=TreeNorthing) %>% arrange(desc(DBH))
 
+# getting plot centers & trees in one data frame will make plotting easier
+
 allplots_UTM10N <- allplots_UTM10N %>% rename (Easting=PlotEastingUTM10N, Northing=PlotNorthingUTM10N)
 
-ggplot(subset(trees_calcs,`Plot#`=="L521"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot L521") + theme(plot.title = element_text(hjust = 0.5)) + xlim(686950, 687190) + ylim (4375050, 4375265) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() -> plot_L521
+all_trees <- as.data.frame(trees_calcs[,c('Plot#','Easting','Northing', 'Species', 'DBH', 'tree_id')])
 
+allplots_UTM10N$Species <- '.Plot Center'
+
+allplots_UTM10N$DBH <- 10
+
+allplots_UTM10N$tree_id <- 'Plot Center'
+
+all_plots <- as.data.frame(allplots_UTM10N [,c('Plot#','Easting','Northing', 'Species', 'DBH', 'tree_id')])
+
+all_plots <- subset(all_plots, select = -geometry)
+
+all_points <- rbind(all_plots, all_trees)
+
+ggplot(subset(all_points,`Plot#`=="L521"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot L521") + theme(plot.title = element_text(hjust = 0.5)) + xlim(686950, 687190) + ylim (4375050, 4375265) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() -> plot_L521
 
 # trying to add plot center, need to keep working on this
 
@@ -268,45 +283,45 @@ ggplot(subset(trees_calcs,`Plot#`=="L521"), aes(Easting, Northing, color=Species
 
 # plot L505
 
-ggplot(subset(trees_calcs,`Plot#`=="L505"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L505") + theme(plot.title = element_text(hjust = 0.5)) + xlim(682250, 682465) + ylim (4390425, 4390640) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() -> plot_L505
+ggplot(subset(all_points,`Plot#`=="L505"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L505") + theme(plot.title = element_text(hjust = 0.5)) + xlim(682250, 682465) + ylim (4390425, 4390640) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() -> plot_L505
 
 # plot L504
 
-ggplot(subset(trees_calcs,`Plot#`=="L504"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L504") + theme(plot.title = element_text(hjust = 0.5)) + xlim(683185, 683400) + ylim (4390585, 4390800) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() -> plot_L504
+ggplot(subset(all_points,`Plot#`=="L504"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L504") + theme(plot.title = element_text(hjust = 0.5)) + xlim(683185, 683400) + ylim (4390585, 4390800) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() -> plot_L504
 
 # plot L536
 
-ggplot(subset(trees_calcs,`Plot#`=="L536"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L536") + theme(plot.title = element_text(hjust = 0.5)) + xlim(679755, 679975) + ylim (4386445, 4386660) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_L536
+ggplot(subset(all_points,`Plot#`=="L536"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L536") + theme(plot.title = element_text(hjust = 0.5)) + xlim(679755, 679975) + ylim (4386445, 4386660) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_L536
 
 # okay THIS label situation needs to be improved, what is going on in the lower left corner
 
 # plot L507
 
-ggplot(subset(trees_calcs,`Plot#`=="L507"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L507") + theme(plot.title = element_text(hjust = 0.5)) + xlim(680525, 680750) + ylim (4385820, 4386010) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_L507
+ggplot(subset(all_points,`Plot#`=="L507"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L507") + theme(plot.title = element_text(hjust = 0.5)) + xlim(680525, 680750) + ylim (4385820, 4386010) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_L507
 
 # plot L502
 
-ggplot(subset(trees_calcs,`Plot#`=="L502"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L502") + theme(plot.title = element_text(hjust = 0.5)) + xlim(679475, 679700) + ylim (4385500, 4385715) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() -> plot_L502
+ggplot(subset(all_points,`Plot#`=="L502"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L502") + theme(plot.title = element_text(hjust = 0.5)) + xlim(679475, 679700) + ylim (4385500, 4385715) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() -> plot_L502
 
 # plot S038
 
-ggplot(subset(trees_calcs,`Plot#`=="S038"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S038") + theme(plot.title = element_text(hjust = 0.5)) + xlim(674680, 674790) + ylim (4380915, 4381020) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_S038
+ggplot(subset(all_points,`Plot#`=="S038"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S038") + theme(plot.title = element_text(hjust = 0.5)) + xlim(674680, 674790) + ylim (4380915, 4381020) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_S038
 
 # plot L529
 
-ggplot(subset(trees_calcs,`Plot#`=="L529"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot L529") + theme(plot.title = element_text(hjust = 0.5)) + xlim(669950, 670165) + ylim (4376810, 4377005) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_L529
+ggplot(subset(all_points,`Plot#`=="L529"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot L529") + theme(plot.title = element_text(hjust = 0.5)) + xlim(669950, 670165) + ylim (4376810, 4377005) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_L529
 
 # plot L508
 
-ggplot(subset(trees_calcs,`Plot#`=="L508"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L508") + theme(plot.title = element_text(hjust = 0.5)) + xlim(672780, 673000) + ylim (4379140, 4379340) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_L508
+ggplot(subset(all_points,`Plot#`=="L508"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right", max.overlaps = Inf) + ggtitle ("Plot L508") + theme(plot.title = element_text(hjust = 0.5)) + xlim(672780, 673000) + ylim (4379140, 4379340) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_L508
 
 # plot S313
 
-ggplot(subset(trees_calcs,`Plot#`=="S313"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S313") + theme(plot.title = element_text(hjust = 0.5)) + xlim(670200, 670305) + ylim (4378510, 4378625) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_S313
+ggplot(subset(all_points,`Plot#`=="S313"), aes(Easting, Northing, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S313") + theme(plot.title = element_text(hjust = 0.5)) + xlim(670200, 670305) + ylim (4378510, 4378625) + geom_point(shape=1, aes(size=DBH), colour = "black") + scale_colour_viridis_d() -> plot_S313
 
 # export plots to pdf
 
-pdf(file="C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\StemMap_ggplots_updatedplotcenters.pdf",height = 8, width = 8)
+pdf(file="C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\StemMap_ggplots_updatedplotcenters_nowincludingplotcenters.pdf",height = 8, width = 8)
 plot(plot_L521)
 plot(plot_L505)
 plot(plot_L504)
