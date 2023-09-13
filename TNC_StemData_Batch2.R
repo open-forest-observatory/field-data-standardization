@@ -231,7 +231,7 @@ trees_calcs$`Species`[trees_calcs$`Species` == '768'] <- 'PREM'
 
 # guessing this one is a typo. 312 is box elder, and this site has too high elevation for box elders
 
-trees_calcs$`Species`[trees_calcs$`Species` == '313'] <- 'ACMA3'
+trees_calcs$`Species`[trees_calcs$`Species` == '313'] <- 'ACNE2'
 
 # guessing this is a typo too. 21 is shasta red fir, definitely out of range here
 
