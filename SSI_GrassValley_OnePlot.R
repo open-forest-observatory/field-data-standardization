@@ -9,14 +9,26 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\SSI.GrassValley
 library(tidyverse)
 library(readxl)
 library(sf)
-library(dplyr)
 library(pracma)
 
 #### Load and inspect data; small tweaks to get it standardized and ready for calculating tree coordinates ####
 
-treedata = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\SSI.GrassValley\\FOCAL LAB_OnePlot_SSI.xlsx"),sheet=3,col_names = TRUE)
+treedata = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\SSI.GrassValley\\FOCAL_LAB_OnePlot_SSI_Corrected.xlsx"),sheet=3,col_names = TRUE)
 
 treedata$Distance_meters = treedata$DISTANCE_FT*0.3048
+
+# some azimuth measurements are in one column and some are in another, making a new column that has all the correct azimuth measurements
+
+treedata$Azimuth4Real <- 0
+
+for(i in 1:nrow(treedata)) {
+  if(is.na(treedata$AZM_corrected[i])) {
+    treedata[i,]$Azimuth4Real = (treedata[i,]$AZM)
+  }
+  else {
+    treedata[i,]$Azimuth4Real = treedata[i,]$AZM_corrected
+  }
+}
 
 #### plot coordinates from Derek #### 
 
@@ -71,8 +83,8 @@ trees_locations = full_join(treedata,st_drop_geometry(plotcenter_UTM10N),by='PLO
 # calculate the coordinates of each tree using the plot center, horizontal distance, and azimuth 
 
 trees_calcs = trees_locations %>%
-  mutate(TreeEasting = as.numeric(PlotEastingUTM10N) + sin(deg2rad(AZM)) * Distance_meters,
-         TreeNorthing = as.numeric(PlotNorthingUTM10N) + cos(deg2rad(AZM)) * Distance_meters)
+  mutate(TreeEasting = as.numeric(PlotEastingUTM10N) + sin(deg2rad(Azimuth4Real)) * Distance_meters,
+         TreeNorthing = as.numeric(PlotNorthingUTM10N) + cos(deg2rad(Azimuth4Real)) * Distance_meters)
 
 #### convert to spatial data and export ####
 
@@ -82,4 +94,3 @@ trees_sp <- st_as_sf(trees_calcs, coords = c("TreeEasting","TreeNorthing"), crs 
 
 st_write(trees_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\SSI.GrassValley\\plot1trees.gpkg"),delete_dsn=TRUE)
 
-# doesn't look great compared to satellite images!
