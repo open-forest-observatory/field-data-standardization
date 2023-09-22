@@ -27,7 +27,7 @@ L506 = L506 %>% mutate(`Plot#` = 'L506')
 # st_crs(L506)
 # EPSG 4326
 
-L511 <- read_sf('Post_Processed_GPS\\L-511_g\\L-511.shp') 
+L511 <- read_sf('Post_Processed_GPS\\L-511_g_CORRECTED\\L511.shp') 
 
 L511 = L511 %>% mutate(`Plot#` = 'L511')
 
