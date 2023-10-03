@@ -11,7 +11,7 @@ library(tidyverse)
 
 #### Load data ####
 
-plotdata = read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\{0001}\\data\\data\\vp_ctlsierra2022_v1_plots.csv", header = TRUE)
+plotdata = read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0001\\data\\data\\vp_ctlsierra2022_v1_plots.csv", header = TRUE)
 
 # Remember to double check the CRS! This VP data is in WGS84, which is what we want
 
@@ -29,72 +29,69 @@ plotdata <- plotdata %>% add_column(plot_id = "")
 
 # adding in the OFO plot_ids
 
-plotdata$plot_id[plotdata$contributor_id == '1-A-145'] <- '{0001}'
-plotdata$plot_id[plotdata$contributor_id == '1-A-147'] <- '{0002}'
-plotdata$plot_id[plotdata$contributor_id == '1-A-150'] <- '{0003}'
-plotdata$plot_id[plotdata$contributor_id == '10-A-114'] <- '{0004}'
-plotdata$plot_id[plotdata$contributor_id == '10-A-115'] <- '{0005}'
-plotdata$plot_id[plotdata$contributor_id == '10-A-127'] <- '{0006}'
-plotdata$plot_id[plotdata$contributor_id == '11-A-104'] <- '{0007}'
-plotdata$plot_id[plotdata$contributor_id == '11-A-107'] <- '{0008}'
-plotdata$plot_id[plotdata$contributor_id == '11-A-109'] <- '{0009}'
-plotdata$plot_id[plotdata$contributor_id == '15-A-129'] <- '{0010}'
+# plotdata$plot_id[plotdata$contributor_id == '1-A-145'] <- '{0001}'
+# plotdata$plot_id[plotdata$contributor_id == '1-A-147'] <- '{0002}'
+# plotdata$plot_id[plotdata$contributor_id == '1-A-150'] <- '{0003}'
+# plotdata$plot_id[plotdata$contributor_id == '10-A-114'] <- '{0004}'
+# plotdata$plot_id[plotdata$contributor_id == '10-A-115'] <- '{0005}'
+# plotdata$plot_id[plotdata$contributor_id == '10-A-127'] <- '{0006}'
+# plotdata$plot_id[plotdata$contributor_id == '11-A-104'] <- '{0007}'
+# plotdata$plot_id[plotdata$contributor_id == '11-A-107'] <- '{0008}'
+# plotdata$plot_id[plotdata$contributor_id == '11-A-109'] <- '{0009}'
+# plotdata$plot_id[plotdata$contributor_id == '15-A-129'] <- '{0010}'
 
-plotdata$plot_id[plotdata$contributor_id == '15-A-135'] <- '{0011}'
-plotdata$plot_id[plotdata$contributor_id == '15-A-143'] <- '{0012}'
-plotdata$plot_id[plotdata$contributor_id == '18-A-56'] <- '{0013}'
-plotdata$plot_id[plotdata$contributor_id == '18-A-57'] <- '{0014}'
-plotdata$plot_id[plotdata$contributor_id == '18-A-62'] <- '{0015}'
-plotdata$plot_id[plotdata$contributor_id == '19-A-35'] <- '{0016}'
-plotdata$plot_id[plotdata$contributor_id == '19-A-37'] <- '{0017}'
-plotdata$plot_id[plotdata$contributor_id == '19-A-43'] <- '{0018}'
-plotdata$plot_id[plotdata$contributor_id == '19-A-48'] <- '{0019}'
-plotdata$plot_id[plotdata$contributor_id == '19-A-50'] <- '{0020}'
+# plotdata$plot_id[plotdata$contributor_id == '15-A-135'] <- '{0011}'
+# plotdata$plot_id[plotdata$contributor_id == '15-A-143'] <- '{0012}'
+# plotdata$plot_id[plotdata$contributor_id == '18-A-56'] <- '{0013}'
+# plotdata$plot_id[plotdata$contributor_id == '18-A-57'] <- '{0014}'
+# plotdata$plot_id[plotdata$contributor_id == '18-A-62'] <- '{0015}'
+# plotdata$plot_id[plotdata$contributor_id == '19-A-35'] <- '{0016}'
+# plotdata$plot_id[plotdata$contributor_id == '19-A-37'] <- '{0017}'
+# plotdata$plot_id[plotdata$contributor_id == '19-A-43'] <- '{0018}'
+# plotdata$plot_id[plotdata$contributor_id == '19-A-48'] <- '{0019}'
+# plotdata$plot_id[plotdata$contributor_id == '19-A-50'] <- '{0020}'
 
-plotdata$plot_id[plotdata$contributor_id == '2-A-151'] <- '{0021}'
-plotdata$plot_id[plotdata$contributor_id == '2-A-152'] <- '{0022}'
-plotdata$plot_id[plotdata$contributor_id == '2-A-157'] <- '{0023}'
-plotdata$plot_id[plotdata$contributor_id == '26-A-74'] <- '{0024}'
-plotdata$plot_id[plotdata$contributor_id == '26-A-71'] <- '{0025}'
-plotdata$plot_id[plotdata$contributor_id == '26-A-72'] <- '{0026}'
-plotdata$plot_id[plotdata$contributor_id == '26-A-87'] <- '{0027}'
-plotdata$plot_id[plotdata$contributor_id == '26-B-73'] <- '{0028}'
-plotdata$plot_id[plotdata$contributor_id == '3-A-166'] <- '{0029}'
-plotdata$plot_id[plotdata$contributor_id == '3-A-169'] <- '{0030}'
+# plotdata$plot_id[plotdata$contributor_id == '2-A-151'] <- '{0021}'
+# plotdata$plot_id[plotdata$contributor_id == '2-A-152'] <- '{0022}'
+# plotdata$plot_id[plotdata$contributor_id == '2-A-157'] <- '{0023}'
+# plotdata$plot_id[plotdata$contributor_id == '26-A-74'] <- '{0024}'
+# plotdata$plot_id[plotdata$contributor_id == '26-A-71'] <- '{0025}'
+# plotdata$plot_id[plotdata$contributor_id == '26-A-72'] <- '{0026}'
+# plotdata$plot_id[plotdata$contributor_id == '26-A-87'] <- '{0027}'
+# plotdata$plot_id[plotdata$contributor_id == '26-B-73'] <- '{0028}'
+# plotdata$plot_id[plotdata$contributor_id == '3-A-166'] <- '{0029}'
+# plotdata$plot_id[plotdata$contributor_id == '3-A-169'] <- '{0030}'
 
-plotdata$plot_id[plotdata$contributor_id == '3-A-170'] <- '{0031}'
-plotdata$plot_id[plotdata$contributor_id == '3-A-182'] <- '{0032}'
-plotdata$plot_id[plotdata$contributor_id == '3-A-305'] <- '{0033}'
-plotdata$plot_id[plotdata$contributor_id == '3-B-167'] <- '{0034}'
-plotdata$plot_id[plotdata$contributor_id == '4-A-180'] <- '{0035}'
-plotdata$plot_id[plotdata$contributor_id == '4-A-194'] <- '{0036}'
-plotdata$plot_id[plotdata$contributor_id == '4-A-195'] <- '{0037}'
-plotdata$plot_id[plotdata$contributor_id == '6-A-208'] <- '{0038}'
-plotdata$plot_id[plotdata$contributor_id == '6-A-181'] <- '{0039}'
-plotdata$plot_id[plotdata$contributor_id == '6-A-184'] <- '{0040}'
+# plotdata$plot_id[plotdata$contributor_id == '3-A-170'] <- '{0031}'
+# plotdata$plot_id[plotdata$contributor_id == '3-A-182'] <- '{0032}'
+# plotdata$plot_id[plotdata$contributor_id == '3-A-305'] <- '{0033}'
+# plotdata$plot_id[plotdata$contributor_id == '3-B-167'] <- '{0034}'
+# plotdata$plot_id[plotdata$contributor_id == '4-A-180'] <- '{0035}'
+# plotdata$plot_id[plotdata$contributor_id == '4-A-194'] <- '{0036}'
+# plotdata$plot_id[plotdata$contributor_id == '4-A-195'] <- '{0037}'
+# plotdata$plot_id[plotdata$contributor_id == '6-A-208'] <- '{0038}'
+# plotdata$plot_id[plotdata$contributor_id == '6-A-181'] <- '{0039}'
+# plotdata$plot_id[plotdata$contributor_id == '6-A-184'] <- '{0040}'
 
-plotdata$plot_id[plotdata$contributor_id == '6-A-189'] <- '{0041}'
-plotdata$plot_id[plotdata$contributor_id == '6-A-198'] <- '{0042}'
-plotdata$plot_id[plotdata$contributor_id == '6-A-203'] <- '{0043}'
-plotdata$plot_id[plotdata$contributor_id == '6-A-207'] <- '{0044}'
-plotdata$plot_id[plotdata$contributor_id == '7-A-304'] <- '{0045}'
-plotdata$plot_id[plotdata$contributor_id == '7-A-94'] <- '{0046}'
-plotdata$plot_id[plotdata$contributor_id == '7-A-96'] <- '{0047}'
-plotdata$plot_id[plotdata$contributor_id == '7-D-97'] <- '{0048}'
-plotdata$plot_id[plotdata$contributor_id == '8-A-301'] <- '{0049}'
-plotdata$plot_id[plotdata$contributor_id == '8-A-302'] <- '{0050}'
+# plotdata$plot_id[plotdata$contributor_id == '6-A-189'] <- '{0041}'
+# plotdata$plot_id[plotdata$contributor_id == '6-A-198'] <- '{0042}'
+# plotdata$plot_id[plotdata$contributor_id == '6-A-203'] <- '{0043}'
+# plotdata$plot_id[plotdata$contributor_id == '6-A-207'] <- '{0044}'
+# plotdata$plot_id[plotdata$contributor_id == '7-A-304'] <- '{0045}'
+# plotdata$plot_id[plotdata$contributor_id == '7-A-94'] <- '{0046}'
+# plotdata$plot_id[plotdata$contributor_id == '7-A-96'] <- '{0047}'
+# plotdata$plot_id[plotdata$contributor_id == '7-D-97'] <- '{0048}'
+# plotdata$plot_id[plotdata$contributor_id == '8-A-301'] <- '{0049}'
+# plotdata$plot_id[plotdata$contributor_id == '8-A-302'] <- '{0050}'
 
-plotdata$plot_id[plotdata$contributor_id == '8-B-303'] <- '{0051}'
+# plotdata$plot_id[plotdata$contributor_id == '8-B-303'] <- '{0051}'
 
-# desparately want to make a for loop do this instead
 
-for(i in 1:nrow(plotdata)) {
-   {
-    plotdata[i,]$plot_id = (?????)
-  }
-}
+# a way faster way of doing this
 
-# will come back to that later
+plotdata$plot_id <- 1:nrow(plotdata)
+
+# future datasets can use something like plotdata$plot_id <- (1:nrow(plotdata) + 51)
 
 # remove contributor id column
 
