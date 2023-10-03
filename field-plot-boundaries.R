@@ -102,17 +102,24 @@ plotdata = subset(plotdata, select = c('plot_id','lon', 'lat') )
 plotdata_sf <- st_as_sf(plotdata, coords = c("lon", "lat"), crs = 4326)
 
 # These are circular plots! Buffer circles by 100 feet (30.48 meters)-- this is the plot radius
+#   First project to a projected (meters) coordinate system with equal x and y distances
+#    CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+plotdata_sf = st_transform(plotdata_sf, crs = 5070)
+plotdata_circles <- st_buffer(plotdata_sf, dist = 30.48, nQuadSegs = 10)
+# Then back to WGS84
+plotdata_circles <- st_transform(plotdata_circles, crs = 4326)
 
-plotdata_circles <- st_buffer(plotdata_sf, dist = 30.48)
 
 #### Need to export each plot polygon individually ####
 
 # again desparately trying to write for loops & giving up
 
 for(i in 1:nrow(plotdata_circles)) {
-  polygon[i] <- plotdata_circles[i]
-  st_write(polygon[i],data ("ofo-field-data\\2_standardized-data\\field-plot-boundaries\\","_",i, ".gpkg"))
+  polygon_current <- plotdata_circles[i, ]
+  plot_id_current = polygon_current$plot_id
+  st_write(polygon_focal, paste0("ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
+
 
 # create individual sf files for each plot
 
