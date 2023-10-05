@@ -11,4 +11,440 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## ALTERATIONS MADE IN R
 
+
+```{r, echo=FALSE}
+
+# Load libraries 
+
+library(tidyverse)
+library(readxl)
+library(sf)
+library(pracma)
+
+```
+
+Load data
+
+```{r}
+
+# Set working directory
+
+setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+
+# Load data
+
+Johnston14 = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0002\\data\\stem_data.xls" ),sheet=1,col_names = TRUE,skip=2)
+
+Johnston15 = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0002\\data\\stem_data.xls" ),sheet=2,col_names = TRUE,skip=2)
+
+Johnston11 = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0002\\data\\stem_data.xls" ),sheet=3,col_names = TRUE,skip=2)
+
+Johnston10 = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0002\\data\\stem_data.xls" ),sheet=4,col_names = TRUE,skip=2)
+
+# Remove trees with NA distance and/or azimuth
+
+Johnston14 <- Johnston14 %>% drop_na (AZIMUTH) %>% drop_na (`DIST (m)`)
+
+Johnston15 <- Johnston15 %>% drop_na (AZIMUTH) %>% drop_na (`DIST (m)`)
+
+Johnston11 <- Johnston11 %>% drop_na (AZIMUTH) %>% drop_na (`DIST (m)`)
+
+Johnston10 <- Johnston10 %>% drop_na (AZIMUTH) %>% drop_na (`DIST (m)`)
+
+```
+
+
+```{r}
+#### create a dataframe of subplot centers and merge it to the plot dataframes ####
+
+# Johnston14
+
+# manually calculated the last 4 subplot coordinates. the first 2 were dd.dddd, the last four were dd mm.mmmm.
+
+Johnston14_subplot_centers <- matrix(c('NW4', -122.447291, 43.597599, 'NE3', -122.446917, 43.597579, 'SW2', -122.444723, 43.597352, 'SE1', -122.446992, 43.597423, 'NW2', -122.447283, 43.59783, 'NE1', -122.44688, 43.597892), ncol=3, byrow=TRUE)
+
+colnames(Johnston14_subplot_centers) <- c('SUBPLOT','PlotCenterEasting','PlotCenterNorthing')
+
+Johnston14_subplot_centers <- as.data.frame.matrix(Johnston14_subplot_centers)
+
+# make into spatial dataframe
+
+Johnston14_subplot_centers_sp <- st_as_sf(Johnston14_subplot_centers, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
+
+# change CRS to UTM
+
+Johnston14_subplot_centers_sp_UTM10N <- st_transform (Johnston14_subplot_centers_sp, 32610)
+
+# Extract UTM coordinates
+
+Johnston14_UTM10N_plotcoords <- data.frame(Johnston14_subplot_centers_sp$SUBPLOT, st_coordinates(Johnston14_subplot_centers_sp_UTM10N[,1], st_coordinates(Johnston14_subplot_centers_sp_UTM10N[,2]))) %>% rename (SUBPLOT=Johnston14_subplot_centers_sp.SUBPLOT, EastingUTM10N=X, NorthingUTM10N=Y)
+
+Johnston14_subplot_centers_sp_UTM10N <- full_join(Johnston14_subplot_centers_sp_UTM10N, Johnston14_UTM10N_plotcoords, by="SUBPLOT")
+
+# Merge UTM coordinates back into tree data dataframe
+
+Johnston14 = full_join(Johnston14,st_drop_geometry(Johnston14_subplot_centers_sp_UTM10N),by="SUBPLOT")
+
+# Johnston15
+
+# doing this one a bit differently because all the subplot coordinates are in dd mm.mmmm
+
+Johnston15_subplot_centers <- matrix(c('S2', -122, -24.0664, 43, 35.8758, 'E1', -122, -24.0618, 43, 35.8983, 'W4', -122, -24.0853, 43, 35.8865, 'N3', -122, -24.0726, 43, 35.8902, '6', -122, -24.0992, 43, 35.8932, '5', -122, -24.0931, 43, 35.8992), ncol=5, byrow=TRUE)
+
+colnames(Johnston15_subplot_centers) <- c('SUBPLOT','PlotCenterEastingDegrees', 'PlotCenterEastingMinutes', 'PlotCenterNorthingDegrees', 'PlotCenterNorthingMinutes')
+
+Johnston15_subplot_centers <- as.data.frame.matrix(Johnston15_subplot_centers)
+
+# Calculate into dd.dddd format
+
+Johnston15_subplot_centers$PlotCenterEasting = (as.numeric(Johnston15_subplot_centers$PlotCenterEastingDegrees)) + ((as.numeric(Johnston15_subplot_centers$PlotCenterEastingMinutes))/60)
+
+Johnston15_subplot_centers$PlotCenterNorthing = (as.numeric(Johnston15_subplot_centers$PlotCenterNorthingDegrees)) + ((as.numeric(Johnston15_subplot_centers$PlotCenterNorthingMinutes))/60)
+
+# make into spatial data frame
+
+Johnston15_subplot_centers_sp <- st_as_sf(Johnston15_subplot_centers, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
+
+# change CRS to UTM
+
+Johnston15_subplot_centers_sp_UTM10N <- st_transform (Johnston15_subplot_centers_sp, 32610)
+
+# Extract UTM coordinates
+
+Johnston15_UTM10N_plotcoords <- data.frame(Johnston15_subplot_centers_sp$SUBPLOT, st_coordinates(Johnston15_subplot_centers_sp_UTM10N[,1], st_coordinates(Johnston15_subplot_centers_sp_UTM10N[,2]))) %>% rename (SUBPLOT=Johnston15_subplot_centers_sp.SUBPLOT, EastingUTM10N=X, NorthingUTM10N=Y)
+
+Johnston15_subplot_centers_sp_UTM10N <- full_join(Johnston15_subplot_centers_sp_UTM10N, Johnston15_UTM10N_plotcoords, by="SUBPLOT")
+
+# Merge UTM coordinates back into tree data dataframe
+
+Johnston15 = full_join(Johnston15,st_drop_geometry(Johnston15_subplot_centers_sp_UTM10N),by="SUBPLOT")
+
+# Johnston11
+
+# all the subplot coordinates are in dd mm.mmmm
+
+Johnston11_subplot_centers <- matrix(c('SW2', -122, -23.5526, 43, 33.8795, 'SE1', -122, -23.5373, 43, 33.8782, 'NW4', -122, -23.5600, 43, 33.8777, 'NE3', -122, -23.5377, 43, 33.8937, '6', -122, -23.5545, 43, 33.9010, '5', -122, -23.5342, 43, 33.8985), ncol=5, byrow=TRUE)
+
+colnames(Johnston11_subplot_centers) <- c('SUBPLOT','PlotCenterEastingDegrees', 'PlotCenterEastingMinutes', 'PlotCenterNorthingDegrees', 'PlotCenterNorthingMinutes')
+
+Johnston11_subplot_centers <- as.data.frame.matrix(Johnston11_subplot_centers)
+
+# Calculate into dd.dddd format
+
+Johnston11_subplot_centers$PlotCenterEasting = (as.numeric(Johnston11_subplot_centers$PlotCenterEastingDegrees)) + ((as.numeric(Johnston11_subplot_centers$PlotCenterEastingMinutes))/60)
+
+Johnston11_subplot_centers$PlotCenterNorthing = (as.numeric(Johnston11_subplot_centers$PlotCenterNorthingDegrees)) + ((as.numeric(Johnston11_subplot_centers$PlotCenterNorthingMinutes))/60)
+
+# make into spatial data frame
+
+Johnston11_subplot_centers_sp <- st_as_sf(Johnston11_subplot_centers, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
+
+# change CRS to UTM
+
+Johnston11_subplot_centers_sp_UTM10N <- st_transform (Johnston11_subplot_centers_sp, 32610)
+
+# Extract UTM coordinates
+
+Johnston11_UTM10N_plotcoords <- data.frame(Johnston11_subplot_centers_sp$SUBPLOT, st_coordinates(Johnston11_subplot_centers_sp_UTM10N[,1], st_coordinates(Johnston11_subplot_centers_sp_UTM10N[,2]))) %>% rename (SUBPLOT=Johnston11_subplot_centers_sp.SUBPLOT, EastingUTM10N=X, NorthingUTM10N=Y)
+
+Johnston11_subplot_centers_sp_UTM10N <- full_join(Johnston11_subplot_centers_sp_UTM10N, Johnston11_UTM10N_plotcoords, by="SUBPLOT")
+
+# Merge UTM coordinates back into tree data dataframe
+
+Johnston11 = full_join(Johnston11,st_drop_geometry(Johnston11_subplot_centers_sp_UTM10N),by="SUBPLOT")
+
+# Johnston10
+
+# all the subplot coordinates are in dd mm.mmmm
+
+Johnston10_subplot_centers <- matrix(c('NW1', -122, -26.9530, 43, 33.6189, 'NE2', -122, -26.9322, 43, 33.6183, 'SE4', -122, -26.9307, 43, 33.6112, 'SW3', -122, -26.9527, 43, 33.6072, '5', -122, -26.9485, 43, 33.5955, '6', -122, -26.9319, 43, 33.5941), ncol=5, byrow=TRUE)
+
+colnames(Johnston10_subplot_centers) <- c('SUBPLOT','PlotCenterEastingDegrees', 'PlotCenterEastingMinutes', 'PlotCenterNorthingDegrees', 'PlotCenterNorthingMinutes')
+
+Johnston10_subplot_centers <- as.data.frame.matrix(Johnston10_subplot_centers)
+
+# Calculate into dd.dddd format
+
+Johnston10_subplot_centers$PlotCenterEasting = (as.numeric(Johnston10_subplot_centers$PlotCenterEastingDegrees)) + ((as.numeric(Johnston10_subplot_centers$PlotCenterEastingMinutes))/60)
+
+Johnston10_subplot_centers$PlotCenterNorthing = (as.numeric(Johnston10_subplot_centers$PlotCenterNorthingDegrees)) + ((as.numeric(Johnston10_subplot_centers$PlotCenterNorthingMinutes))/60)
+
+# make into spatial data frame
+
+Johnston10_subplot_centers_sp <- st_as_sf(Johnston10_subplot_centers, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
+
+# change CRS to UTM
+
+Johnston10_subplot_centers_sp_UTM10N <- st_transform (Johnston10_subplot_centers_sp, 32610)
+
+# Extract UTM coordinates
+
+Johnston10_UTM10N_plotcoords <- data.frame(Johnston10_subplot_centers_sp$SUBPLOT, st_coordinates(Johnston10_subplot_centers_sp_UTM10N[,1], st_coordinates(Johnston10_subplot_centers_sp_UTM10N[,2]))) %>% rename (SUBPLOT=Johnston10_subplot_centers_sp.SUBPLOT, EastingUTM10N=X, NorthingUTM10N=Y)
+
+Johnston10_subplot_centers_sp_UTM10N <- full_join(Johnston10_subplot_centers_sp_UTM10N, Johnston10_UTM10N_plotcoords, by="SUBPLOT")
+
+# Merge UTM coordinates back into tree data dataframe
+
+Johnston10 = full_join(Johnston10,st_drop_geometry(Johnston10_subplot_centers_sp_UTM10N),by="SUBPLOT")
+
+```
+
+Finding tree lat and lon
+
+```{r}
+
+# calculate!
+
+Johnston14 = Johnston14 %>%
+  mutate(TreeEasting = as.numeric(EastingUTM10N) + sin(deg2rad(AZIMUTH)) * `DIST (m)`,
+         TreeNorthing = as.numeric(NorthingUTM10N) + cos(deg2rad(AZIMUTH)) * `DIST (m)`)
+
+Johnston15 = Johnston15 %>%
+  mutate(TreeEasting = as.numeric(EastingUTM10N) + sin(deg2rad(AZIMUTH)) * `DIST (m)`,
+         TreeNorthing = as.numeric(NorthingUTM10N) + cos(deg2rad(AZIMUTH)) * `DIST (m)`)
+
+Johnston11 = Johnston11 %>%
+  mutate(TreeEasting = as.numeric(EastingUTM10N) + sin(deg2rad(AZIMUTH)) * `DIST (m)`,
+         TreeNorthing = as.numeric(NorthingUTM10N) + cos(deg2rad(AZIMUTH)) * `DIST (m)`)
+
+Johnston10 = Johnston10 %>%
+  mutate(TreeEasting = as.numeric(EastingUTM10N) + sin(deg2rad(AZIMUTH)) * `DIST (m)`,
+         TreeNorthing = as.numeric(NorthingUTM10N) + cos(deg2rad(AZIMUTH)) * `DIST (m)`)
+
+# Tree eastings and northings from UTM back to WGS84
+
+Johnston14_sp <- st_as_sf(Johnston14, coords = c("TreeEasting", "TreeNorthing"), crs = 32610, remove=F) 
+
+Johnston14_sp <- st_transform (Johnston14_sp, 4326)
+
+Johnston15_sp <- st_as_sf(Johnston15, coords = c("TreeEasting", "TreeNorthing"), crs = 32610, remove=F) 
+
+Johnston15_sp <- st_transform (Johnston15_sp, 4326)
+
+Johnston11_sp <- st_as_sf(Johnston11, coords = c("TreeEasting", "TreeNorthing"), crs = 32610, remove=F) 
+
+Johnston11_sp <- st_transform (Johnston11_sp, 4326)
+
+Johnston10_sp <- st_as_sf(Johnston10, coords = c("TreeEasting", "TreeNorthing"), crs = 32610, remove=F) 
+
+Johnston10_sp <- st_transform (Johnston10_sp, 4326)
+
+# extract the geometry features into columns of lat and long, then merge back into the spatial data frame
+
+Johnston14_sp <- data.frame(Johnston14_sp$'SERIES', st_coordinates(Johnston14_sp[,1], st_coordinates(Johnston14_sp[,2]))) %>% rename (tree_lon=X, tree_lat=Y, SERIES=Johnston14_sp.SERIES)
+
+Johnston14 <- full_join(Johnston14, Johnston14_sp, by="SERIES")
+
+Johnston15_sp <- data.frame(Johnston15_sp$'SERIES', st_coordinates(Johnston15_sp[,1], st_coordinates(Johnston15_sp[,2]))) %>% rename (tree_lon=X, tree_lat=Y, SERIES=Johnston15_sp.SERIES)
+
+Johnston15 <- full_join(Johnston15, Johnston15_sp, by="SERIES")
+
+Johnston11_sp <- data.frame(Johnston11_sp$'SERIES', st_coordinates(Johnston11_sp[,1], st_coordinates(Johnston11_sp[,2]))) %>% rename (tree_lon=X, tree_lat=Y, SERIES=Johnston11_sp.SERIES)
+
+Johnston11 <- full_join(Johnston11, Johnston11_sp, by="SERIES")
+
+Johnston10_sp <- data.frame(Johnston10_sp$'SERIES', st_coordinates(Johnston10_sp[,1], st_coordinates(Johnston10_sp[,2]))) %>% rename (tree_lon=X, tree_lat=Y, SERIES=Johnston10_sp.SERIES)
+
+Johnston10 <- full_join(Johnston10, Johnston10_sp, by="SERIES")
+
+```
+
+Adding OFO plot_id
+
+```{r}
+# add a new column with the right plot ID
+
+Johnston14 <- Johnston14 %>%
+  add_column(plot_id_ofo = "0053")
+
+Johnston15 <- Johnston15 %>%
+  add_column(plot_id_ofo = "0054")
+
+Johnston11 <- Johnston11 %>%
+  add_column(plot_id_ofo = "0055")
+
+Johnston10 <- Johnston10 %>%
+  add_column(plot_id_ofo = "0056")
+
+```
+
+
+OFO subplot_id
+
+```{r}
+# add a new column with the right plot ID
+
+Johnston14 <- Johnston14 %>%
+  add_column(subplot_id_ofo = "0") 
+
+Johnston14$subplot_id_ofo[Johnston14$SUBPLOT == 'NW4'] <- '0001'
+Johnston14$subplot_id_ofo[Johnston14$SUBPLOT == 'NE3'] <- '0002'
+Johnston14$subplot_id_ofo[Johnston14$SUBPLOT == 'SW2'] <- '0003'
+Johnston14$subplot_id_ofo[Johnston14$SUBPLOT == 'SE1'] <- '0004'
+Johnston14$subplot_id_ofo[Johnston14$SUBPLOT == 'NW2'] <- '0005'
+Johnston14$subplot_id_ofo[Johnston14$SUBPLOT == 'NE1'] <- '0006'
+
+Johnston15 <- Johnston15 %>%
+  add_column(subplot_id_ofo = "0")
+
+Johnston15$subplot_id_ofo[Johnston15$SUBPLOT == 'S2'] <- '0007'
+Johnston15$subplot_id_ofo[Johnston15$SUBPLOT == 'E1'] <- '0008'
+Johnston15$subplot_id_ofo[Johnston15$SUBPLOT == 'W4'] <- '0009'
+Johnston15$subplot_id_ofo[Johnston15$SUBPLOT == 'N3'] <- '0010'
+Johnston15$subplot_id_ofo[Johnston15$SUBPLOT == '6'] <- '0011'
+Johnston15$subplot_id_ofo[Johnston15$SUBPLOT == '5'] <- '0012'
+
+Johnston11 <- Johnston11 %>%
+  add_column(subplot_id_ofo = "0")
+
+Johnston11$subplot_id_ofo[Johnston11$SUBPLOT == 'SW2'] <- '0013'
+Johnston11$subplot_id_ofo[Johnston11$SUBPLOT == 'SE1'] <- '0014'
+Johnston11$subplot_id_ofo[Johnston11$SUBPLOT == 'NW4'] <- '0015'
+Johnston11$subplot_id_ofo[Johnston11$SUBPLOT == 'NE3'] <- '0016'
+Johnston11$subplot_id_ofo[Johnston11$SUBPLOT == '6'] <- '0017'
+Johnston11$subplot_id_ofo[Johnston11$SUBPLOT == '5'] <- '0018'
+
+Johnston10 <- Johnston10 %>%
+  add_column(subplot_id_ofo = "0")
+
+Johnston10$subplot_id_ofo[Johnston10$SUBPLOT == 'NW1'] <- '0019'
+Johnston10$subplot_id_ofo[Johnston10$SUBPLOT == 'NE2'] <- '0020'
+Johnston10$subplot_id_ofo[Johnston10$SUBPLOT == 'SE4'] <- '0021'
+Johnston10$subplot_id_ofo[Johnston10$SUBPLOT == 'SW3'] <- '0022'
+Johnston10$subplot_id_ofo[Johnston10$SUBPLOT == '5'] <- '0023'
+Johnston10$subplot_id_ofo[Johnston10$SUBPLOT == '6'] <- '0024'
+
+```
+
+DBH is in cm, height is in m, everything in metric! :)
+
+Going to combine all 4 plot datasets to make the next manipulations easier
+
+```{r}
+
+# first make sure all dataframes have the same columns-- due to discrepancies in how subplot coordinates were recorded, some plots have dd / mm.mmmm columns while others have dd.dddd
+
+treeskeep <- c("SUBPLOT", "SPECIES", "CONDITION        (LI, ST, SN, LO)", "DECAY CLASS (ST, SN only)", "DBH (cm)", "TREE HEIGHT (m)", "HEIGHT TO LIVE FOLIAGE (m)", "HEIGHT TO DEAD BRANCH (m)", "DIST (m)", "AZIMUTH", "CROWN TO BASE HEIGHT (m)", "NOTES", "PlotCenterEasting", "PlotCenterNorthing","tree_lon", "tree_lat", "plot_id_ofo", "subplot_id_ofo" )
+
+# now make sure all data sets have the same column titles and same column formats, there are some discrepancies
+
+Johnston14$PlotCenterEasting <- as.numeric(Johnston14$PlotCenterEasting)
+Johnston14$PlotCenterNorthing <- as.numeric(Johnston14$PlotCenterNorthing)
+
+Johnston15 <- Johnston15 %>% rename ("DBH (cm)" = "DBH", "TREE HEIGHT (m)" = "TREE HEIGHT", "HEIGHT TO LIVE FOLIAGE (m)" = "HEIGHT TO LIVE FOLIAGE", "HEIGHT TO DEAD BRANCH (m)" = "HEIGHT TO DEAD BRANCH", "CROWN TO BASE HEIGHT (m)" = "CROWN TO BASE HEIGHT")
+
+Johnston11 <- Johnston11 %>% rename ("DBH (cm)" = "DBH", "TREE HEIGHT (m)" = "TREE HEIGHT", "HEIGHT TO LIVE FOLIAGE (m)" = "HEIGHT TO LIVE FOLIAGE", "HEIGHT TO DEAD BRANCH (m)" = "HEIGHT TO DEAD BRANCH", "CROWN TO BASE HEIGHT (m)" = "CROWN TO BASE HEIGHT")
+
+Johnston10 <- Johnston10  %>% rename ("DBH (cm)" = "DBH", "TREE HEIGHT (m)" = "TREE HEIGHT", "HEIGHT TO LIVE FOLIAGE (m)" = "HEIGHT TO LIVE FOLIAGE", "HEIGHT TO DEAD BRANCH (m)" = "HEIGHT TO DEAD BRANCH", "CROWN TO BASE HEIGHT (m)" = "CROWN TO BASE HEIGHT")
+
+# parse down plot data sheets so they have the same columns
+
+Johnston14 <- Johnston14[treeskeep]
+Johnston15 <- Johnston15[treeskeep]
+Johnston11 <- Johnston11[treeskeep]
+Johnston10 <- Johnston10[treeskeep]
+
+# combine
+
+alldata <-bind_rows (Johnston14, Johnston15, Johnston11, Johnston10)
+
+```
+
+Species
+
+```{r}
+
+alldata$SPECIES[alldata$SPECIES == 'PSME'] <- '202'
+
+alldata$SPECIES[alldata$SPECIES == 'CADE'] <- '081'
+
+alldata$SPECIES[alldata$SPECIES == 'PILA'] <- '117'
+
+alldata$SPECIES[alldata$SPECIES == 'ABGR'] <- '017'
+
+alldata$SPECIES[alldata$SPECIES == 'UNK'] <- '000'
+
+alldata$SPECIES[alldata$SPECIES == 'CHCH'] <- '431'
+
+alldata$SPECIES[alldata$SPECIES == 'TABR'] <- '231'
+
+alldata$SPECIES[alldata$SPECIES == 'TSHE'] <- '263'
+
+alldata$SPECIES[alldata$SPECIES == 'CONU'] <- '492'
+
+alldata$SPECIES[alldata$SPECIES == 'ARME'] <- '361'
+
+alldata$SPECIES[alldata$SPECIES == 'THPL'] <- '242'
+
+alldata$SPECIES[alldata$SPECIES == 'ABAM'] <- '361'
+
+alldata$SPECIES[alldata$SPECIES == 'TSME'] <- '264'
+
+alldata$SPECIES[alldata$SPECIES == 'ABPR'] <- '022'
+
+alldata$SPECIES[alldata$SPECIES == 'ABIES SP.'] <- '010'
+
+alldata$SPECIES[alldata$SPECIES == 'PIPO'] <- '122'
+
+```
+
+Condition
+
+```{r}
+
+# LO is log, ST is stump. We want to delete these from the dataset. Let's rename them as NAs
+
+alldata$`CONDITION        (LI, ST, SN, LO)`[alldata$`CONDITION        (LI, ST, SN, LO)` == 'LO'] <- 'NA'
+
+alldata$`CONDITION        (LI, ST, SN, LO)`[alldata$`CONDITION        (LI, ST, SN, LO)` == 'ST'] <- 'NA'
+
+alldata <- alldata %>% rename ("CONDITION" = "CONDITION        (LI, ST, SN, LO)")
+
+alldata$CONDITION[alldata$CONDITION == "NA"] <- NA
+
+# LI is live, SN is snag
+
+alldata$`CONDITION        (LI, ST, SN, LO)`[alldata$`CONDITION        (LI, ST, SN, LO)` == 'LI'] <- 'L'
+
+alldata$`CONDITION        (LI, ST, SN, LO)`[alldata$`CONDITION        (LI, ST, SN, LO)` == 'SN'] <- 'D'
+
+# delete all NAs in this column
+
+alldata <- alldata[complete.cases(alldata$CONDITION),]
+
+```
+
+Decay class
+
+```{r}
+
+# We don't want NAs in this column, let's get rid of them
+
+alldata$`DECAY CLASS (ST, SN only)`[alldata$`DECAY CLASS (ST, SN only)` == 'NA'] <- ''
+
+```
+
+Notes
+
+```{r}
+
+# We don't want NAs in this column, let's get rid of them
+
+alldata$NOTES[is.na(alldata$NOTES)] <- ""
+
+```
+
+Export CSV
+
+```{r}
+
+write.csv(alldata, "C:\\Users\\emily\\OneDrive\\Desktop\\FOCAL\\field-data-standardization\\contributor_data_to_OFO_schema\\20231004_OSU_stem_data.csv")
+
+```
+
+
 ## ALTERATIONS MADE IN EXCEL
+
+dd = d + m/60 + s/3600 --> manually calculated lat/lon with this formula in excel for the subplots in Johnston 14 that had dd mm.mmmmm. This is because some were in dd.dddd already.
+
+All other lat/lon calculations were made in R
