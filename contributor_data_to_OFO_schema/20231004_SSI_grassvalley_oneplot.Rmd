@@ -135,3 +135,8 @@ treedata <- full_join(treedata, treedata_coords, by="TREE_ID")
 
 ```
 
+
+#ALTERATIONS MADE IN EXCEL
+
+
+
