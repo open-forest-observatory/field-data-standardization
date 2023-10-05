@@ -1,0 +1,14 @@
+---
+title: "20231004_OSU_stem_data"
+author: "Emily Marie Purvis"
+date: "2023-10-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ALTERATIONS MADE IN R
+
+## ALTERATIONS MADE IN EXCEL
