@@ -324,7 +324,7 @@ Going to combine all 4 plot datasets to make the next manipulations easier
 
 # first make sure all dataframes have the same columns-- due to discrepancies in how subplot coordinates were recorded, some plots have dd / mm.mmmm columns while others have dd.dddd
 
-treeskeep <- c("SUBPLOT", "SPECIES", "CONDITION        (LI, ST, SN, LO)", "DECAY CLASS (ST, SN only)", "DBH (cm)", "TREE HEIGHT (m)", "HEIGHT TO LIVE FOLIAGE (m)", "HEIGHT TO DEAD BRANCH (m)", "DIST (m)", "AZIMUTH", "CROWN TO BASE HEIGHT (m)", "NOTES", "PlotCenterEasting", "PlotCenterNorthing","tree_lon", "tree_lat", "plot_id_ofo", "subplot_id_ofo" )
+treeskeep <- c("SUBPLOT", "SPECIES", "CONDITION        (LI, ST, SN, LO)", "DECAY CLASS (ST, SN only)", "DBH (cm)", "TREE HEIGHT (m)", "HEIGHT TO LIVE FOLIAGE (m)", "HEIGHT TO DEAD BRANCH (m)", "DIST (m)", "AZIMUTH", "CROWN TO BASE HEIGHT (m)", "NOTES", "PlotCenterEasting", "PlotCenterNorthing","tree_lon", "tree_lat", "plot_id_ofo", "subplot_id_ofo", "SERIES" )
 
 # now make sure all data sets have the same column titles and same column formats, there are some discrepancies
 
@@ -398,9 +398,7 @@ alldata$`CONDITION        (LI, ST, SN, LO)`[alldata$`CONDITION        (LI, ST, S
 
 alldata$`CONDITION        (LI, ST, SN, LO)`[alldata$`CONDITION        (LI, ST, SN, LO)` == 'ST'] <- 'NA'
 
-alldata <- alldata %>% rename ("CONDITION" = "CONDITION        (LI, ST, SN, LO)")
-
-alldata$CONDITION[alldata$CONDITION == "NA"] <- NA
+alldata$`CONDITION        (LI, ST, SN, LO)`[alldata$`CONDITION        (LI, ST, SN, LO)` == "NA"] <- NA
 
 # LI is live, SN is snag
 
@@ -410,7 +408,7 @@ alldata$`CONDITION        (LI, ST, SN, LO)`[alldata$`CONDITION        (LI, ST, S
 
 # delete all NAs in this column
 
-alldata <- alldata[complete.cases(alldata$CONDITION),]
+alldata <- alldata[complete.cases(alldata$`CONDITION        (LI, ST, SN, LO)`),]
 
 ```
 
@@ -434,6 +432,23 @@ alldata$NOTES[is.na(alldata$NOTES)] <- ""
 
 ```
 
+Calculated distance to pith with distance + 1/2(DBH)
+
+```{r}
+# Horizontal distance from plot center to tree surface to horizontal distance from plot center to tree pith 
+
+# add a new column for horizontal distance to pith 
+
+alldata <- alldata %>%
+  add_column(horiz_distance_pith = "")
+
+# calculate 
+
+alldata$horiz_distance_pith = alldata$`DIST (m)`+ (0.5 * 0.01 * alldata$`DBH (cm)`)
+
+```
+
+
 Export CSV
 
 ```{r}
@@ -445,6 +460,8 @@ write.csv(alldata, "C:\\Users\\emily\\OneDrive\\Desktop\\FOCAL\\field-data-stand
 
 ## ALTERATIONS MADE IN EXCEL
 
-dd = d + m/60 + s/3600 --> manually calculated lat/lon with this formula in excel for the subplots in Johnston 14 that had dd mm.mmmmm. This is because some were in dd.dddd already.
+- dd = d + m/60 + s/3600 --> manually calculated lat/lon with this formula in excel for the subplots in Johnston 14 that had dd mm.mmmmm. This is because some were in dd.dddd already.
 
-All other lat/lon calculations were made in R
+- All other lat/lon calculations were made in R
+
+- In an email to me (E.M. Purvis), dataset contributor Sven Rodne clarified that "As for the "duplicate trees", those notes are in reference to coring plots that were established at each site, so that is the proper tree inventory and not duplicates in the stem data." I manually deleted all notes about duplicate trees to avoid confusion. In previous stem map creation, I confirmed that all trees labelled "duplicate" in fact had unique spatial coordinates.
