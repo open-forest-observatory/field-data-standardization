@@ -1,0 +1,137 @@
+---
+title: "20231004_SSI_grassvalley_oneplot"
+author: "Emily Marie Purvis"
+date: "2023-10-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ALTERATIONS MADE IN R
+
+```{r, echo=FALSE}
+
+# Load libraries 
+
+library(tidyverse)
+library(readxl)
+library(sf)
+library(pracma)
+```
+
+
+```{r}
+
+# Set working directory
+
+setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+
+# Load data
+
+treedata = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0003\\data\\FOCAL_LAB_OnePlot_SSI_Corrected.xlsx"),sheet=3,col_names = TRUE)
+
+treedata = read_excel(data("C:/Users/emily/Box/FOCAL/ofo-field-data/1_received-data/0003/data/FOCAL_LAB_OnePlot_SSI_Corrected.xlsx"),sheet=3,col_names = TRUE)
+
+treedata = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\SSI.GrassValley\\FOCAL_LAB_OnePlot_SSI_Corrected.xlsx"),sheet=3,col_names = TRUE)
+
+# Seriously bugging out today
+
+treedata = read_excel(file.choose())
+
+```
+
+Adding OFO plot_id
+
+```{r}
+# add a new column with the right plot ID
+
+treedata <- treedata %>%
+  add_column(plot_id_ofo = "0052")
+```
+
+Imperial to metric
+
+```{r}
+
+treedata$Distance_meters = treedata$DISTANCE_FT*0.3048
+
+# what format are the heights and dbhs in??
+
+```
+
+One column of azimuths (right now there are two)
+
+```{r}
+
+# some azimuth measurements are in one column and some are in another, making a new column that has all the correct azimuth measurements
+
+treedata$Azimuth4Real <- 0
+
+for(i in 1:nrow(treedata)) {
+  if(is.na(treedata$AZM_corrected[i])) {
+    treedata[i,]$Azimuth4Real = (treedata[i,]$AZM)
+  }
+  else {
+    treedata[i,]$Azimuth4Real = treedata[i,]$AZM_corrected
+  }
+}
+```
+
+Add plot center coordinates to a dataframe
+
+```{r}
+
+# make the plot center coordinates into a spatial dataframe
+
+plotcenter <- matrix(c('1', -120.905293, 39.199336), ncol=3, byrow=TRUE)
+
+colnames(plotcenter) <- c('PLOT_ID','PlotCenterEasting','PlotCenterNorthing')
+
+plotcenter <- as.data.frame.matrix(plotcenter)
+
+plotcenter_sp <- st_as_sf(plotcenter, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
+
+# convert plot center coordinates to UTM10N so calculations in the next step work
+
+plotcenter_UTM10N <- st_transform (plotcenter_sp, 32610)
+
+# extract the geometry features into columns of lat and long, then merge back into the spatial data frame
+
+UTM10N_plotcoords <- data.frame(plotcenter_UTM10N$'PLOT_ID', st_coordinates(plotcenter_UTM10N[,1], st_coordinates(plots_UTM10N[,2]))) %>% rename ('PLOT_ID'=plotcenter_UTM10N.PLOT_ID, PlotEastingUTM10N=X, PlotNorthingUTM10N=Y)
+
+plotcenter_UTM10N <- full_join(plotcenter_UTM10N, UTM10N_plotcoords, by="PLOT_ID")
+```
+
+
+Tree lat and tree lon
+
+```{r}
+
+# add new columns to the treedata dataframe so that each individual tree has a populated plot center easting and northing
+
+plotcenter_UTM10N$PLOT_ID = as.numeric(as.character(plotcenter_UTM10N$PLOT_ID))
+
+treedata = full_join(treedata,st_drop_geometry(plotcenter_UTM10N),by='PLOT_ID')
+
+# calculate the coordinates of each tree using the plot center, horizontal distance, and azimuth 
+
+treedata = treedata %>%
+  mutate(TreeEasting = as.numeric(PlotEastingUTM10N) + sin(deg2rad(Azimuth4Real)) * Distance_meters,
+         TreeNorthing = as.numeric(PlotNorthingUTM10N) + cos(deg2rad(Azimuth4Real)) * Distance_meters)
+
+# Tree eastings and northings from UTM back to WGS84
+
+treedata_sp <- st_as_sf(treedata, coords = c("TreeEasting", "TreeNorthing"), crs = 32610, remove=F) 
+
+treedata_sp <- st_transform (treedata_sp, 4326)
+
+# extract the geometry features into columns of lat and long, then merge back into the spatial data frame
+
+treedata_coords <- data.frame(treedata_sp$'TREE_ID', st_coordinates(treedata_sp[,1], st_coordinates(treedata_sp[,2]))) %>% rename (tree_lon=X, tree_lat=Y, TREE_ID=treedata_sp.TREE_ID)
+
+treedata <- full_join(treedata, treedata_coords, by="TREE_ID")
+
+```
+
