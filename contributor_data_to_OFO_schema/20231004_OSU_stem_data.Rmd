@@ -318,6 +318,23 @@ Johnston10$subplot_id_ofo[Johnston10$SUBPLOT == '6'] <- '0024'
 
 DBH is in cm, height is in m, everything in metric! :)
 
+Make a csv that has subplot lat/lon for plots 15, 11, and 10
+
+```{r}
+
+subplotlatlon <- c ("SUBPLOT", "plot_id_ofo", "subplot_id_ofo", "PlotCenterEasting", "PlotCenterNorthing")
+
+subplots15 <- Johnston15[subplotlatlon]
+subplots11 <- Johnston11[subplotlatlon]
+subplots10 <- Johnston10[subplotlatlon]
+
+subplotlatlon <- bind_rows(subplots15, subplots11, subplots10)
+
+write.csv(subplotlatlon, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\20231004_OSU_stem_data_subplotlatlon.csv")
+
+```
+
+
 Going to combine all 4 plot datasets to make the next manipulations easier
 
 ```{r}
