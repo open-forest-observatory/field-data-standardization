@@ -1,0 +1,223 @@
+---
+title: "FOCAL dispersal kernel project"
+author: "Emily Marie Purvis"
+date: "2023-10-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ALTERATIONS MADE IN R
+
+Libraries 
+
+```{r, echo=FALSE}
+
+# Load libraries 
+
+library(tidyverse)
+library(sf)
+
+```
+Importing tree data
+
+```{r, ECHO=false}
+
+treedata = read.csv(data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0004\\data\\stems_v3_aligned.csv"))
+
+```
+
+Adding OFO plot_id and subplot_id
+
+```{r}
+# add a new column with the right plot ID
+
+treedata <- treedata %>%
+  add_column(plot_id_ofo = "0")
+
+treedata$plot_id_ofo[treedata$stem_map_name == 'Chips_1_ABCO'] <- '0057'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Chips_1'] <- '0058'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Valley_1'] <- '0059'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Lassic_1'] <- '0060'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Delta_1'] <- '0061'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Lassic_2'] <- '0062'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Delta_2'] <- '0063'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Chips_2'] <- '0064'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Delta_3'] <- '0065'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Creek_1'] <- '0066'
+treedata$plot_id_ofo[treedata$stem_map_name == 'Creek_2'] <- '0067'
+
+# add a new column with the right subplot ID
+
+treedata <- treedata %>%
+  add_column(subplot_id_ofo = "") 
+
+treedata$subplot_id_ofo[treedata$center_id == 'cABCOa'] <- '0025'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (treedata$center_id == 'c24a')] <- '0026'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (treedata$center_id == 'c23a')] <- '0027'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (treedata$center_id == 'c22a')] <- '0028'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (treedata$center_id == 'c21a')] <- '0029'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (treedata$center_id == 'c17a')] <- '0030'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (treedata$center_id == 'c18a')] <- '0031'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (treedata$center_id == 'c19a')] <- '0032'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (treedata$center_id == 'c20a')] <- '0033'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_2') & (treedata$center_id == 'C16A')] <- '0034'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_2') & (treedata$center_id == 'C12A')] <- '0035'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (treedata$center_id == 'c24a')] <- '0036'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (treedata$center_id == 'c23a')] <- '0037'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (treedata$center_id == 'c22a')] <- '0038'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (treedata$center_id == 'c21a')] <- '0039'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (treedata$center_id == 'c17a')] <- '0040'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (treedata$center_id == 'c18a')] <- '0041'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (treedata$center_id == 'c19a')] <- '0042'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (treedata$center_id == 'c20a')] <- '0043'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c11')] <- '0044'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c10')] <- '0045'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c14')] <- '0046'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c15')] <- '0047'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c16')] <- '0048'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c12')] <- '0049'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c08')] <- '0050'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c07')] <- '0051'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c06')] <- '0052'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c13')] <- '0053'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c09')] <- '0054'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c01')] <- '0055'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c05')] <- '0056'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c02')] <- '0057'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c03')] <- '0058'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_1') & (treedata$center_id == 'c04')] <- '0059'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c06')] <- '0060'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c02')] <- '0061'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c01')] <- '0062'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c05')] <- '0063'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c13')] <- '0064'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c14')] <- '0065'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c10')] <- '0066'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c15')] <- '0067'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c11')] <- '0068'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c07')] <- '0069'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c03')] <- '0070'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c04')] <- '0071'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c08')] <- '0072'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c12')] <- '0073'
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c16')] <- '0074'
+
+```
+
+Live/dead
+
+```{r}
+
+treedata <- treedata %>%
+  add_column(livedead = "")
+
+# if the species column is or contains "snag", the tree is dead
+
+treedata$livedead <- (grepl('snag', treedata$species)) | (grepl('SNAG', treedata$species)) | (grepl('Snag', treedata$species))
+
+treedata$livedead[(treedata$livedead == 'TRUE')] <- 'D'
+treedata$livedead[(treedata$livedead == 'FALSE')] <- 'L'
+
+```
+
+Species
+
+```{r}
+
+treedata$species[treedata$species == 'ABCO'] <- '015'
+treedata$species[treedata$species == 'ABCO snag'] <- '015'
+treedata$species[treedata$species == 'abco'] <- '015'
+treedata$species[treedata$species == 'abco snag'] <- '015'
+treedata$species[treedata$species == 'PSME'] <- '202'
+treedata$species[treedata$species == 'psme'] <- '202'
+treedata$species[treedata$species == 'PILA'] <- '117'
+treedata$species[treedata$species == 'PILA snag'] <- '117'
+treedata$species[treedata$species == 'pila'] <- '117'
+treedata$species[treedata$species == 'CADE'] <- '081'
+treedata$species[treedata$species == 'CADE Snag'] <- '081'
+treedata$species[treedata$species == 'CADE snag'] <- '081'
+treedata$species[treedata$species == 'cade'] <- '081'
+treedata$species[treedata$species == 'cade snag'] <- '081'
+treedata$species[treedata$species == 'PIPO'] <- '122'
+treedata$species[treedata$species == 'PIPO snag'] <- '122'
+treedata$species[treedata$species == 'pipo'] <- '122'
+treedata$species[treedata$species == 'QUKE'] <- '818'
+treedata$species[treedata$species == 'quke'] <- '818'
+treedata$species[treedata$species == 'quke snag'] <- '818'
+treedata$species[treedata$species == 'QUGA'] <- '815'
+treedata$species[treedata$species == 'quga'] <- '815'
+treedata$species[treedata$species == 'qu spp'] <- '800'
+treedata$species[treedata$species == 'qu spp.'] <- '800'
+treedata$species[treedata$species == 'qu spp. snag'] <- '800'
+treedata$species[treedata$species == 'pixx snag'] <- '100'
+treedata$species[treedata$species == 'pixx'] <- '100'
+treedata$species[treedata$species == 'pipj'] <- '150'
+treedata$species[treedata$species == 'PIPJ'] <- '150'
+treedata$species[treedata$species == 'PIPJ snag'] <- '150'
+treedata$species[treedata$species == 'PIJE'] <- '116'
+treedata$species[treedata$species == 'pije'] <- '116'
+treedata$species[treedata$species == 'abxxx snag'] <- '010'
+treedata$species[treedata$species == 'abxx snag'] <- '010'
+treedata$species[treedata$species == 'abxx'] <- '010'
+treedata$species[treedata$species == 'abma snag'] <- '020'
+treedata$species[treedata$species == 'abma'] <- '020'
+# assuming QUCH
+treedata$species[treedata$species == 'QUCC'] <- '805'
+treedata$species[treedata$species == 'QUEV'] <- '850'
+
+# labelling snags without other species indications as unknowns
+
+treedata$species[treedata$species == 'SNAG'] <- '000'
+treedata$species[treedata$species == 'snag'] <- '000'
+treedata$species[treedata$species == 'MISSING'] <- '000'
+```
+
+Height lowest needle-- change NAs to "-"
+
+```{r}
+
+treedata$ht_lowest_ndl[treedata$ht_lowest_ndl == 'NA'] <- ''
+treedata$ht_lowest_ndl[treedata$ht_lowest_ndl == 'N/A'] <- ''
+treedata$ht_lowest_ndl[treedata$ht_lowest_ndl == 'n/a'] <- ''
+
+```
+
+Get rid of NAs in percent green, height to lowest needle, distance, azimuth, and notes columns
+
+```{r}
+
+treedata$pct_prefire_green[is.na(treedata$pct_prefire_green)] <- ""
+treedata$pct_prefire_green[treedata$pct_prefire_green == 'N/A'] <- ''
+treedata$pct_prefire_green[treedata$pct_prefire_green == 'n/A'] <- ''
+treedata$pct_prefire_green[treedata$pct_prefire_green == 'n/a'] <- ''
+
+treedata$pct_current_green[is.na(treedata$pct_current_green)] <- ""
+treedata$pct_current_green[treedata$pct_current_green == 'N/A'] <- ''
+treedata$pct_current_green[treedata$pct_current_green == 'n/a'] <- ''
+
+treedata$ht_lowest_ndl[is.na(treedata$ht_lowest_ndl)] <- ""
+treedata$distance[is.na(treedata$distance)] <- ""
+treedata$azimuth[is.na(treedata$azimuth)] <- ""
+treedata$notes[is.na(treedata$notes)] <- ""
+
+```
+
+Just a note that there are no distances in the final OFO data sheet! This is because distances were measured from subplot centers to the face of the tree. Because no DBH measurements were taken in this dataset, we can't calculate distance to the pith.
+
+
+Export CSV
+
+```{r}
+
+write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL.dispersal.kernel.project\\20231005_FOCAL_dispersal_kernel_project.csv")
+
+```
+
+
+## ALTERATIONS MADE IN EXCEL
+
+None!
+
