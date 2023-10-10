@@ -138,3 +138,43 @@ for(i in 1:nrow(polygons)) {
   plot_id_current = polygon_current$plot_id_ofo
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
+
+#### SSI Grass Valley OnePlot ####
+
+
+# make the plot center coordinates into a spatial dataframe
+
+SSIplotcenter <- matrix(c('1', -120.905293, 39.199336), ncol=3, byrow=TRUE)
+
+colnames(SSIplotcenter) <- c('PLOT_ID','PlotCenterEasting','PlotCenterNorthing')
+
+SSIplotcenter <- as.data.frame.matrix(SSIplotcenter)
+
+SSIplotcenter_sp <- st_as_sf(SSIplotcenter, coords = c("PlotCenterEasting", "PlotCenterNorthing"), crs = 4326, remove=F)
+
+# These are circular plots! Buffer circles by 100 feet (30.48 meters)-- this is the plot radius
+
+# First project to a projected (meters) coordinate system with equal x and y distances
+
+# CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+
+SSIplotcenter_sp = st_transform(SSIplotcenter_sp, crs = 5070)
+
+SSIplotcenter_circles <- st_buffer(SSIplotcenter_sp, dist = 30.48, nQuadSegs = 10)
+
+# Then back to WGS84
+
+SSIplotcenter_circles <- st_transform(SSIplotcenter_circles, crs = 4326)
+
+# add OFO plot ID
+
+SSIplotcenter_circles <- SSIplotcenter_circles %>%
+  add_column(plot_id_ofo = "0052")
+
+# pare down spatial data file so it only contains geometry and OFO plot ID
+
+SSIplotcenter_circles = subset(SSIplotcenter_circles, select = c('plot_id_ofo','geometry') )
+
+# Export polygon
+
+st_write(SSIplotcenter_circles, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0052.gpkg")
