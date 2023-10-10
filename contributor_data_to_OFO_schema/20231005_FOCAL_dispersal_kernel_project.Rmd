@@ -175,7 +175,7 @@ treedata$species[treedata$species == 'snag'] <- '000'
 treedata$species[treedata$species == 'MISSING'] <- '000'
 ```
 
-Height lowest needle-- change NAs to "-"
+Height lowest needle-- change NAs to ""
 
 ```{r}
 

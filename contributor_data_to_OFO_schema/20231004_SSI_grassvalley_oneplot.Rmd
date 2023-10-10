@@ -32,14 +32,6 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
 
 treedata = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0003\\data\\FOCAL_LAB_OnePlot_SSI_Corrected.xlsx"),sheet=3,col_names = TRUE)
 
-treedata = read_excel(data("C:/Users/emily/Box/FOCAL/ofo-field-data/1_received-data/0003/data/FOCAL_LAB_OnePlot_SSI_Corrected.xlsx"),sheet=3,col_names = TRUE)
-
-treedata = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\SSI.GrassValley\\FOCAL_LAB_OnePlot_SSI_Corrected.xlsx"),sheet=3,col_names = TRUE)
-
-# Seriously bugging out today
-
-treedata = read_excel(file.choose())
-
 ```
 
 Adding OFO plot_id
@@ -49,15 +41,18 @@ Adding OFO plot_id
 
 treedata <- treedata %>%
   add_column(plot_id_ofo = "0052")
+
 ```
 
 Imperial to metric
 
 ```{r}
 
-treedata$Distance_meters = treedata$DISTANCE_FT*0.3048
+treedata$distance_meters = treedata$DISTANCE_FT*0.3048
 
-# what format are the heights and dbhs in??
+treedata$dbh_cm = treedata$DIAMETER*2.54
+
+treedata$height_meters = treedata$HT*0.3048
 
 ```
 
@@ -102,6 +97,7 @@ plotcenter_UTM10N <- st_transform (plotcenter_sp, 32610)
 UTM10N_plotcoords <- data.frame(plotcenter_UTM10N$'PLOT_ID', st_coordinates(plotcenter_UTM10N[,1], st_coordinates(plots_UTM10N[,2]))) %>% rename ('PLOT_ID'=plotcenter_UTM10N.PLOT_ID, PlotEastingUTM10N=X, PlotNorthingUTM10N=Y)
 
 plotcenter_UTM10N <- full_join(plotcenter_UTM10N, UTM10N_plotcoords, by="PLOT_ID")
+
 ```
 
 
@@ -118,8 +114,8 @@ treedata = full_join(treedata,st_drop_geometry(plotcenter_UTM10N),by='PLOT_ID')
 # calculate the coordinates of each tree using the plot center, horizontal distance, and azimuth 
 
 treedata = treedata %>%
-  mutate(TreeEasting = as.numeric(PlotEastingUTM10N) + sin(deg2rad(Azimuth4Real)) * Distance_meters,
-         TreeNorthing = as.numeric(PlotNorthingUTM10N) + cos(deg2rad(Azimuth4Real)) * Distance_meters)
+  mutate(TreeEasting = as.numeric(PlotEastingUTM10N) + sin(deg2rad(Azimuth4Real)) * distance_meters,
+         TreeNorthing = as.numeric(PlotNorthingUTM10N) + cos(deg2rad(Azimuth4Real)) * distance_meters)
 
 # Tree eastings and northings from UTM back to WGS84
 
@@ -135,7 +131,7 @@ treedata <- full_join(treedata, treedata_coords, by="TREE_ID")
 
 ```
 
-Species: BO is black oak (818), DF is douglas fir (202), CY is 
+Species: BO is black oak (818), DF is douglas fir (202), CY is canyon live oak (805), PP is ponderosa pine (122)
 
 ```{r}
 
@@ -143,7 +139,9 @@ treedata$SPECIES[treedata$SPECIES == 'BO'] <- '818'
 
 treedata$SPECIES[treedata$SPECIES == 'DF'] <- '202'
 
-treedata$SPECIES[treedata$SPECIES == 'CY'] <- ''
+treedata$SPECIES[treedata$SPECIES == 'CY'] <- '805'
+
+treedata$SPECIES[treedata$SPECIES == 'PP'] <- '122'
 
 ```
 
@@ -166,6 +164,19 @@ for(i in 1:nrow(treedata)) {
   }
 }
 
+# Can also be calculated with tree history codes! I did both methods and got the same results 
+
+#treedata$LiveDeadHist <- "a"
+
+# for(i in 1:nrow(treedata)) {
+#  if((treedata$HISTORY[i]) == 1) {
+#    treedata[i,]$LiveDeadHist = "L"
+#  }
+#  else {
+#    treedata[i,]$LiveDeadHist = "D"
+#  }
+#}
+
 ```
 
 Crown position: C= codominant, I= intermediate, D= dominant, O= overtopped
@@ -183,6 +194,8 @@ treedata$POSITION[treedata$POSITION == 'I'] <- '4'
 treedata$POSITION[treedata$POSITION == 'O'] <- '5'
 
 treedata$POSITION[treedata$POSITION == 'NA'] <- ''
+
+treedata$POSITION[is.na(treedata$POSITION)] <- ""
 
 treedata$POSITION <- as.numeric(treedata$POSITION)
 
@@ -210,15 +223,93 @@ treedata$ohvis <- case_match(
 
 ```
 
-History code
+Get rid of NAs in snag decay class, crown ratio, and height
 
-HTTOPK
+```{r}
 
-Damage/Severity codes
+treedata$`SNAG DEC`[is.na(treedata$`SNAG DEC`)] <- ""
 
-Crown Ratio vs Crown Ratio Compacted?
+treedata$`CRRATIO`[is.na(treedata$`CRRATIO`)] <- ""
+
+treedata$height_meters[is.na(treedata$height_meters)] <- ""
+
+```
+
+Damage/Severity codes:  Broken/missing top is code 96, code 45 indicates rot, and 98 is a crook or lean.
+
+```{r}
+
+# broken top
+
+treedata$DAMAGE1[treedata$DAMAGE1 == '96'] <- '90001'
+treedata$DAMAGE2[treedata$DAMAGE2 == '96'] <- '90001'
+treedata$DAMAGE3[treedata$DAMAGE3 == '96'] <- '90001'
+
+# rot-- classifying this as "general diseases" because the type of rot is not specified
+
+treedata$DAMAGE1[treedata$DAMAGE1 == '45'] <- '19000'
+treedata$DAMAGE2[treedata$DAMAGE2 == '45'] <- '19000'
+treedata$DAMAGE3[treedata$DAMAGE3 == '45'] <- '19000'
+
+# crook or lean
+
+treedata$DAMAGE1[treedata$DAMAGE1 == '98'] <- '90006'
+treedata$DAMAGE2[treedata$DAMAGE2 == '98'] <- '90006'
+treedata$DAMAGE3[treedata$DAMAGE3 == '98'] <- '90006'
+
+# get rid of NAs
+
+treedata$DAMAGE1[is.na(treedata$DAMAGE1)] <- ""
+treedata$DAMAGE2[is.na(treedata$DAMAGE2)] <- ""
+treedata$DAMAGE3[is.na(treedata$DAMAGE3)] <- ""
+
+```
+
+Calculated distance to pith with distance + 1/2(DBH)
+
+```{r}
+# Horizontal distance from plot center to tree surface to horizontal distance from plot center to tree pith 
+
+# add a new column for horizontal distance to pith 
+
+treedata <- treedata %>%
+  add_column(horiz_distance_pith = "")
+
+# calculate 
+
+treedata$horiz_distance_pith = treedata$distance_meters + (0.5 * 0.01 * treedata$dbh_cm)
+
+```
+
+Crown ratios are coded: 1 - 1 to 10%, 2 - 11 to 20%, 3 - 21 to 30%, 4 – 31 to 40%, 5 - 41 to 50%, 6 - 51 to 60%, 7 - 61 to 70%, 8 - 71 to 80%. Decoding into percentages using the midpoint of each range.
+
+```{r}
+
+# get rid of NAs
+
+treedata$CRRATIO[is.na(treedata$CRRATIO)] <- ""
+
+# decode using midpoints
+
+treedata$CRRATIO[treedata$CRRATIO == '1'] <- '5'
+treedata$CRRATIO[treedata$CRRATIO == '2'] <- '15'
+treedata$CRRATIO[treedata$CRRATIO == '3'] <- '25'
+treedata$CRRATIO[treedata$CRRATIO == '4'] <- '35'
+treedata$CRRATIO[treedata$CRRATIO == '5'] <- '45'
+treedata$CRRATIO[treedata$CRRATIO == '6'] <- '55'
+treedata$CRRATIO[treedata$CRRATIO == '7'] <- '65'
+treedata$CRRATIO[treedata$CRRATIO == '8'] <- '75'
+
+```
 
 
+Export CSV
+
+```{r}
+
+write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\SSI.GrassValley\\20231010_SSI_grassvalley_oneplot.csv")
+
+```
 
 
 #ALTERATIONS MADE IN EXCEL

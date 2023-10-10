@@ -90,6 +90,11 @@ treedata$horiz_distance_pith = treedata$distance_m + (0.5 * 0.01 * treedata$DBH_
 
 # Always check out the NAs before you delete them!! They could have an important meaning
 
+# for character NAs
+treedata$`SNAG DEC`[treedata$`SNAG DEC` == 'NA'] <- ''
+
+# for real NAs
+treedata$`SNAG DEC`[is.na(treedata$`SNAG DEC`)] <- ""
 
 #### Export to csv ####
 
