@@ -178,3 +178,18 @@ SSIplotcenter_circles = subset(SSIplotcenter_circles, select = c('plot_id_ofo','
 # Export polygon
 
 st_write(SSIplotcenter_circles, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0052.gpkg")
+
+#### Weeks Emerald Point ####
+
+# import
+
+plotpolygon <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0005\\data\\ground_map_mask_precise.geojson")
+
+# add OFO plot ID
+
+plotpolygon <- plotpolygon %>%
+  add_column(plot_id_ofo = "0068")
+
+# Export polygon
+
+st_write(plotpolygon, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0068.gpkg")
