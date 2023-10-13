@@ -205,7 +205,7 @@ treedata$notes[is.na(treedata$notes)] <- ""
 
 ```
 
-Just a note that there are no distances in the final OFO data sheet! This is because distances were measured from subplot centers to the face of the tree. Because no DBH measurements were taken in this dataset, we can't calculate distance to the pith.
+Just a note that distances were measured from subplot centers to the face of the tree. Because no DBH measurements were taken in this dataset, we can't calculate distance to the pith.
 
 
 Export CSV

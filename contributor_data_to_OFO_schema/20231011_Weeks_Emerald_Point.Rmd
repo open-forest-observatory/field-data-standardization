@@ -1,0 +1,306 @@
+---
+title: "Weeks Emerald Point"
+author: "Emily Marie Purvis"
+date: "2023-10-11"
+output: html_document
+---
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+```
+
+Load data
+
+```{r, echo=FALSE}
+
+# Set working directory
+
+setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+
+# Load data
+trees <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0005\\data\\ept_trees_01_rectified_inclSmall.geojson")
+
+subplots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0005\\data\\ept_plots_05.geojson")
+  
+plotpolygon <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0005\\data\\ground_map_mask_precise.geojson")
+```
+
+
+Calculate the area and centroid of the main plot polygon
+
+```{r}
+# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
+
+plotpolygon = st_transform(plotpolygon, crs = 5070)
+
+st_area (plotpolygon)
+
+# Add a new column to the spatial data frame for area and calculate
+
+plotpolygon$area_meters <- 0
+
+plotpolygon$area_meters = st_area (plotpolygon)
+
+# Convert back to 4326
+
+plotpolygon = st_transform(plotpolygon, crs = 4326)
+
+#### Calculate centroid of each polygon ####
+
+plotpolygon$centroid <- 0
+
+plotpolygon$centroid <- st_centroid(plotpolygon)
+```
+Export subplot names and geometry to a csv
+
+```{r}
+# extract the geometry features into columns of lat and long, then merge back into the spatial data frame
+
+subplotscoords <- data.frame(subplots$'Plot_Loc', st_coordinates(subplots[,1], st_coordinates(subplots[,2]))) 
+
+subplotscoords <- subplotscoords %>% rename ('Plot_Loc'= subplots.Plot_Loc, PlotEasting=X, PlotNorthing=Y)
+
+#Export
+
+write.csv(subplotscoords, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Weeks.EmeraldPoint\\20231012_WeeksEmeraldPoint_subplots.csv")
+```
+
+Add OFO plot ID and subplot IDs
+
+```{r}
+
+# plot ID
+
+trees <- trees %>%
+  add_column(plot_id_ofo = "0068")
+
+# subplot IDs-- first add to subplot data, then to treedata
+
+subplots <- subplots %>%
+  add_column(subplot_id_ofo = "") 
+
+subplots$subplot_id_ofo <- (1:nrow(subplots) + 74)
+
+subplots_merge <- subset(subplots, select = (c(subplot_id_ofo, Plot_Loc)))
+
+trees <- trees %>%
+  add_column(subplot_id_ofo = "") 
+
+trees = full_join(trees, st_drop_geometry(subplots_merge), by='Plot_Loc')
+
+```
+
+Add tree lat and lon
+
+```{r}
+
+# add a tree id column 
+
+trees <- trees %>%
+  add_column(tree_id_ofo = "") 
+
+trees$tree_id_ofo <- 1:nrow(trees)
+
+# extract the geometry features into columns of lat and long, then merge back into the spatial data frame
+
+treescoords <- data.frame(trees$'tree_id_ofo', st_coordinates(trees[,1], st_coordinates(trees[,2]))) 
+
+treescoords <- treescoords %>% rename ('tree_id_ofo'= trees.tree_id_ofo, TreeEasting=X, TreeNorthing=Y)
+
+trees = full_join(trees, st_drop_geometry(treescoords), by='tree_id_ofo')
+```
+
+Units of height, dbh, height to crown, crown width (x2)
+
+```{r}
+
+# DBH is in centimeters! We do need to exclude trees with DBH below 7.5 though
+
+trees <- trees[trees$DBH > 7.4, ] 
+
+# Height is in meters
+
+# Height to crown is in meters, has a lot of NAs. Lets get rid of em
+
+trees$Height_to_crown[is.na(trees$Height_to_crown)] <- ""
+trees$Height_to_crown[trees$Height_to_crown == 'NA'] <- ''
+
+# Crown width is in meters
+
+# Crown width has lots of NAs to get rid of too
+
+trees$Crown_width_1[is.na(trees$Crown_width_1)] <- ""
+trees$Crown_width_1[trees$Crown_width_1 == 'NA'] <- ''
+
+trees$Crown_width_2[is.na(trees$Crown_width_2)] <- ""
+trees$Crown_width_2[trees$Crown_width_2 == 'NA'] <- ''
+
+```
+
+
+Calculate distance to pith
+
+```{r}
+
+# distance measured is horizontal distance from subplot center to the face of the tree
+
+# add a new column for horizontal distance to pith
+
+trees <- trees %>%
+  add_column(horiz_distance_pith = "")
+
+# calculate
+
+trees$horiz_distance_pith = trees$Distance + (0.5 * 0.01 * trees$DBH)
+```
+
+Health codes
+
+```{r}
+
+# get rid of NAs in health and remarks classes
+
+trees$Health_1[is.na(trees$Health_1)] <- ""
+trees$Health_1[trees$Health_1 == 'NA'] <- ''
+
+trees$Health_2[is.na(trees$Health_2)] <- ""
+trees$Health_2[trees$Health_2 == 'NA'] <- ''
+
+trees$Health_3[is.na(trees$Health_3)] <- ""
+trees$Health_3[trees$Health_3 == 'NA'] <- ''
+
+trees$Remarks[is.na(trees$Remarks)] <- ""
+trees$Remarks[trees$Remarks == 'NA'] <- ''
+
+# Black CADEs don't have a damage code-- that's a non-pathogenic fungus called sooty mold (Arthrobotryum spongiosum)
+
+trees$Health_1[trees$Health_1 == 'very black'] <- ''
+trees$Health_1[trees$Health_1 == 'black'] <- ''
+trees$Health_1[trees$Health_1 == 'slightly black'] <- ''
+
+# get rid of "goods"
+
+trees$Health_1[trees$Health_1 == 'good'] <- ''
+
+# dieback (90010) for leaves sparse/very sparse and dead branches
+
+trees$Health_1[trees$Health_1 == 'leaves sparse'] <- '90010'
+trees$Health_1[trees$Health_1 == 'Leaves very sparse'] <- '90010'
+trees$Health_1[trees$Health_1 == 'some branches dead'] <- '90010'
+trees$Health_1[trees$Health_1 == 'only one live branch'] <- '90010'
+trees$Health_1[trees$Health_1 == 'most branches dead'] <- '90010'
+trees$Health_2[trees$Health_2 == 'leaves sparse'] <- '90010'
+trees$Health_3[trees$Health_3 == 'leaves very sparse'] <- '90010'
+
+# foliage discoloration (90008) for leaves browning/yellowing
+
+trees$Health_1[trees$Health_1 == 'some red leaves'] <- '90008'
+trees$Health_1[trees$Health_1 == 'many red leaves'] <- '90008'
+trees$Health_1[trees$Health_1 == 'leaves yellowing'] <- '90008'
+trees$Health_2[trees$Health_2 == 'some red leaves'] <- '90008'
+trees$Health_2[trees$Health_2 == 'leaves yellowing slightly'] <- '90008'
+trees$Health_2[trees$Health_2 == 'leaves yellowing'] <- '90008'
+trees$Health_3[trees$Health_3 == 'leaves yellowing'] <- '90008'
+
+# 90007 is bole cracks
+
+trees$Health_1[trees$Health_1 == 'trunk cracked'] <- '90007'
+
+# 90001 is broken top
+
+trees$Health_1[trees$Health_1 == 'top fell off'] <- '90001'
+trees$Health_2[trees$Health_2 == 'top fell off'] <- '90001'
+
+# get rid of "sapping" --> no way of knowing if this is mechanical damage, insect damage, etc. same with "spindly" --> can't tell if they're overtopped or have another disease. same with "all lower bark gone" --> no idea if it's human girdling, animal girdling, or something else. will keep these as an unknown damage code 99000 . 
+
+trees$Health_1[trees$Health_1 == 'sapping'] <- '99000'
+trees$Health_1[trees$Health_1 == 'slightly sapping'] <- '99000'
+trees$Health_1[trees$Health_1 == 'heavily sapping'] <- '99000'
+trees$Health_1[trees$Health_1 == 'sapping slightly'] <- '99000'
+trees$Health_1[trees$Health_1 == 'sapping heavily'] <- '99000'
+trees$Health_1[trees$Health_1 == 'spindly'] <- '99000'
+trees$Remarks[trees$Remarks == 'all lower bark gone'] <- '99000'
+
+# leaning is 90006 (crook or sweep)
+
+trees$Health_1[trees$Health_1 == 'leaning over'] <- '90006'
+trees$Health_2[trees$Health_2 == 'leaning over'] <- '90006'
+trees$Remarks[trees$Remarks == 'leaning over'] <- '90006'
+
+# big gash is 90011 open wound
+
+trees$Health_2[trees$Health_2 == 'big gash'] <- '90011'
+
+```
+
+Species codes
+
+```{r}
+
+trees$Species[trees$Species == 'ABCO'] <- '015'
+trees$Species[trees$Species == 'CADE'] <- '081'
+trees$Species[trees$Species == 'PIPO'] <- '122'
+trees$Species[trees$Species == 'PIJE'] <- '116'
+trees$Species[trees$Species == 'TSME'] <- '264'
+trees$Species[trees$Species == 'SALSCO'] <- '924'
+trees$Species[trees$Species == 'PILA'] <- '117'
+trees$Species[trees$Species == 'PICO'] <- '108'
+trees$Species[trees$Species == 'ABMA'] <-'020'
+trees$Species[trees$Species == 'PI'] <-'100'
+```
+
+
+Get rid of NAs
+
+```{r}
+
+# decay class
+
+trees$Decay_class[is.na(trees$Decay_class)] <- ""
+trees$Decay_class[trees$Decay_class == 'NA'] <- ''
+
+```
+
+
+Exclude duplicate trees and columns that are just NAs
+
+```{r}
+
+# exclude rows full of NAs
+
+trees <- trees %>% drop_na (Plot)
+
+# exclude duplicates
+
+trees <- trees[trees$duplicated == FALSE, ] 
+
+```
+
+Exclude trees outside plot boundary
+
+```{r}
+
+trees_inside <- st_intersection(trees, plotpolygon)
+
+# also confirmed this result in qGIS!
+
+```
+
+Just a note that azimuth_corrected is the column we want to use here! Has declination applied :)
+
+Export to csv
+
+```{r}
+#Export
+
+write.csv(st_drop_geometry(trees_inside), "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Weeks.EmeraldPoint\\20231012_WeeksEmeraldPoint_treesprocessed.csv")
+```
+
+
+# CORRECTIONS MADE IN EXCEL
+
+Manually dragged some damage codes that were hiding in the "remarks" section to the damage code columns 
