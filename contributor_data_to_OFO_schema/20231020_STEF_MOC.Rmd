@@ -1,0 +1,55 @@
+---
+title: "STEF MOC"
+author: "Emily Marie Purvis"
+date: "2023-10-20"
+output: html_document
+---
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+```
+
+Load data
+
+```{r, echo=FALSE}
+
+# Set working directory
+
+setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+
+# Load data
+trees <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOCPlots_8_9_10_11_Trees_2007_2016.csv")
+  
+plotpolygon <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0005\\data\\ground_map_mask_precise.geojson")
+```
+
+
+Calculate the area and centroid of the main plot polygon
+
+```{r}
+# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
+
+plotpolygon = st_transform(plotpolygon, crs = 5070)
+
+st_area (plotpolygon)
+
+# Add a new column to the spatial data frame for area and calculate
+
+plotpolygon$area_meters <- 0
+
+plotpolygon$area_meters = st_area (plotpolygon)
+
+# Convert back to 4326
+
+plotpolygon = st_transform(plotpolygon, crs = 4326)
+
+#### Calculate centroid of each polygon ####
+
+plotpolygon$centroid <- 0
+
+plotpolygon$centroid <- st_centroid(plotpolygon)
+```
