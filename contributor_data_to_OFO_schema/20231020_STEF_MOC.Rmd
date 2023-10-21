@@ -5,6 +5,8 @@ date: "2023-10-20"
 output: html_document
 ---
 
+## DATA MANIPULATED IN R
+
 ```{r, echo=FALSE}
 
 # Load libraries
@@ -24,32 +26,190 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
 # Load data
 trees <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOCPlots_8_9_10_11_Trees_2007_2016.csv")
   
-plotpolygon <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0005\\data\\ground_map_mask_precise.geojson")
+spatialdata <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb")
+
+spatiallayers <- st_layers(dsn = "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb")
+
+spatiallayers
+
+MOC8boundary <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb", layer = "MOC8_Boundary")
+
+MOC9boundary <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb", layer = "MOC9_Boundary")
+
+MOC10boundary <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb", layer = "MOC10_Boundary")
+
+MOC11boundary <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb", layer = "MOC11_Boundary_2007")
 ```
 
+PLOT LEVEL DATA
 
-Calculate the area and centroid of the main plot polygon
+Calculate centroid of plot polygons
 
 ```{r}
-# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
 
-plotpolygon = st_transform(plotpolygon, crs = 5070)
+# As a note-- the .gdb layers already have area of each polygon in square meters
 
-st_area (plotpolygon)
+# Right now the MOC polygons are in UTM 10N. Transform to EPSG 4326.
 
-# Add a new column to the spatial data frame for area and calculate
-
-plotpolygon$area_meters <- 0
-
-plotpolygon$area_meters = st_area (plotpolygon)
-
-# Convert back to 4326
-
-plotpolygon = st_transform(plotpolygon, crs = 4326)
+MOC8 = st_transform(MOC8boundary, crs = 4326)
+MOC9 = st_transform(MOC9boundary, crs = 4326)
+MOC10 = st_transform(MOC10boundary, crs = 4326)
+MOC11 = st_transform(MOC11boundary, crs = 4326)
 
 #### Calculate centroid of each polygon ####
 
-plotpolygon$centroid <- 0
+MOC8$centroid <- 0
+MOC9$centroid <- 0
+MOC10$centroid <- 0
+MOC11$centroid <- 0
 
-plotpolygon$centroid <- st_centroid(plotpolygon)
+MOC8$centroid <- st_centroid(MOC8)
+MOC9$centroid <- st_centroid(MOC9)
+MOC10$centroid <- st_centroid(MOC10)
+MOC11$centroid <- st_centroid(MOC11)
 ```
+
+TREE LEVEL DATA
+
+Add OFO plot ID
+
+```{r}
+
+# plot ID
+
+trees <- trees %>%
+  add_column(plot_id_ofo = "0")
+
+trees$plot_id_ofo[trees$MOC_PlotNo == '8'] <- '0069'
+trees$plot_id_ofo[trees$MOC_PlotNo == '9'] <- '0070'
+trees$plot_id_ofo[trees$MOC_PlotNo == '10'] <- '0071'
+trees$plot_id_ofo[trees$MOC_PlotNo == '11'] <- '0072'
+
+```
+
+Convert tree lat and tree lon to the right crs
+
+```{r}
+
+# right now tree lat and tree lon are in crs: NAD 1983 Universal Transverse Mercator (UTM) Zone 10N, or epsg 26910
+
+# first make the regular tree dataframe into a spatial dataframe
+
+trees_sp <- st_as_sf(trees, coords = c("X_UTM", "Y_UTM"), crs = 26910, remove=F)
+
+# change CRS to WGS84
+
+trees_sp <- st_transform (trees_sp, 4326)
+
+# Extract new coordinates
+
+trees_sp_coords <- data.frame(trees_sp$OBJECTID, st_coordinates(trees_sp[,1], st_coordinates(trees_sp[,2]))) 
+
+trees_sp_coords <- trees_sp_coords %>% rename (OBJECTID=trees_sp.OBJECTID, TreeEasting=X, TreeNorthing=Y)
+
+# merge back into tree dataframe
+
+trees <- full_join(trees, trees_sp_coords, by="OBJECTID")
+
+```
+
+Convert height from feet to meters and get rid of NAs
+
+```{r}
+# add a new column for height in meters
+
+trees <- trees %>%
+  add_column(height_m = "")
+
+# calculate 
+
+trees$height_m = trees$Height * 0.3048
+
+# get rid of pesky NAs
+
+trees$height_m[is.na(trees$height_m)] <- ""
+```
+
+Convert dbh from inches to centimeters and get rid of NAs
+
+```{r}
+# add a new column for DBH in centimeters
+
+trees <- trees %>%
+  add_column(DBH_cm = "")
+
+# calculate 
+
+trees$DBH_cm = trees$DBH * 2.54
+
+# get rid of NAs
+
+trees$DBH_cm[is.na(trees$DBH_cm)] <- ""
+```
+
+Tree species to FIA codes
+• ABCO = Abies concolor 
+• CADE = Calocedrus decurrens 
+• PILA = Pinus lambertiana 
+• PIPO = Pinus ponderosa 
+• PIJE = Pinus jeffreyi 
+• QUKE = Quercus kelloggii 
+• SASC = Salix scouleriana 
+• UNKN = Unknown species 
+
+```{r}
+
+trees$Species[trees$Species == 'ABCO'] <- '015'
+trees$Species[trees$Species == 'CADE'] <- '081'
+trees$Species[trees$Species == 'PILA'] <- '117'
+trees$Species[trees$Species == 'PIPO'] <- '122'
+trees$Species[trees$Species == 'PIJE'] <- '116'
+trees$Species[trees$Species == 'QUKE'] <- '818'
+trees$Species[trees$Species == 'SASC'] <- '924'
+trees$Species[trees$Species == 'UNKN'] <- '000'
+
+```
+
+Status from Live/Dead to L/D
+
+```{r}
+
+trees$Status[trees$Status == 'Live'] <- 'L'
+
+trees$Status[trees$Status == 'Dead'] <- 'D'
+```
+
+There are some secret damage codes hiding in the notes section!
+
+```{r}
+
+# add a new column for damage
+
+trees <- trees %>%
+  add_column(damage = "")
+
+# dead top damage code
+trees$damage[trees$Notes == 'dead top'] <- '90002'
+
+# no specific damage code for something decayed below dbh-- I can't determine what caused the decay from this dataset alone-- so I'm marking it as the "unknown" damage code
+trees$damage[trees$Notes == 'decayed below dbh'] <- '99000'
+```
+
+
+Remove NAs from snag decay class
+
+```{r}
+
+trees$SnagDecayClass[is.na(trees$SnagDecayClass)] <- ""
+```
+
+Export CSV
+
+```{r}
+
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.MOC\\20231020_STEF_MOC.csv")
+
+```
+
+
+## DATA MANIPULATED IN EXCEL

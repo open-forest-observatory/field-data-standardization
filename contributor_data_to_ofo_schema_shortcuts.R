@@ -96,6 +96,30 @@ treedata$`SNAG DEC`[treedata$`SNAG DEC` == 'NA'] <- ''
 # for real NAs
 treedata$`SNAG DEC`[is.na(treedata$`SNAG DEC`)] <- ""
 
+#### Convert csv coordinates to a different crs ####
+
+# this example comes from the STEF MOC dataset!
+
+# right now tree lat and tree lon are in crs: NAD 1983 Universal Transverse Mercator (UTM) Zone 10N, or epsg 26910
+
+# first make the regular tree dataframe into a spatial dataframe
+
+trees_sp <- st_as_sf(trees, coords = c("X_UTM", "Y_UTM"), crs = 26910, remove=F)
+
+# change CRS to WGS84
+
+trees_sp <- st_transform (trees_sp, 4326)
+
+# Extract new coordinates
+
+trees_sp_coords <- data.frame(trees_sp$OBJECTID, st_coordinates(trees_sp[,1], st_coordinates(trees_sp[,2]))) 
+
+trees_sp_coords <- trees_sp_coords %>% rename (OBJECTID=trees_sp.OBJECTID, TreeEasting=X, TreeNorthing=Y)
+
+# merge back into tree dataframe
+
+trees <- full_join(trees, trees_sp_coords, by="OBJECTID")
+
 #### Export to csv ####
 
 write.csv(treedata, "C:\\Users\\emily\\Desktop\\ALTERED_vp_ctlsierra2022_v1_trees.csv")
