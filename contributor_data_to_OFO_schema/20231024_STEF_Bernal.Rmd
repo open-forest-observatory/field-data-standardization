@@ -1,0 +1,276 @@
+---
+title: "STEF Bernal"
+author: "Emily Marie Purvis"
+date: "2023-10-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## DATA MANIPULATED IN R
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+library(readxl)
+library(stringr)
+```
+
+Load data
+
+```{r}
+
+# Set working directory
+
+setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+
+# Load data
+trees <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0007\\data\\STEF_VDT_Derek_Young\\VDT_Data\\All_trees.csv")
+
+treeheights <- read_excel("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0007\\data\\STEF_VDT_Derek_Young\\VDT_Data\\STEF_Regression_Heights.xlsx")
+
+trees_spatial <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0007\\data\\STEF_VDT_Derek_Young\\VDT_GIS\\VDT_trees\\All_trees.shp")
+  
+units_spatial <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0007\\data\\STEF_VDT_Derek_Young\\VDT_GIS\\VDT_unit_boundaries\\VDT_boundaries.shp")
+```
+
+Calculate the area and centroid of the unit polygons
+
+```{r}
+# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
+
+units_spatial <- st_transform(units_spatial, crs = 5070)
+
+# Add a new column to the spatial data frame for area and calculate
+
+units_spatial$area_meters <- 0
+
+units_spatial$area_meters = st_area (units_spatial)
+
+# Convert back to 4326
+
+units_spatial = st_transform(units_spatial, crs = 4326)
+
+#### Calculate centroid of each polygon ####
+
+units_spatial$centroid <- 0
+
+units_spatial$centroid <- st_centroid(units_spatial)
+```
+
+Add OFO plot ID
+
+```{r}
+
+# plot ID
+
+trees <- trees %>%
+  add_column(plot_id_ofo = "0")
+
+trees$plot_id_ofo[trees$unit == '2'] <- '0073'
+trees$plot_id_ofo[trees$unit == '5'] <- '0074'
+trees$plot_id_ofo[trees$unit == '8'] <- '0075'
+trees$plot_id_ofo[trees$unit == '10'] <- '0076'
+trees$plot_id_ofo[trees$unit == '15'] <- '0077'
+trees$plot_id_ofo[trees$unit == '18'] <- '0078'
+trees$plot_id_ofo[trees$unit == '21'] <- '0079'
+trees$plot_id_ofo[trees$unit == '22'] <- '0080'
+
+```
+
+Convert listed lats/lons from UTM to WGS84
+
+```{r}
+
+# right now tree lat and tree lon are in crs: NAD 1983 Universal Transverse Mercator (UTM) Zone 10N, or epsg 26910
+
+# first make the regular tree dataframe into a spatial dataframe
+
+trees_sp <- st_as_sf(trees, coords = c("x", "y"), crs = 26910, remove=F)
+
+# change CRS to WGS84
+
+trees_sp <- st_transform (trees_sp, 4326)
+
+# Extract new coordinates
+
+trees_sp <- data.frame(trees_sp$FID, st_coordinates(trees_sp[,1], st_coordinates(trees_sp[,2]))) 
+
+trees_sp <- trees_sp %>% rename (FID=trees_sp.FID, TreeEasting=X, TreeNorthing=Y)
+
+# merge back into tree dataframe
+
+trees <- full_join(trees, trees_sp, by="FID")
+
+```
+
+
+Calculate heights from allometric equations! 
+
+```{r}
+
+# Alexis Bernal shared a series of species-specific allometric equations that can be used to predict tree heights from DBH. These equations were created from stands at STEF.
+
+# ABCO: y = 14.388ln(x) - 29.989, R² = 0.5246
+
+# CADE: y = 12.769ln(x) - 27.69, R² = 0.8418
+
+# PIJE: y = 15.809ln(x) - 34.875, R² = 0.8052 (sketchy alert: only 16 trees used to create this equation...)
+
+# PILA: y = 19.007ln(x) - 45.148, R² = 0.7853
+
+# PIPO: y = 18.566ln(x) - 41.959, R² = 0.745
+
+# QUKE: y = 5.9019ln(x) - 5.7386, R² = 0.123 (super sketchy alert: there were only 10 trees used to create this equation)
+
+trees <- trees %>%
+  add_column(height_allometric = "0")
+
+for(i in 1:nrow(trees)) {
+  if (trees$species[i] == 'ABCO') {
+  trees$height_allometric[i] <- ((14.388*(log(trees$dbh.18[i]))) - 29.989)
+} 
+  else if (trees$species[i] == 'CADE') {
+  trees$height_allometric[i] <- ((12.769*(log(trees$dbh.18[i]))) - 27.69)
+} 
+  else if (trees$species[i] == 'PIJE') {
+  trees$height_allometric[i] <- ((15.809*(log(trees$dbh.18[i]))) - 34.875)
+  } 
+    else if (trees$species[i] == 'PILA') {
+  trees$height_allometric[i] <- ((19.007*(log(trees$dbh.18[i]))) - 45.148)
+} 
+  else if (trees$species[i] == 'PIPO') {
+  trees$height_allometric[i] <- ((18.566*(log(trees$dbh.18[i]))) - 41.959)
+  } 
+  else if (trees$species[i] == 'QUKE') {
+  trees$height_allometric[i] <- ((5.9019*(log(trees$dbh.18[i]))) - 5.7386)
+} 
+  else {
+  trees$height_allometric[i] <- ""
+}
+}
+
+```
+
+
+DBH is already in centimeters! Status is already in L/D!
+
+Species to FIA codes
+
+```{r}
+
+trees$species[trees$species == 'ABCO'] <- '015'
+trees$species[trees$species == 'CADE'] <- '081'
+trees$species[trees$species == 'PILA'] <- '117'
+trees$species[trees$species == 'PIPO'] <- '122'
+trees$species[trees$species == 'PIJE'] <- '116'
+trees$species[trees$species == 'QUKE'] <- '818'
+```
+
+Remove decay class code of 0 for live trees
+
+```{r}
+
+trees$decay[trees$decay == 0] <- ""
+```
+
+
+Translate notes and agent columns to damage codes
+
+```{r}
+
+# agents: bark beetles, fire, drought, mechanical, unknown, fungi
+
+trees$agent[trees$agent == 'BB'] <- '11000'
+trees$agent[trees$agent == 'FIRE'] <- '30000'
+trees$agent[trees$agent == 'DROUGHT'] <- '50003'
+trees$agent[trees$agent == 'MECH'] <- '50019'
+trees$agent[trees$agent == 'FUNGI'] <- '19000' #there are so many fungi that can kill trees, I'm labelling these as "general diseases" which encapsulates rots, rusts, root/butt diseases, other types of stem decay, etc
+trees$agent[trees$agent == 'UNKN'] <- ''
+trees$agent[is.na(trees$agent)] <- ""
+
+# notes
+
+trees$notes <- str_replace(trees$notes, "WOUND", "90011")
+trees$notes <- str_replace(trees$notes, "WEEPING INJURY", "90011")
+trees$notes <- str_replace(trees$notes, "BLACK WEEP @ BASE W/ WOUND OCCLUSION", "90011")
+trees$notes <- str_replace(trees$notes, "BLACK WEEP", "90011")
+trees$notes <- str_replace(trees$notes, "BASAL WOUND", "90011")
+trees$notes <- str_replace(trees$notes, "SV", "11050") # Scolytus ventralis 
+trees$notes <- str_replace(trees$notes, "WITCHE", "19000") # many causes of witches' brooms so I'm labelling them as "general diseases"
+trees$notes <- str_replace(trees$notes, "TOPPED", "60000")
+trees$notes <- str_replace(trees$notes, "MISTLETOE", "23000") # general code for parisitic/epiphytic plants, there are so many mistletoes 
+trees$notes <- str_replace(trees$notes, "Mistletoe", "23000") # general code for parisitic/epiphytic plants, there are so many mistletoes 
+trees$notes <- str_replace(trees$notes, "SUPPRESSED", "60001")
+trees$notes <- str_replace(trees$notes, "C. VOLVATUS", "22024") # grey-brown sap rot
+trees$notes <- str_replace(trees$notes, "C.VOLVATUS", "22024") # grey-brown sap rot	
+trees$notes <- str_replace(trees$notes, "LARVAL GALLERIES", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
+trees$notes <- str_replace(trees$notes, "GALLERIES", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
+trees$notes <- str_replace(trees$notes, "MATERNAL", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
+trees$notes <- str_replace(trees$notes, "ROTTEN", "21000") # general code for root/butt diseases 
+trees$notes <- str_replace(trees$notes, "ROOT ROT", "21000") # general code for root/butt diseases 
+trees$notes <- str_replace(trees$notes, "ADVANCED STAGES OF ROT", "21000") # general code for root/butt diseases 
+trees$notes <- str_replace(trees$notes, "DP", "11006") # Dendroctonus ponderosae
+trees$notes <- str_replace(trees$notes, "DB", "11002") # Dendroctonus brevicomis
+trees$notes <- str_replace(trees$notes, "BB ACTIVITY", "11000")
+trees$notes <- str_replace(trees$notes, "PITCH TUBES", "11000")
+trees$notes <- str_replace(trees$notes, "SAPSUCKER DAMAGE", "41008")
+trees$notes <- str_replace(trees$notes, "BROKEN TOP", "90001")
+trees$notes <- str_replace(trees$notes, "BRROKEN TOP", "90001")
+trees$notes <- str_replace(trees$notes, "Broken top", "90001")
+trees$notes <- str_replace(trees$notes, "DEAD TOP", "90002")
+trees$notes <- str_replace(trees$notes, "TOP DEAD", "90002")
+trees$notes <- str_replace(trees$notes, "FALLEN", "90000") # "other damages" code
+trees$notes <- str_replace(trees$notes, "fallen", "90000") # "other damages" code
+trees$notes <- str_replace(trees$notes, "DND", "90000") # DEAD AND DOWN,"other damages" code
+trees$notes <- str_replace(trees$notes, "CANKERS", "22000")
+trees$notes <- str_replace(trees$notes, "CANKER", "22000")
+trees$notes <- str_replace(trees$notes, "ARMILLARIA", "21001")
+trees$notes <- str_replace(trees$notes, "PITCHING", "19000") # many causes of pitching, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "PITCH", "19000") # many causes of pitching, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "PITCIN", "19000") # many causes of pitching, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "PITCHING HEAVILY", "19000") # many causes of pitching, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "HEAVY PITCHING", "19000") # many causes of pitching, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "WHITE MYCELLIUM", "19000") # many fungi, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "BLACK MYCELLIUM", "19000") # many fungi, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "BLACK FUNGUS", "19000") # many fungi, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "MECHANICAL DAMAGE FROM LEANING PILA", "50000") # labelled as "abiotic damage" because can't tell if it's human-caused or not 
+trees$notes <- str_replace(trees$notes, "LIGHTNING SCAR", "50008")
+trees$notes <- str_replace(trees$notes, "FROST SCARS", "50005")
+trees$notes <- str_replace(trees$notes, "FROST SCAR", "50005")
+trees$notes <- str_replace(trees$notes, "BRANCH SCARS", "90013")
+trees$notes <- str_replace(trees$notes, "HIGH FIRE CHAR", "30000")
+trees$notes <- str_replace(trees$notes, "HIGH FIRE CHAR (>50%)", "30000")
+trees$notes <- str_replace(trees$notes, "HIGH CHAR", "30000")
+trees$notes <- str_replace(trees$notes, "BURNED OUT", "30000")
+trees$notes <- str_replace(trees$notes, "CHAR", "30000")
+trees$notes <- str_replace(trees$notes, "HEAT INJURY UNDER BARK", "50007")
+trees$notes <- str_replace(trees$notes, "HEART ROT", "22001")
+trees$notes <- str_replace(trees$notes, "H.ANNOSUM", "21010")
+trees$notes <- str_replace(trees$notes, "H. ANNOSUM", "21010")# Heterobasidion annosum
+trees$notes <- str_replace(trees$notes, "X.MACROCARPAE", "14001") # Xylococcus macrocarpae, incense cedar scale. No code for this, coded as "scale insects"
+trees$notes <- str_replace(trees$notes, "C. RIBICOLA", "26001") # Cronartium ribicola , white pine blister rust
+trees$notes <- str_replace(trees$notes, "FLAGGING", "90008") # code for foliage discoloration
+trees$notes <- str_replace(trees$notes, "FADING", "90010") # code for dieback
+
+# not adding codes for anything that starts with "no" (like no fungi, no beetles) and other things that are not damages
+
+```
+
+Export CSV
+
+```{r}
+
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.BERNAL\\20231024_STEF_BERNAL.csv")
+
+```
+
+## DATA MANIPULATED IN EXCEL
+
+Manually separated "notes" damage codes into damage code columns 

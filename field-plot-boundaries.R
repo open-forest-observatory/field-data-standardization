@@ -193,3 +193,54 @@ plotpolygon <- plotpolygon %>%
 # Export polygon
 
 st_write(plotpolygon, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0068.gpkg")
+
+
+## STEF MOC
+
+#import data
+
+MOC8boundary <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb", layer = "MOC8_Boundary")
+
+MOC9boundary <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb", layer = "MOC9_Boundary")
+
+MOC10boundary <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb", layer = "MOC10_Boundary")
+
+MOC11boundary <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0006\\data\\RDS-2021-0061\\Data\\STEF_MOC_Plots_8_9_10_11_archive.gdb", layer = "MOC11_Boundary_2007")
+
+# Right now the MOC polygons are in UTM 10N. Transform to EPSG 4326.
+
+MOC8boundary = st_transform(MOC8boundary, crs = 4326)
+MOC9boundary = st_transform(MOC9boundary, crs = 4326)
+MOC10boundary = st_transform(MOC10boundary, crs = 4326)
+MOC11boundary = st_transform(MOC11boundary, crs = 4326)
+
+# add OFO plot ID
+
+MOC8boundary <- MOC8boundary %>%
+  add_column(plot_id_ofo = "0069")
+
+MOC9boundary <- MOC9boundary %>%
+  add_column(plot_id_ofo = "0070")
+
+MOC10boundary <- MOC10boundary %>%
+  add_column(plot_id_ofo = "0071")
+
+MOC11boundary <- MOC11boundary %>%
+  add_column(plot_id_ofo = "0072")
+
+# remove extra columns, we only want the polygon and the OFO plot ID
+
+MOC8boundary <- MOC8boundary[c(3,4)]
+MOC9boundary <- MOC9boundary[c(3,4)]
+MOC10boundary <- MOC10boundary[c(3,4)]
+MOC11boundary <- MOC11boundary[c(3,4)]
+
+# Export polygon
+
+st_write(MOC8boundary, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0069.gpkg")
+
+st_write(MOC9boundary, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0070.gpkg")
+
+st_write(MOC10boundary, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0071.gpkg")
+
+st_write(MOC11boundary, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0072.gpkg")
