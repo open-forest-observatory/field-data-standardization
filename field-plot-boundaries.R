@@ -244,3 +244,39 @@ st_write(MOC9boundary, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standard
 st_write(MOC10boundary, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0071.gpkg")
 
 st_write(MOC11boundary, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0072.gpkg")
+
+#### STEF BERNAL ####
+
+# import data
+
+units_spatial <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0007\\data\\STEF_VDT_Derek_Young\\VDT_GIS\\VDT_unit_boundaries\\VDT_boundaries.shp")
+
+# Right now the polygons are in UTM 10N. Transform to EPSG 4326.
+
+units_spatial = st_transform(units_spatial, crs = 4326)
+
+# add OFO plot ID
+
+units_spatial <- units_spatial %>%
+  add_column(plot_id_ofo = "0")
+
+units_spatial$plot_id_ofo[units_spatial$UnitNo == '2'] <- '0073'
+units_spatial$plot_id_ofo[units_spatial$UnitNo == '5'] <- '0074'
+units_spatial$plot_id_ofo[units_spatial$UnitNo == '8'] <- '0075'
+units_spatial$plot_id_ofo[units_spatial$UnitNo == '10'] <- '0076'
+units_spatial$plot_id_ofo[units_spatial$UnitNo == '15'] <- '0077'
+units_spatial$plot_id_ofo[units_spatial$UnitNo == '18'] <- '0078'
+units_spatial$plot_id_ofo[units_spatial$UnitNo == '21'] <- '0079'
+units_spatial$plot_id_ofo[units_spatial$UnitNo == '22'] <- '0080'
+
+# remove extra columns, we only want the polygons and the OFO plot IDs
+
+units_spatial <- units_spatial[c(5,4)]
+
+# Export
+
+for(i in 1:nrow(units_spatial)) {
+  polygon_current <- units_spatial[i, ]
+  plot_id_current = polygon_current$plot_id_ofo
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}

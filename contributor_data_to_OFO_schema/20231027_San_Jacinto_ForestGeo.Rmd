@@ -1,0 +1,70 @@
+---
+title: "San Jacinto ForestGEO"
+author: "Emily Marie Purvis"
+date: "2023-10-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## DATA MANIPULATED IN R
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+library(readxl)
+```
+
+Load data
+
+```{r}
+
+# Set working directory
+
+setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+
+# Load data
+trees <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0008\\data\\SJFDP_Census_4ha_full_202230427.csv")
+
+plotcorners <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0008\\data\\Plot_coordinates_20190127.csv")
+
+```
+
+We want to eliminate shrubs and any stems that aren't main stems
+
+```{r}
+
+# Only keep main stems
+
+trees <- subset(trees, Main!="S")
+
+# Get rid of shrubs
+
+trees <- subset(trees, Code!="ARCGLA" & Code!="ARCPRI" & Code!="ARCPUN" & Code!="CEAPAL" & Code!="FRACAL" & Code!="LONSUB" & Code!="RHOOCC")
+
+```
+
+Calculate plot centroid
+
+```{r}
+
+# x coordinate is the 16s
+
+# y coordinate is the Fs
+
+# so theoretically 16F is the centroid of the whole plot
+
+
+```
+
+
+
+
+
+
