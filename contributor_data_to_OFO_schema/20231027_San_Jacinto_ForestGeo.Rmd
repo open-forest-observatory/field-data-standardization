@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(sf)
-library(readxl)
+library(stringr)
 ```
 
 Load data
@@ -32,7 +32,7 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
 # Load data
 trees <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0008\\data\\SJFDP_Census_4ha_full_202230427.csv")
 
-plotcorners <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0008\\data\\Plot_coordinates_20190127.csv")
+subplots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0008\\data\\SJFDP_Env_4ha_20230504.csv")
 
 ```
 
@@ -54,12 +54,163 @@ Calculate plot centroid
 
 ```{r}
 
-# x coordinate is the 16s
+# x coordinate centroid is the 16s
 
-# y coordinate is the Fs
+# y coordinate centroid is the Fs
 
-# so theoretically 16F is the centroid of the whole plot
+# therefore F16 is the centroid of the whole plot
 
+```
+
+Add OFO plot ID and subplot IDs
+
+OH NO PROBLEMS:
+- some plants were shot from quadrat corners outside the grid (e.g. the Ks and the 21s)
+- some plants were measured from along the grid line with a tape measure (e.g. not shot from a quadrat corner)
+
+LOOKS LIKE THESE ARE PROBLEMS FOR LATER
+
+```{r}
+
+# plot ID
+
+trees <- trees %>%
+  add_column(plot_id_ofo = "0081")
+
+# subplot ID
+
+trees <- trees %>%
+  add_column(subplot_id_ofo = "0")
+
+# going to add subplot ID to the subplot datasheet and then merge it into the tree datasheet
+
+# add column
+
+subplots <- subplots %>%
+  add_column(subplot_id_ofo = "0")
+
+# sort in descending order
+
+subplots <- arrange(subplots, Quad)
+
+# remove subplots not used for our purposes here
+
+# first the 21s
+
+subplots <- subset(subplots, Quad!="A21" & Quad!="B21" & Quad!="C21" & Quad!="D21" & Quad!="E21" & Quad!="F21" & Quad!="G21" & Quad!="H21" & Quad!="I21" & Quad!="J21")
+
+# then the Ks
+
+subplots <- subset(subplots, Quad!="K11" & Quad!="K12" & Quad!="K13" & Quad!="K14" & Quad!="K15" & Quad!="K16" & Quad!="K17" & Quad!="K18" & Quad!="K19" & Quad!="K20" & Quad!="K21")
+
+# add subplot ID numbers to each quadrat
+
+for(i in 1:nrow(subplots)) {
+subplots$subplot_id_ofo[i] <- i + 211
+}
+
+# change some column names and get rid of some columsn in the subplot data sheet to prepare to merge it into the tree data sheet
+
+subplots <- subset(subplots, select = c(Quad, Lat, Long, subplot_id_ofo))
+
+subplots <- subplots %>% rename("QuadLat" = "Lat") %>% rename("QuadLong" = "Long") 
+
+# !!!!we're going to assign trees to subplots based on which quadrat corner they were measured from, NOT which quadrat they are in!!!!
+
+# change the name of the "RF_Grid_Corner"	(The grid pole that the rangefinder was shot from) column to "Quad"
+
+trees <- trees %>% 
+       rename("Quad" = "RF_Grid_Corner")
+
+```
+
+Tree lat and tree lon
+
+```{r}
+
+```
+
+
+Tree DBH is in cm :)
+
+Tree species
+
+```{r}
+
+# putting FIA species codes in the pre-existing "Code" column, which I'm renaming to "Species Code"
+
+trees$Code[trees$Code == 'ABICON'] <- '015'
+trees$Code[trees$Code == 'CALDEC'] <- '081'
+trees$Code[trees$Code == 'PINLAM'] <- '117'
+trees$Code[trees$Code == 'PINPON'] <- '122'
+trees$Code[trees$Code == 'PINJEF'] <- '116'
+trees$Code[trees$Code == 'QUEKEL'] <- '818'
+trees$Code[trees$Code == 'UNKN'] <- '000'
+
+trees$Code[trees$Code == 'QUEWIS'] <- '839'
+trees$Code[trees$Code == 'QUECHR'] <- '805'
+trees$Code[trees$Code == 'PINCOU'] <- '109'
+trees$Code[trees$Code == 'QUEXMO'] <- '800' # the Quercus x moreha (Q. kelloggii x wislizeni) is being labelled as Quercus spp.
+
+
+trees <- trees %>% 
+       rename("SpeciesCode" = "Code")
+```
+
+Status Live/Dead
+
+```{r}
+
+# codes to L and D
+
+trees$Status[trees$Status == 'DS'] <- 'D'
+trees$Status[trees$Status == 'LI'] <- 'L'
+
+# remove trees that are dead and down
+
+trees <- subset(trees, Status!="Dt")
+```
+
+Damage codes
+
+BB	Bark beetle
+CD	Crown >75% damaged
+FS	Fire scar
+L	Leaning > 30 degrees
+MS	Mistletoe
+PD	Pest damage
+SBAD	Stem broken above DBH
+T	Topped
+
+```{r}
+
+trees$Codes <- str_replace(trees$Codes, "BB", "11000")
+trees$Codes <- str_replace(trees$Codes, "CD", "90000") # unclear what kind of crown damage this is referring to (biotic or abiotic, mechanical damage, flagging...it's a mystery) so I'm labelling this as "other damages"
+trees$Codes <- str_replace(trees$Codes, "FS", "30000")
+trees$Codes <- str_replace(trees$Codes, "L", "90006")
+trees$Codes <- str_replace(trees$Codes, "MS", "23000") # general code for parisitic/epiphytic plants, there are so many mistletoes 
+trees$Codes <- str_replace(trees$Codes, "PD", "10000") # general code for insect damage
+trees$Codes <- str_replace(trees$Codes, "SBAD", "90001")
+trees$Codes <- str_replace(trees$Codes, "T", "60001")
+
+```
+
+Distance to pith from wherever the tree was shot from
+
+```{r}
+
+# add a new column for horizontal distance to pith
+
+trees <- trees %>%
+  add_column(horiz_distance_pith = "")
+
+# calculate
+
+trees$horiz_distance_pith = trees$HD + (0.5 * 0.01 * trees$DBH)
+
+# get rid of NAs-- only the trees measured with distance/azimuth from a quadrat corner will have this measurement
+
+trees$horiz_distance_pith[is.na(trees$horiz_distance_pith)] <- ""
 
 ```
 
@@ -68,3 +219,6 @@ Calculate plot centroid
 
 
 
+## ALTERATIONS MADE IN EXCEL
+
+Manually separated damage codes into damage code columns 
