@@ -164,4 +164,5 @@ write.csv(treedata, "C:\\Users\\emily\\Desktop\\ALTERED_vp_ctlsierra2022_v1_tree
 
 - Some errors were corrected manually (e.g. trees listed as alive that had both a decay class and a "0" crown ratio were changed to dead; trees listed as dead that had both no decay class and a positive crown ratio were changed to live)
 
+- Added growth_form data
 

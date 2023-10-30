@@ -482,3 +482,5 @@ write.csv(alldata, "C:\\Users\\emily\\OneDrive\\Desktop\\FOCAL\\field-data-stand
 - All other lat/lon calculations were made in R
 
 - In an email to me (E.M. Purvis), dataset contributor Sven Rodne clarified that "As for the "duplicate trees", those notes are in reference to coring plots that were established at each site, so that is the proper tree inventory and not duplicates in the stem data." I manually deleted all notes about duplicate trees to avoid confusion. In previous stem map creation, I confirmed that all trees labelled "duplicate" in fact had unique spatial coordinates.
+
+- Added growth_form data

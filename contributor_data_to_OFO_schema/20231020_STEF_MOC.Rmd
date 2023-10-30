@@ -213,3 +213,5 @@ write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF
 
 
 ## DATA MANIPULATED IN EXCEL
+
+Added growth_form data

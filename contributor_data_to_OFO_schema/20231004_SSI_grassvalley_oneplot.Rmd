@@ -314,5 +314,5 @@ write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\S
 
 #ALTERATIONS MADE IN EXCEL
 
-
+Added growth_form data
 

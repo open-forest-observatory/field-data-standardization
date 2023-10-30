@@ -304,3 +304,5 @@ write.csv(st_drop_geometry(trees_inside), "C:\\Users\\emily\\Box\\FOCAL\\field-d
 # CORRECTIONS MADE IN EXCEL
 
 Manually dragged some damage codes that were hiding in the "remarks" section to the damage code columns 
+
+Added growth_form data

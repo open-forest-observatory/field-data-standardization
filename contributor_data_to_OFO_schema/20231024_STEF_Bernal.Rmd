@@ -199,8 +199,8 @@ trees$agent[is.na(trees$agent)] <- ""
 
 trees$notes <- str_replace(trees$notes, "WOUND", "90011")
 trees$notes <- str_replace(trees$notes, "WEEPING INJURY", "90011")
-trees$notes <- str_replace(trees$notes, "BLACK WEEP @ BASE W/ WOUND OCCLUSION", "90011")
 trees$notes <- str_replace(trees$notes, "BLACK WEEP", "90011")
+trees$notes <- str_replace(trees$notes, "BLACK WEEP @ BASE W/ WOUND OCCLUSION", "90011")
 trees$notes <- str_replace(trees$notes, "BASAL WOUND", "90011")
 trees$notes <- str_replace(trees$notes, "SV", "11050") # Scolytus ventralis 
 trees$notes <- str_replace(trees$notes, "WITCHE", "19000") # many causes of witches' brooms so I'm labelling them as "general diseases"
@@ -210,6 +210,7 @@ trees$notes <- str_replace(trees$notes, "Mistletoe", "23000") # general code for
 trees$notes <- str_replace(trees$notes, "SUPPRESSED", "60001")
 trees$notes <- str_replace(trees$notes, "C. VOLVATUS", "22024") # grey-brown sap rot
 trees$notes <- str_replace(trees$notes, "C.VOLVATUS", "22024") # grey-brown sap rot	
+trees$notes <- str_replace(trees$notes, "V.VOLVATUS", "22024") # grey-brown sap rot	
 trees$notes <- str_replace(trees$notes, "LARVAL GALLERIES", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
 trees$notes <- str_replace(trees$notes, "GALLERIES", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
 trees$notes <- str_replace(trees$notes, "MATERNAL", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
@@ -226,17 +227,14 @@ trees$notes <- str_replace(trees$notes, "BRROKEN TOP", "90001")
 trees$notes <- str_replace(trees$notes, "Broken top", "90001")
 trees$notes <- str_replace(trees$notes, "DEAD TOP", "90002")
 trees$notes <- str_replace(trees$notes, "TOP DEAD", "90002")
-trees$notes <- str_replace(trees$notes, "FALLEN", "90000") # "other damages" code
-trees$notes <- str_replace(trees$notes, "fallen", "90000") # "other damages" code
-trees$notes <- str_replace(trees$notes, "DND", "90000") # DEAD AND DOWN,"other damages" code
 trees$notes <- str_replace(trees$notes, "CANKERS", "22000")
 trees$notes <- str_replace(trees$notes, "CANKER", "22000")
 trees$notes <- str_replace(trees$notes, "ARMILLARIA", "21001")
+trees$notes <- str_replace(trees$notes, "PITCHING HEAVILY", "19000") # many causes of pitching, noting it as "general diseases" 
+trees$notes <- str_replace(trees$notes, "HEAVY PITCHING", "19000") # many causes of pitching, noting it as "general diseases"
 trees$notes <- str_replace(trees$notes, "PITCHING", "19000") # many causes of pitching, noting it as "general diseases" 
 trees$notes <- str_replace(trees$notes, "PITCH", "19000") # many causes of pitching, noting it as "general diseases" 
 trees$notes <- str_replace(trees$notes, "PITCIN", "19000") # many causes of pitching, noting it as "general diseases" 
-trees$notes <- str_replace(trees$notes, "PITCHING HEAVILY", "19000") # many causes of pitching, noting it as "general diseases" 
-trees$notes <- str_replace(trees$notes, "HEAVY PITCHING", "19000") # many causes of pitching, noting it as "general diseases" 
 trees$notes <- str_replace(trees$notes, "WHITE MYCELLIUM", "19000") # many fungi, noting it as "general diseases" 
 trees$notes <- str_replace(trees$notes, "BLACK MYCELLIUM", "19000") # many fungi, noting it as "general diseases" 
 trees$notes <- str_replace(trees$notes, "BLACK FUNGUS", "19000") # many fungi, noting it as "general diseases" 
@@ -245,8 +243,8 @@ trees$notes <- str_replace(trees$notes, "LIGHTNING SCAR", "50008")
 trees$notes <- str_replace(trees$notes, "FROST SCARS", "50005")
 trees$notes <- str_replace(trees$notes, "FROST SCAR", "50005")
 trees$notes <- str_replace(trees$notes, "BRANCH SCARS", "90013")
-trees$notes <- str_replace(trees$notes, "HIGH FIRE CHAR", "30000")
 trees$notes <- str_replace(trees$notes, "HIGH FIRE CHAR (>50%)", "30000")
+trees$notes <- str_replace(trees$notes, "HIGH FIRE CHAR", "30000")
 trees$notes <- str_replace(trees$notes, "HIGH CHAR", "30000")
 trees$notes <- str_replace(trees$notes, "BURNED OUT", "30000")
 trees$notes <- str_replace(trees$notes, "CHAR", "30000")
@@ -261,16 +259,24 @@ trees$notes <- str_replace(trees$notes, "FADING", "90010") # code for dieback
 
 # not adding codes for anything that starts with "no" (like no fungi, no beetles) and other things that are not damages
 
+# get rid of fallen and "dead and down" trees from the dataset. indicate this in the excel file-- can't remove in R unfortunately because these notes are part of much longer strings
+
+trees$notes <- str_replace(trees$notes, "FALLEN", "REMOVE FROM DATA") 
+trees$notes <- str_replace(trees$notes, "fallen", "REMOVE FROM DATA") # "other damages" code
+trees$notes <- str_replace(trees$notes, "DND", "REMOVE FROM DATA") # DEAD AND DOWN,"other damages" code
+
 ```
 
 Export CSV
 
 ```{r}
 
-write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.BERNAL\\20231024_STEF_BERNAL.csv")
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.BERNAL\\20231030_STEF_BERNAL.csv")
 
 ```
 
 ## DATA MANIPULATED IN EXCEL
 
 Manually separated "notes" damage codes into damage code columns 
+
+Added growth_form data
