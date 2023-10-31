@@ -213,6 +213,7 @@ trees$notes <- str_replace(trees$notes, "C.VOLVATUS", "22024") # grey-brown sap 
 trees$notes <- str_replace(trees$notes, "V.VOLVATUS", "22024") # grey-brown sap rot	
 trees$notes <- str_replace(trees$notes, "LARVAL GALLERIES", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
 trees$notes <- str_replace(trees$notes, "GALLERIES", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
+trees$notes <- str_replace(trees$notes, "GALLERIE", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
 trees$notes <- str_replace(trees$notes, "MATERNAL", "10000") # general code for insects-- too many beetles/flies leave galleries that I can't identify 
 trees$notes <- str_replace(trees$notes, "ROTTEN", "21000") # general code for root/butt diseases 
 trees$notes <- str_replace(trees$notes, "ROOT ROT", "21000") # general code for root/butt diseases 
@@ -223,6 +224,8 @@ trees$notes <- str_replace(trees$notes, "BB ACTIVITY", "11000")
 trees$notes <- str_replace(trees$notes, "PITCH TUBES", "11000")
 trees$notes <- str_replace(trees$notes, "SAPSUCKER DAMAGE", "41008")
 trees$notes <- str_replace(trees$notes, "BROKEN TOP", "90001")
+trees$notes <- str_replace(trees$notes, "BROKEN IN HALF", "90001")
+trees$notes <- str_replace(trees$notes, "Broken in half", "90001")
 trees$notes <- str_replace(trees$notes, "BRROKEN TOP", "90001")
 trees$notes <- str_replace(trees$notes, "Broken top", "90001")
 trees$notes <- str_replace(trees$notes, "DEAD TOP", "90002")
@@ -256,14 +259,16 @@ trees$notes <- str_replace(trees$notes, "X.MACROCARPAE", "14001") # Xylococcus m
 trees$notes <- str_replace(trees$notes, "C. RIBICOLA", "26001") # Cronartium ribicola , white pine blister rust
 trees$notes <- str_replace(trees$notes, "FLAGGING", "90008") # code for foliage discoloration
 trees$notes <- str_replace(trees$notes, "FADING", "90010") # code for dieback
+trees$notes <- str_replace(trees$notes, "LOST MOST MAIN BRANCHES", "90013") 
 
 # not adding codes for anything that starts with "no" (like no fungi, no beetles) and other things that are not damages
 
 # get rid of fallen and "dead and down" trees from the dataset. indicate this in the excel file-- can't remove in R unfortunately because these notes are part of much longer strings
 
 trees$notes <- str_replace(trees$notes, "FALLEN", "REMOVE FROM DATA") 
-trees$notes <- str_replace(trees$notes, "fallen", "REMOVE FROM DATA") # "other damages" code
-trees$notes <- str_replace(trees$notes, "DND", "REMOVE FROM DATA") # DEAD AND DOWN,"other damages" code
+trees$notes <- str_replace(trees$notes, "fallen", "REMOVE FROM DATA") 
+trees$notes <- str_replace(trees$notes, "Fallen", "REMOVE FROM DATA") 
+trees$notes <- str_replace(trees$notes, "DND", "REMOVE FROM DATA") # DEAD AND DOWN
 
 ```
 
