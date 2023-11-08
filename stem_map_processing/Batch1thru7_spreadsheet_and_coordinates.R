@@ -247,7 +247,105 @@ st_write(Batch2plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-stand
 
 #### Batch 3 ####
 
-# Tragically I do not have these GPS points so they are not in this dataset; will update when I get them
+setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\Post_Processed_GPS\\")
+
+# Import plot coordinates
+
+L519 <- read_sf('L-519_g\\L-519.shp') 
+
+L519 = L519 %>% mutate(`Plot#` = 'L519')
+
+L519 <- L519 [-c(1:19, 22:23)]
+
+# st_crs(L519)
+# EPSG 4326
+
+S015 <- read_sf('S-015_g\\S-015.shp') 
+
+S015 = S015 %>% mutate(`Plot#` = 'S015')
+
+S015 <- S015 [-c(1:18, 21:22)]
+
+# st_crs(S015)
+# EPSG 4326
+
+S074 <- read_sf('S-074_g\\S_074.shp') 
+
+S074 = S074 %>% mutate(`Plot#` = 'S074')
+
+S074 <- S074 [-c(1:19, 22:23)]
+
+# st_crs(S074)
+# EPSG 4326
+
+S075 <- read_sf('S-075_g\\S-075.shp') 
+
+S075 = S075 %>% mutate(`Plot#` = 'S075')
+
+S075 <- S075 [-c(1:19, 22:23)]
+
+# st_crs(S075)
+# EPSG 4326
+
+S080 <- read_sf('S-080_g\\S-080.shp') 
+
+S080 = S080 %>% mutate(`Plot#` = 'S080')
+
+S080 <- S080 [-c(1:18, 21:22)]
+
+# st_crs(S080)
+# S080 <- S080 %>% st_set_crs(4326)
+# EPSG 4326
+
+S083 <- read_sf('S-083_g\\S-083.shp') 
+
+S083 = S083 %>% mutate(`Plot#` = 'S083')
+
+S083 <- S083 [-c(1:18, 21:22)]
+
+# st_crs(S083)
+# S083 <- S083 %>% st_set_crs(4326)
+# EPSG 4326
+
+S084 <- read_sf('S-084_g\\S-084.shp') 
+
+S084 = S084 %>% mutate(`Plot#` = 'S084')
+
+S084 <- S084 [-c(1:18, 21:22)]
+
+# st_crs(S084)
+# S084 <- S084 %>% st_set_crs(4326)
+# EPSG 4326
+
+S087 <- read_sf('S-087_g\\S-087.shp') 
+
+S087 = S087 %>% mutate(`Plot#` = 'S087')
+
+S087 <- S087 [-c(1:18, 21:22)]
+
+# st_crs(S087)
+# S087 <- S087 %>% st_set_crs(4326)
+# EPSG 4326
+
+S097 <- read_sf('S-097_g\\OHNOTHISFILEISCOrruptED.shp') 
+
+S097 = S097 %>% mutate(`Plot#` = 'S097')
+
+S097 <- S097 [-c(1:18, 21:22)]
+
+# st_crs(S097)
+# S097 <- S097 %>% st_set_crs(4326)
+# EPSG 4326
+
+S973 <- read_sf('S-973_g\\S-973.shp') OH NO THIS FILE IS ALSO CORRUPTED
+
+S973 = S973 %>% mutate(`Plot#` = 'S973')
+
+S973 <- S973 [-c(1:18, 21:22)]
+
+# st_crs(S097)
+# S097 <- S097 %>% st_set_crs(4326)
+# EPSG 4326
 
 #### Batches 4-7 ####
 
