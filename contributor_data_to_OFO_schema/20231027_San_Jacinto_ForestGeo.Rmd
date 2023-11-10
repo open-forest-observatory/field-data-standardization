@@ -19,6 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(sf)
 library(stringr)
+library(pracma)
 ```
 
 Load data
@@ -36,7 +37,7 @@ subplots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-d
 
 ```
 
-We want to eliminate shrubs and any stems that aren't main stems
+We want to any stems that aren't main stems-- spatial data was not collected on them
 
 ```{r}
 
@@ -44,9 +45,9 @@ We want to eliminate shrubs and any stems that aren't main stems
 
 trees <- subset(trees, Main!="S")
 
-# Get rid of shrubs
+# need to delete random rows of all NAs 
 
-trees <- subset(trees, Code!="ARCGLA" & Code!="ARCPRI" & Code!="ARCPUN" & Code!="CEAPAL" & Code!="FRACAL" & Code!="LONSUB" & Code!="RHOOCC")
+trees <- trees %>% drop_na(`Quadrat`)
 
 ```
 
@@ -64,11 +65,6 @@ Calculate plot centroid
 
 Add OFO plot ID and subplot IDs
 
-OH NO PROBLEMS:
-- some plants were shot from quadrat corners outside the grid (e.g. the Ks and the 21s)
-- some plants were measured from along the grid line with a tape measure (e.g. not shot from a quadrat corner)
-
-LOOKS LIKE THESE ARE PROBLEMS FOR LATER
 
 ```{r}
 
@@ -77,10 +73,10 @@ LOOKS LIKE THESE ARE PROBLEMS FOR LATER
 trees <- trees %>%
   add_column(plot_id_ofo = "0081")
 
-# subplot ID
+# we are defining subplots based on where plants were measured FROM, not which quadrat they reside in. subplots in this plot are therefore overlapping.
 
-trees <- trees %>%
-  add_column(subplot_id_ofo = "0")
+# some plants were shot with a rangefinder from quadrat corners. these have an "RF_grid_corner" cell value-- this is the subplot.
+# some plants were measured from along the grid line with a tape measure (e.g. not shot from a quadrat corner). the "quad" cell value for these plants is the subplot.
 
 # going to add subplot ID to the subplot datasheet and then merge it into the tree datasheet
 
@@ -91,17 +87,7 @@ subplots <- subplots %>%
 
 # sort in descending order
 
-subplots <- arrange(subplots, Quad)
-
-# remove subplots not used for our purposes here
-
-# first the 21s
-
-subplots <- subset(subplots, Quad!="A21" & Quad!="B21" & Quad!="C21" & Quad!="D21" & Quad!="E21" & Quad!="F21" & Quad!="G21" & Quad!="H21" & Quad!="I21" & Quad!="J21")
-
-# then the Ks
-
-subplots <- subset(subplots, Quad!="K11" & Quad!="K12" & Quad!="K13" & Quad!="K14" & Quad!="K15" & Quad!="K16" & Quad!="K17" & Quad!="K18" & Quad!="K19" & Quad!="K20" & Quad!="K21")
+ subplots <- arrange(subplots, Quad)
 
 # add subplot ID numbers to each quadrat
 
@@ -113,20 +99,127 @@ subplots$subplot_id_ofo[i] <- i + 211
 
 subplots <- subset(subplots, select = c(Quad, Lat, Long, subplot_id_ofo))
 
-subplots <- subplots %>% rename("QuadLat" = "Lat") %>% rename("QuadLong" = "Long") 
+subplots <- subplots %>% rename("SubplotLat" = "Lat") %>% rename("SubplotLon" = "Long")
 
-# !!!!we're going to assign trees to subplots based on which quadrat corner they were measured from, NOT which quadrat they are in!!!!
+subplots <- subplots %>% rename("quad_measured_from" = "Quad") 
 
-# change the name of the "RF_Grid_Corner"	(The grid pole that the rangefinder was shot from) column to "Quad"
+# we need the coordinates in UTMs to do the tree coordinate calculations!
 
-trees <- trees %>% 
-       rename("Quad" = "RF_Grid_Corner")
+# first, make the subplot data into a spatial dataframe
+
+subplots_sp <- st_as_sf(subplots, coords = c("SubplotLon","SubplotLat"), crs = 4326)
+
+# save the subplot spatial data in case it's useful later
+
+subplots_sp <- subplots_sp %>% st_transform(4326)
+
+st_write(subplots_sp, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\San_Jacinto_ForestGeo\\quadrat_corners.gpkg"))
+
+# convert to UTM11N
+
+subplots_sp <- subplots_sp %>% st_transform(32611)
+
+# extract the geometry features into columns of lat and long, then merge back into the spatial data frame
+
+subplots_UTM <- data.frame(subplots_sp$'subplot_id_ofo', st_coordinates(subplots_sp[,1], st_coordinates(subplots_sp[,2]))) 
+
+subplots_UTM <- subplots_UTM %>% rename ('subplot_id_ofo'=subplots_sp.subplot_id_ofo, SubplotLonUTM=X, SubplotLatUTM=Y)
+
+subplots <- full_join(subplots, subplots_UTM, by="subplot_id_ofo")
+
+# great, time to get a "real quad" column in the tree data set so we can match it up with the subplot data set
+
+# add a new column
+
+trees <- trees %>%
+  add_column(quad_measured_from = "")
+
+# get the right value in the column
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees$`RF_Grid_Corner`[i])) {
+    trees[i,]$quad_measured_from = (trees[i,]$Quadrat)
+  }
+  else {
+    trees[i,]$quad_measured_from = trees[i,]$`RF_Grid_Corner`
+  }
+}
+
+# merge subplot id
+
+trees <- full_join(trees, subplots, by="quad_measured_from")
 
 ```
 
 Tree lat and tree lon
 
 ```{r}
+
+# for trees that have distance and azimuth: calculate the coordinates of each tree using the subplot center, horizontal distance, and azimuth 
+
+trees = trees %>%
+  mutate(TreeLonUTM = as.numeric(SubplotLonUTM) + sin(deg2rad(AZ)) * HD,
+         TreeLatUTM = as.numeric(SubplotLatUTM) + cos(deg2rad(AZ)) * HD)
+
+# for trees that have x and y measurements from quadrat corner:
+# used the measure bearing tool in Qgis to calculate an approximate rotation angle for the plot grid relative to N-S
+# rotation angle measurements: 36.9, 37.7, 36.24. we'll say the rotation angle is 37 degrees.
+# used the x and y to compute the distance (sqrt(x^2 + y^2)) and azimuth (atan(x/y)
+# added the rotation to the azimuth
+# computed the rotated x and y as though it was a normal distance-azimuth plot
+
+trees = trees %>%
+  mutate(HD_computed = (sqrt((trees$Xcoordinates^2) + (trees$Ycoordinates^2))))
+
+trees = trees %>%
+  mutate(atanxy = atan((trees$Xcoordinates)/(trees$Ycoordinates)))
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees$`AZ`[i])) {
+    trees[i,]$TreeLonUTM = (
+      (trees[i,]$SubplotLonUTM) + 
+      ((trees[i,]$HD_computed) *
+      (sin(trees[i,]$atanxy + deg2rad(37)))))
+    trees[i,]$TreeLatUTM = (
+      (trees[i,]$SubplotLatUTM) + 
+      ((trees[i,]$HD_computed) *
+      (cos(trees[i,]$atanxy + deg2rad(37)))))
+  }
+}
+
+```
+
+Convert tree data to spatial data and save
+
+```{r}
+
+# one plant is missing spatial data because it has a horizontal distance but no azimuth, we're deleting it
+
+trees <- trees %>% drop_na(`TreeLonUTM`)
+
+trees_sp <- st_as_sf(trees, coords = c("TreeLonUTM","TreeLatUTM"), crs = 32611)
+
+trees_sp <- trees_sp %>% st_transform(4326)
+
+st_write(trees_sp, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\San_Jacinto_ForestGeo\\trees.gpkg"))
+
+```
+
+Convert tree UTMs to WGS84 coordinates and merge back into the dataset
+
+```{r}
+# give trees ID numbers
+
+trees_sp = trees_sp %>% mutate(tree_id = 1:nrow(trees_sp))
+trees = trees %>% mutate(tree_id = 1:nrow(trees))
+
+# extract the geometry features into columns of lat and long, then merge back into the spatial data frame
+
+trees_WGS <- data.frame(trees_sp$'tree_id', st_coordinates(trees_sp[,1], st_coordinates(trees_sp[,2]))) 
+
+trees_WGS <- trees_WGS %>% rename ('tree_id'=trees_sp.tree_id, TreeLonWGS=X, TreeLatWGS=Y)
+
+trees <- full_join(trees, trees_WGS, by="tree_id")
 
 ```
 
@@ -146,15 +239,55 @@ trees$Code[trees$Code == 'PINPON'] <- '122'
 trees$Code[trees$Code == 'PINJEF'] <- '116'
 trees$Code[trees$Code == 'QUEKEL'] <- '818'
 trees$Code[trees$Code == 'UNKN'] <- '000'
-
 trees$Code[trees$Code == 'QUEWIS'] <- '839'
 trees$Code[trees$Code == 'QUECHR'] <- '805'
 trees$Code[trees$Code == 'PINCOU'] <- '109'
 trees$Code[trees$Code == 'QUEXMO'] <- '800' # the Quercus x moreha (Q. kelloggii x wislizeni) is being labelled as Quercus spp.
+trees$Code[trees$Code == 'FRACAL'] <- '7200' # Frangula californica
+trees$Code[trees$Code == 'ARCPRI'] <- 'ARPRD2' 
+trees$Code[trees$Code == 'ARCGLA'] <- 'ARGL3' 
+trees$Code[trees$Code == 'ARCPUN'] <- 'ARPU5' 
+trees$Code[trees$Code == 'CEAPAL'] <- 'CEPA' 
+trees$Code[trees$Code == 'LONSUB'] <- 'LOSUD' 
+trees$Code[trees$Code == 'RHOOCC'] <- 'RHOC' 
+
+
+# Code!="CEAPAL" & Code!="LONSUB" & Code!="RHOOCC"
 
 
 trees <- trees %>% 
        rename("SpeciesCode" = "Code")
+```
+
+Tree, shrub, intermediate
+
+```{r}
+
+# add column
+
+trees <- trees %>%
+  add_column(growth_form = "")
+
+
+trees$growth_form[trees$SpeciesCode == '015'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '081'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '117'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '122'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '116'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '818'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '000'] <- 'intermediate'
+trees$growth_form[trees$SpeciesCode == '839'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '805'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '109'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '800'] <- 'tree'
+trees$growth_form[trees$SpeciesCode == '7200'] <- 'intermediate'
+trees$growth_form[trees$SpeciesCode == 'RHOC'] <- 'shrub'
+trees$growth_form[trees$SpeciesCode == 'ARPRD2'] <- 'shrub'
+trees$growth_form[trees$SpeciesCode == 'ARGL3'] <- 'shrub'
+trees$growth_form[trees$SpeciesCode == 'ARPU5'] <- 'shrub'
+trees$growth_form[trees$SpeciesCode == 'CEPA'] <- 'shrub'
+trees$growth_form[trees$SpeciesCode == 'LOSUD'] <- 'shrub'
+
 ```
 
 Status Live/Dead
@@ -183,7 +316,12 @@ SBAD	Stem broken above DBH
 T	Topped
 
 ```{r}
+trees$Codes <- str_replace(trees$Codes, "TG", "")
+trees$Codes <- str_replace(trees$Codes, "RS", "")
+trees$Codes <- str_replace(trees$Codes, "I", "")
+trees$Codes <- str_replace(trees$Codes, "QS", "")
 
+trees$Codes <- str_replace(trees$Codes, "SBBD", "90001")
 trees$Codes <- str_replace(trees$Codes, "BB", "11000")
 trees$Codes <- str_replace(trees$Codes, "CD", "90000") # unclear what kind of crown damage this is referring to (biotic or abiotic, mechanical damage, flagging...it's a mystery) so I'm labelling this as "other damages"
 trees$Codes <- str_replace(trees$Codes, "FS", "30000")
@@ -192,6 +330,13 @@ trees$Codes <- str_replace(trees$Codes, "MS", "23000") # general code for parisi
 trees$Codes <- str_replace(trees$Codes, "PD", "10000") # general code for insect damage
 trees$Codes <- str_replace(trees$Codes, "SBAD", "90001")
 trees$Codes <- str_replace(trees$Codes, "T", "60001")
+
+trees$Codes <- str_replace(trees$Codes, "M", "")
+trees$Codes <- str_replace(trees$Codes, "A", "")
+trees$Codes <- str_replace(trees$Codes, "B", "")
+trees$Codes <- str_replace(trees$Codes, "S", "")
+trees$Codes <- str_replace(trees$Codes, "FR", "")
+trees$Codes <- str_replace(trees$Codes, "PRO", "")
 
 ```
 
@@ -206,17 +351,59 @@ trees <- trees %>%
 
 # calculate
 
-trees$horiz_distance_pith = trees$HD + (0.5 * 0.01 * trees$DBH)
+for(i in 1:nrow(trees)) {
+  if(is.na(trees$`AZ`[i])) {
+    trees[i,]$horiz_distance_pith = trees[i,]$HD_computed + (0.5 * 0.01 * trees[i,]$DBH)
+  }
+  else {
+    trees[i,]$horiz_distance_pith = trees[i,]$HD + (0.5 * 0.01 * trees[i,]$DBH)
+  }
+}
 
-# get rid of NAs-- only the trees measured with distance/azimuth from a quadrat corner will have this measurement
+```
 
-trees$horiz_distance_pith[is.na(trees$horiz_distance_pith)] <- ""
+Compute distance and azimuth for all plants
+
+```{r}
+
+# distance
+
+trees <- trees %>%
+  add_column(HD_combined = "")
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees$`AZ`[i])) {
+    trees[i,]$HD_combined = trees[i,]$HD_computed
+  }
+  else {
+    trees[i,]$HD_combined = trees[i,]$HD 
+  }
+}
+
+# azimuth
+
+trees <- trees %>%
+  add_column(AZ_combined = "")
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees$`AZ`[i])) {
+    trees[i,]$AZ_combined = (rad2deg(trees[i,]$atanxy) + 37)
+  }
+  else {
+    trees[i,]$AZ_combined = trees[i,]$AZ 
+  }
+}
 
 ```
 
 
+Export CSV
 
+```{r}
 
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\San_Jacinto_ForestGeo\\20231110_SanJacintoForestGeo.csv")
+
+```
 
 
 ## ALTERATIONS MADE IN EXCEL

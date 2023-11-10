@@ -1,0 +1,281 @@
+---
+title: "Lamping"
+author: "Emily Marie Purvis"
+date: "2023-10-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## DATA MANIPULATED IN R
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+library(stringr)
+```
+
+Load data
+
+```{r}
+
+# Set working directory
+
+setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+
+# Load data
+
+# First the tree data! Each of these data sets is a different plot
+
+BS2 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\BS2_StemMap.csv")
+
+MC1 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\MC1_StemMap.csv")
+
+SJER <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\SJER_StemMap.csv")
+
+TO1 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\TO1_StemMap.csv")
+
+TO2 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\TO2_StemMap.csv")
+
+UN3 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\UN3_StemMap.csv")
+
+# now the plot data
+
+plots <- read.csv("GET PLOT KMZ FILE!")
+
+```
+
+PLOT LEVEL DATA
+
+Calculate centroid of plot polygons
+
+```{r}
+
+# Right now the MOC polygons are in UTM 10N. Transform to EPSG 4326.
+
+MOC8 = st_transform(MOC8boundary, crs = 4326)
+MOC9 = st_transform(MOC9boundary, crs = 4326)
+MOC10 = st_transform(MOC10boundary, crs = 4326)
+MOC11 = st_transform(MOC11boundary, crs = 4326)
+
+#### Calculate centroid of each polygon ####
+
+MOC8$centroid <- 0
+MOC9$centroid <- 0
+MOC10$centroid <- 0
+MOC11$centroid <- 0
+
+MOC8$centroid <- st_centroid(MOC8)
+MOC9$centroid <- st_centroid(MOC9)
+MOC10$centroid <- st_centroid(MOC10)
+MOC11$centroid <- st_centroid(MOC11)
+
+#### calculate area of each polygon ####
+
+# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
+
+plotpolygon = st_transform(plotpolygon, crs = 5070)
+
+st_area (plotpolygon)
+
+# Add a new column to the spatial data frame for area and calculate
+
+plotpolygon$area_meters <- 0
+
+plotpolygon$area_meters = st_area (plotpolygon)
+```
+
+TREE LEVEL DATA
+
+Add OFO plot ID
+
+```{r}
+
+# plot ID
+
+BS2 <- BS2 %>%
+  add_column(plot_id_ofo = "0082")
+
+MC1 <- MC1 %>%
+  add_column(plot_id_ofo = "0083")
+
+SJER <- SJER %>%
+  add_column(plot_id_ofo = "0084")
+
+TO1 <- TO1 %>%
+  add_column(plot_id_ofo = "0085")
+
+TO2 <- TO2 %>%
+  add_column(plot_id_ofo = "0086")
+
+UN3 <- UN3 %>%
+  add_column(plot_id_ofo = "0087")
+
+```
+
+Convert tree lat and tree lon to the right crs
+
+
+```{r}
+
+# right now tree lat and tree lon are in UTM! MC1, TO1, and TO2 are NAD83 UTM zone 10N (EPSG:26910); BS2, UN3, and SJER are NAD83 UTM zone 11N (EPSG:26911)
+
+#### let's combine the UTM10N data sets into one data frame ####
+
+by <- join_by(name, SPECIES, STATUS, DBH, HEIGHT, CANPOS, DRIPLINE, COMMENTS, XUTM, YUTM, elevation, plot_id_ofo)
+
+treesUTM10N <- full_join(MC1, TO1, by)
+
+treesUTM10N <- full_join (treesUTM10N, TO2, by)
+
+#### and the UTM11N data sets into one dataframe ####
+
+treesUTM11N <- full_join(BS2, UN3, by)
+
+treesUTM11N <- transform(treesUTM11N, name = as.character(name))
+
+# two of the SJER trees have nonsensical heights (one is "B" and one is "-"); I need this column to be numeric so I'm forcing it into numeric format and then replacing the resulting two "NA"s with blanks
+
+SJER <- transform(SJER, HEIGHT = as.numeric(HEIGHT))
+
+# now I can join all the UTM11N data together
+
+treesUTM11N <- full_join (treesUTM11N, SJER, by)
+
+treesUTM11N$HEIGHT[is.na(treesUTM11N$HEIGHT)] <- ""
+
+#### make the regular tree dataframes into spatial dataframes ####
+
+# first remove trees that have been bulldozed and no longer have coordinates
+
+treesUTM10N <- treesUTM10N %>% drop_na(XUTM)
+
+# add ID columns to make the re-merging of WGS coordinate columns easier 
+
+treesUTM10N$ID <- seq.int(nrow(treesUTM10N))
+
+treesUTM11N$ID <- seq.int(nrow(treesUTM11N))
+
+# and convert to spatial dataframes
+
+treesUTM10N_sp <- st_as_sf(treesUTM10N, coords = c("XUTM", "YUTM"), crs = 26910, remove=F)
+
+treesUTM11N_sp <- st_as_sf(treesUTM11N, coords = c("XUTM", "YUTM"), crs = 26911, remove=F)
+
+# change CRS to WGS84
+
+treesUTM10N_sp <- st_transform (treesUTM10N_sp, 4326)
+
+treesUTM11N_sp <- st_transform (treesUTM11N_sp, 4326)
+
+# Extract new coordinates
+
+treesUTM10N_sp_coords <- data.frame(treesUTM10N_sp$ID, st_coordinates(treesUTM10N_sp[,1], st_coordinates(treesUTM10N_sp[,2]))) 
+
+treesUTM10N_sp_coords <- treesUTM10N_sp_coords %>% rename (ID=treesUTM10N_sp.ID, TreeWGSX=X, TreeWGSY=Y)
+
+treesUTM11N_sp_coords <- data.frame(treesUTM11N_sp$ID, st_coordinates(treesUTM11N_sp[,1], st_coordinates(treesUTM11N_sp[,2]))) 
+
+treesUTM11N_sp_coords <- treesUTM11N_sp_coords %>% rename (ID=treesUTM11N_sp.ID, TreeWGSX=X, TreeWGSY=Y)
+
+# merge back into tree dataframe
+
+treesUTM10N <- full_join(treesUTM10N, treesUTM10N_sp_coords, by="ID")
+
+treesUTM11N <- full_join(treesUTM11N, treesUTM11N_sp_coords, by="ID")
+
+# and combine the new WGS84 dataframes
+
+by <- join_by(name, SPECIES, STATUS, DBH, HEIGHT, CANPOS, DRIPLINE, COMMENTS, XUTM, YUTM, elevation, plot_id_ofo, ID, TreeWGSX, TreeWGSY)
+
+treesUTM10N <- transform(treesUTM10N, name = as.character(name))
+
+treesUTM10N <- transform(treesUTM10N, HEIGHT = as.character(HEIGHT))
+
+alltrees <- full_join(treesUTM10N, treesUTM11N, by)
+
+```
+
+DBH is in cm and height is in m :)
+
+Tree species to FIA codes
+		Species Code			Species Name
+			 PILA				Pinus lambertiana
+			 ABCO				Abies concolor
+			 PIJE				Pinus Jeffreyi
+			 CADE				Calocedrus decurrens
+			 ABMA				Abies magnifica
+			 QUKE				Quercus kelloggii
+			 ABGR				Abies grandis
+			 PSME				Pseudotsuga menziesii
+			 CETH				Ceanothus thyrsiflorus
+			 NODE				Notholithocarpus densiflorus
+			 UMCA				Umbellularia californica
+			 RHMA				Rhamnus sp.		
+			 ARME				Arbutus menziesii
+			 ACMA				Acer macrophyllum
+			 FRLA				Fraxinus latifolia
+			 FRPU				Fraxinus purshiana
+			 SESE 				Sequoia sempervirens
+			 SASP				Salix sp.
+			 CONU 				Cornus nuttallii
+			 COSP				Cornus nttallii
+			 ALRU				Alnus rubra
+			 QUWI				Quercus wislizenii
+			 PISA 				Pinus sabiniana
+			 RHCA				Rhamnus californica
+			 ARBU 				Arbutus sp.
+			 AECA				Aesculus californica
+			 QUDU				Quercus douglassii
+			 RHPU				Rhamnus purshiana
+			 ACSP				Acer sp.
+			 TSHE 				Tsuga heterophylla
+			 PISP				Pinus sp.
+
+```{r}
+
+alltrees$SPECIES[alltrees$SPECIES == 'PILA'] <- '117'
+alltrees$SPECIES[alltrees$SPECIES == 'ABCO'] <- '015'
+alltrees$SPECIES[alltrees$SPECIES == 'PIJE'] <- '116'
+alltrees$SPECIES[alltrees$SPECIES == 'CADE'] <- '081'
+alltrees$SPECIES[alltrees$SPECIES == 'ABMA'] <- '020'
+alltrees$SPECIES[alltrees$SPECIES == 'QUKE'] <- '818'
+alltrees$SPECIES[alltrees$SPECIES == 'ABGR'] <- '017'
+alltrees$SPECIES[alltrees$SPECIES == 'PSME'] <- '202'
+alltrees$SPECIES[alltrees$SPECIES == 'NODE'] <- '631'
+alltrees$SPECIES[alltrees$SPECIES == 'LIDE'] <- '631'
+alltrees$SPECIES[alltrees$SPECIES == 'UMCA'] <- '981'
+alltrees$SPECIES[alltrees$SPECIES == 'ARME'] <- '361'
+alltrees$SPECIES[alltrees$SPECIES == 'ASME'] <- '361'
+alltrees$SPECIES[alltrees$SPECIES == 'ACMA'] <- '312'
+alltrees$SPECIES[alltrees$SPECIES == 'FRLA'] <- '542'
+alltrees$SPECIES[alltrees$SPECIES == 'SESE'] <- '211'
+alltrees$SPECIES[alltrees$SPECIES == 'CONU'] <- '492'
+alltrees$SPECIES[alltrees$SPECIES == 'COSP'] <- '492'
+alltrees$SPECIES[alltrees$SPECIES == 'ALRU'] <- '351'
+alltrees$SPECIES[alltrees$SPECIES == 'QUWI'] <- '839'
+alltrees$SPECIES[alltrees$SPECIES == 'PISA'] <- '127'
+alltrees$SPECIES[alltrees$SPECIES == 'AECA'] <- '333'
+alltrees$SPECIES[alltrees$SPECIES == 'QUDU'] <- '807'
+alltrees$SPECIES[alltrees$SPECIES == 'ACSP'] <- '310'
+alltrees$SPECIES[alltrees$SPECIES == 'TSHE'] <- '263'
+alltrees$SPECIES[alltrees$SPECIES == 'PISP'] <- '100'
+alltrees$SPECIES[alltrees$SPECIES == 'SASP'] <- '920'
+alltrees$SPECIES[alltrees$SPECIES == 'UNKN'] <- '000'
+alltrees$SPECIES[alltrees$SPECIES == 'ARBU'] <- '361'
+alltrees$SPECIES[alltrees$SPECIES == 'RMCA'] <- '7200'
+# alltrees$SPECIES[alltrees$SPECIES == 'FRPU'] <- '' 
+#alltrees$SPECIES[alltrees$SPECIES == 'RHPU'] <- '' # Rhamnus purshiana
+#alltrees$SPECIES[alltrees$SPECIES == 'RHCA'] <- '' # Rhamnus californica? one comment says RHAMNUS CROCEA
+
+```
+
+
+
+## ALTERATIONS MADE IN EXCEL
