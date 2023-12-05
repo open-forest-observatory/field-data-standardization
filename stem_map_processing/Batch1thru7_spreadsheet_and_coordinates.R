@@ -327,25 +327,31 @@ S087 <- S087 [-c(1:18, 21:22)]
 # S087 <- S087 %>% st_set_crs(4326)
 # EPSG 4326
 
-S097 <- read_sf('S-097_g\\OHNOTHISFILEISCOrruptED.shp') 
+S097 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\rebatch3gpsfiles_s097\\S-097.shp') 
 
 S097 = S097 %>% mutate(`Plot#` = 'S097')
 
-S097 <- S097 [-c(1:18, 21:22)]
+S097 <- S097 [-c(1:19, 22:23)]
 
 # st_crs(S097)
-# S097 <- S097 %>% st_set_crs(4326)
 # EPSG 4326
 
-S973 <- read_sf('S-973_g\\S-973.shp') OH NO THIS FILE IS ALSO CORRUPTED
+S973 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\rebatch3gpsfiles_s973\\S-973.shp')
 
 S973 = S973 %>% mutate(`Plot#` = 'S973')
 
-S973 <- S973 [-c(1:18, 21:22)]
+S973 <- S973 [-c(1:19, 22:23)]
 
 # st_crs(S097)
-# S097 <- S097 %>% st_set_crs(4326)
 # EPSG 4326
+
+Batch3plotsWGS84 <- rbind(L519, S015, S074, S075, S080, S083, S084, S087, S097, S973)
+
+st_write(Batch3plotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\Stem_Batch_3_plotcoordinatesWGS84.gpkg"),delete_dsn=TRUE)
+
+Batch3plotsUTM10N <- Batch3plotsWGS84 %>% st_transform(32610)
+
+st_write(Batch3plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\Stem_Batch_3_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
 
 #### Batches 4-7 ####
 
@@ -406,6 +412,20 @@ combinedplotsUTM10N <- rbind(Batch1plotsUTM10N, Batch2plotsUTM10N, Batch4plotsUT
 st_write(combinedplotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml"),delete_dsn=TRUE)
 
 st_write(combinedplotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersUTM10N.kml"),delete_dsn=TRUE)
+
+#### Coming back later to combine batch 3 with the other batches ####
+
+combinedplotsWGS84 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml")
+
+Batch3plotsWGS84 <- Batch3plotsWGS84 [-c(1:2)]
+
+combinedplotsWGS84 <- combinedplotsWGS84 [-c(2)]
+
+Batch3plotsWGS84 <- Batch3plotsWGS84 %>% rename (Name=`Plot#`)
+
+combinedplotsWGS84 <- rbind(Batch3plotsWGS84, combinedplotsWGS84)
+
+st_write(combinedplotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml"),delete_dsn=TRUE)
 
 #### Combine Batches 1-7 spreadsheets ####
 
