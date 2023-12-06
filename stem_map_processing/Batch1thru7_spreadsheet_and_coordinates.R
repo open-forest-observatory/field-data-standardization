@@ -7,6 +7,7 @@ library(tidyverse)
 library(readxl)
 library(sf)
 library(stringr)
+library(pracma)
 
 #### Combine coordinates into one KML ####
 
