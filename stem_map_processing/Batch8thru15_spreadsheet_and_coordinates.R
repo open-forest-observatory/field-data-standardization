@@ -1069,6 +1069,10 @@ combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-073'] <- 'S073'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-085'] <- 'S085'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-092'] <- 'S092'
 
+combinedtrees$`Plot #`[combinedtrees$`Plot #` == 's053'] <- 'S053'
+combinedtrees$`Plot #`[combinedtrees$`Plot #` == 's063'] <- 'S063'
+combinedtrees$`Plot #`[combinedtrees$`Plot #` == 's048'] <- 'S048'
+
 # Batch 10
 
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-036'] <- 'S036'
@@ -1410,6 +1414,15 @@ combinedtrees$`CanopyPosition`[combinedtrees$`CanopyPosition` == '4'] <- 'Interm
 combinedtrees$`CanopyPosition`[combinedtrees$`CanopyPosition` == '5'] <- 'Overtopped'
 
 combinedtrees$`CanopyPosition`[combinedtrees$`CanopyPosition` == '15'] <- ''
+
+#### Combine with Batches 1-7 ####
+
+
+
+
+
+
+
 
 #### Export ####
 
