@@ -872,7 +872,7 @@ Batch12trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-stand
 
 Batch13trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_13\\Batch_13_Final_Geoff\\Batch13.xlsx"),sheet=1,col_names = TRUE)
 
-Batch14trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_14\\Batch14\\Plot_Data\\Stem_Batch14.xlsx"),sheet=1,col_names = TRUE)
+Batch14trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_14\\Batch14\\Plot_Data\\Stem_Batch14_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
 Batch15trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_15\\Batch15\\Plot_Data\\Stem_Batch15.xlsx"),sheet=1,col_names = TRUE)
 
@@ -949,6 +949,10 @@ for(i in 1:nrow(combinedtrees)) {
 
 #### Add plot coordinates to tree dataframe ####
 
+combinedplotsWGS84 <- rbind(Batch8plotsWGS84, Batch9plotsWGS84, Batch10plotsWGS84, Batch11plotsWGS84, Batch12plotsWGS84, Batch13plotsWGS84, Batch14plotsWGS84, Batch15plotsWGS84)
+
+combinedplotsUTM10N <- rbind(Batch8plotsUTM10N, Batch9plotsUTM10N, Batch10plotsUTM10N, Batch11plotsUTM10N, Batch12plotsUTM10N, Batch13plotsUTM10N, Batch14plotsUTM10N, Batch15plotsUTM10N)
+
 combinedplotsWGS84 <- combinedplotsWGS84 %>% rename (`Plot #`=Name)
 
 combinedplotsUTM10N <- combinedplotsUTM10N %>% rename (`Plot #`=Name)
@@ -974,36 +978,6 @@ combinedplotsUTM10N_coordinates <- combinedplotsUTM10N_coordinates %>% rename (`
 # make sure all plot names are in the same format
 
 # Batch 8
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-This is where I stopped again because there are weird things happening with batch 14 data 
-
-
-
-
-
-
-
-
-
 
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-023'] <- 'S023'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-028'] <- 'S028'
@@ -1135,56 +1109,6 @@ combinedtrees$`TreeLatitudeUTM10N` <- 0
 
 ##### Calculate tree coordinates in UTMs ####
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-COME BACK AND DO THIS PART AGAIN WITH BATCH 14. DO EVERYTHING AGAIN.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Longitude UTM10N
 
 for(i in 1:nrow(combinedtrees)) {
@@ -1223,32 +1147,7 @@ treecoordinatesconversion <- treecoordinatesconversion %>% st_transform(4326)
 
 # save this in case it's helpful later
 
-st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\Batch8thru15_EXCEPTBATCH14_treecoordinatesWGS84.kml"),delete_dsn=TRUE)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-SAVE THAT WITH A DIFFERENT FILE NAME THAT INCLUDES BATCH 14
-
-
-
-
-
-
-
-
-
-
+st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\Batch8thru15_treecoordinatesWGS84.kml"),delete_dsn=TRUE)
 
 # extract the geometry features into columns of lat and long WGS84, then merge back into the tree data frame
 
@@ -1259,23 +1158,6 @@ treecoordinatesconversionWGS84 <- treecoordinatesconversionWGS84 %>% rename (tre
 combinedtrees <- full_join (combinedtrees, treecoordinatesconversionWGS84, by="tree_id")
 
 #### Convert DBH from inches to cm ####
-
-
-
-
-
-DON'T HAVE TO DO THIS PART AGAIN'
-
-
-
-
-
-
-
-
-
-
-
 
 # add new column
 
@@ -1380,20 +1262,43 @@ combinedtrees$`CanopyPosition`[combinedtrees$`CanopyPosition` == '5'] <- 'Overto
 
 combinedtrees$`CanopyPosition`[combinedtrees$`CanopyPosition` == '15'] <- ''
 
-#### Combine with Batches 1-7 ####
-
-
-
-
-
-
-
-
 #### Export ####
 
 write.csv(combinedtrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\Batch8thru15trees.csv")
 
+#### Combine with Batches 1-7 tree data ####
 
+treesbatches1thru7 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\partially_complete_data_sets\\Batch1thru7trees.csv")
 
+treesbatches1thru7 <- treesbatches1thru7 [,-1]
 
+treesbatches1thru7 <- treesbatches1thru7 %>% rename(`Plot #`=`Plot.`, `Tree#`= `Tree.`, `Slope distance (feet)`=`Slope.distance..feet.`, `Horizontal distance (feet)`=`Horizontal.distance..feet.`, `Live/Dead`=`Live.Dead`)
+
+treesbatches1thru7 <- treesbatches1thru7 %>% rename(`DBH (inches)`=`DBH..inches.`, `DBH (cm)`= `DBH..cm.`, `Height (feet)`=`Height..feet.`, `% Crown`=`X.Crown`, `Live Tree Defects`=`Live.Tree.Defects`, `Snag Decay Class`=`Snag.Decay.Class`)
+
+treesbatches1thru7 <- treesbatches1thru7 %>% rename(`All Horizontal Distances (feet)`=`All.Horizontal.Distances..feet.`)
+
+treesbatches1thru7 <- treesbatches1thru7 %>% rename(`%Crown`=`% Crown`)
+
+treesbatches1thru7 <- treesbatches1thru7 [,-c(23:26)]
+
+combinedtrees <- combinedtrees %>% rename(`UpdatedPlotLongitudeWGS84`=`PlotLongitudeWGS84`, `UpdatedPlotLatitudeWGS84`=`PlotLatitudeWGS84`, `UpdatedPlotLongitudeUTM10N`=`PlotLongitudeUTM10N`, `UpdatedPlotLatitudeUTM10N`=`PlotLatitudeUTM10N`)
+
+treesbatches1thru15 <- rbind(combinedtrees, treesbatches1thru7)
+
+write.csv(treesbatches1thru15, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\Batch1thru15trees.csv")
+
+#### Combine tree kml files from Batches 1 thru 15 ####
+
+batch1thru7treecoordinates <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\partially_complete_data_sets\\batch1thru7treecoordinatesWGS84.kml")
+
+batch1thru7treecoordinates <- batch1thru7treecoordinates [,-2]
+
+batch8thru15treecoordinates <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\partially_complete_data_sets\\Batch8thru15_treecoordinatesWGS84.kml")
+
+batch8thru15treecoordinates <- batch8thru15treecoordinates [,-2]
+
+alltreecoordinates <- rbind(batch1thru7treecoordinates, batch8thru15treecoordinates)
+
+st_write(alltreecoordinates, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\alltreecoordinatesWGS84.kml"),delete_dsn=TRUE)
 
