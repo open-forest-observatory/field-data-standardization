@@ -1,9 +1,9 @@
 # Author: Emily Marie Purvis
 # Date: 12.6.2023
-# Goal: convert Batch 9 individual tree coordinates from distance/azimuth to easting/northing and create stem map ggplots
+# Goal: convert Batch 10 individual tree coordinates from distance/azimuth to easting/northing and create stem map ggplots
 
 #### Set working directory ####
-setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Batch_9")
+setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\Batch_10_final")
 
 #### Load libraries ####
 library(tidyverse)
@@ -14,13 +14,14 @@ library(ggrepel)
 
 #### Load and inspect tree data; small tweaks to get it standardized and ready for calculating tree coordinates ####
 
-treedata = read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Batch_9\\Batch_9_Complete.xlsx"),sheet=1,col_names = TRUE)
+treedata = read_excel(data("Batch_10_Final_Data.xlsx"),sheet=1,col_names = TRUE)
 
 # need to reformat the plot numbers in treedata so they match the plot data 
 
-treedata$`Plot #`[treedata$`Plot #` == 's053'] <- 'S053'
-treedata$`Plot #`[treedata$`Plot #` == 's063'] <- 'S063'
-treedata$`Plot #`[treedata$`Plot #` == 's048'] <- 'S048'
+treedata$`Plot #`[treedata$`Plot #` == 's093'] <- 'S093'
+treedata$`Plot #`[treedata$`Plot #` == 's982'] <- 'S982'
+treedata$`Plot #`[treedata$`Plot #` == 'S-055'] <- 'S055'
+
 
 # need to delete random rows of all NAs in treedata
 
@@ -49,7 +50,7 @@ for(i in 1:nrow(treedata)) {
 
 #### Load and inspect plot gps data ####
 
-plotcenters <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Stem_Batch_9_plotcoordinatesWGS84.gpkg")
+plotcenters <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\Stem_Batch_10_plotcoordinatesWGS84.gpkg")
 
 plotcenters <- plotcenters %>% rename(`Plot #` = `Name`)
 
@@ -87,9 +88,9 @@ trees_sp <- st_as_sf(treedata, coords = c("TreeLongitudeUTM10N","TreeLatitudeUTM
 
 # exporting the tree spatial data in the same format as the plot data came in, 4326
 
-st_write(trees_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Stem_Batch_9_treecoordinatesWGS84.gpkg"),delete_dsn=TRUE)
+st_write(trees_sp %>% st_transform(4326),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\Stem_Batch_10_treecoordinatesWGS84.gpkg"),delete_dsn=TRUE)
 
-st_write(trees_sp %>% st_transform(32610),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Stem_Batch_9_treecoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
+st_write(trees_sp %>% st_transform(32610),data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\Stem_Batch_10_treecoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
 
 #### ggplots ####
 
@@ -119,6 +120,7 @@ treedata$`Species`[treedata$`Species` == '839'] <- 'QUWI2'
 treedata$`Species`[treedata$`Species` == '64'] <- 'JUOC'
 treedata$`Species`[treedata$`Species` == '768'] <- 'PREM'
 treedata$`Species`[treedata$`Species` == '816'] <- 'QUKE' # 816 is quercus ilicifolia which only grows in the eastern US so almost certainly a typo. this is a guess.
+treedata$`Species`[treedata$`Species` == '212'] <- 'PIPO' # 212 is giant sequoia, almost certainly a typo
 
 # Renaming the latitude and longitude columns so the tree and plot data match-- this will allow me to plot both on the same axes
 
@@ -144,58 +146,57 @@ all_plots <- as.data.frame(plotcenters_UTM10N [,c('Plot #','Longitude','Latitude
 
 all_points <- rbind(all_plots, all_trees)
 
-# plot S009
+# plot S036
 
-ggplot(subset(all_points,`Plot #`=="S009"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S009") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(665050, 665160) + ylim (4362975, 4363095) -> plot_S009
+ggplot(subset(all_points,`Plot #`=="S036"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S036") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(674725, 674845) + ylim (4379070, 4379180) -> plot_S036
 
-# plot S030
+# plot S042
 
-ggplot(subset(all_points,`Plot #`=="S030"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S030") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(673965, 674075) + ylim (4373480, 4373600) -> plot_S030
+ggplot(subset(all_points,`Plot #`=="S042"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S042") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(675535, 675615) + ylim (4383750, 4383845) -> plot_S042
 
-# plot S040
+# plot S046
 
-ggplot(subset(all_points,`Plot #`=="S040"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S040") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(675835, 675950) + ylim (4373535, 4373655) -> plot_S040
+ggplot(subset(all_points,`Plot #`=="S046"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S046") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(677205, 677330) + ylim (4388420, 4388535) -> plot_S046
 
-# plot S048
+# plot S051
 
-ggplot(subset(all_points,`Plot #`=="S048"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S048") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(678580, 678700) + ylim (4374550, 4374670) -> plot_S048
+ggplot(subset(all_points,`Plot #`=="S051"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S051") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(678100, 678225) + ylim (4389355, 4389480) -> plot_S051
 
-# plot S053
+# plot S055
 
-ggplot(subset(all_points,`Plot #`=="S053"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S053") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(680310, 680420) + ylim (4379255, 4379380) -> plot_S053
+ggplot(subset(all_points,`Plot #`=="S055"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S055") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(680200, 680315) + ylim (4382000, 4382125) -> plot_S055
 
-# plot S062
+# plot S089
 
-ggplot(subset(all_points,`Plot #`=="S062"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S062") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(681370, 681470) + ylim (4374640, 4374760) -> plot_S062
+ggplot(subset(all_points,`Plot #`=="S089"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S089") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(688380, 688500) + ylim (4386915, 4387040) -> plot_S089
 
-# plot S063
+# plot S093
 
-ggplot(subset(all_points,`Plot #`=="S063"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S063") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(681280, 681385) + ylim (4377430, 4377545) -> plot_S063
+ggplot(subset(all_points,`Plot #`=="S093"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S093") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(692040, 692165) + ylim (4388920, 4389000) -> plot_S093
 
-# plot S073
+# plot S314
 
-ggplot(subset(all_points,`Plot #`=="S073"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S073") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(683230, 683350) + ylim (4374715, 4374795) -> plot_S073
+ggplot(subset(all_points,`Plot #`=="S314"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S314") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(670190, 670300) + ylim (4379005, 4379120) -> plot_S314
 
-# plot S085
+# plot S315
 
-ggplot(subset(all_points,`Plot #`=="S085"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S085") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(685760, 685870) + ylim (4383130, 4383235) -> plot_S085
+ggplot(subset(all_points,`Plot #`=="S315"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S315") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(671830, 671950) + ylim (4374575, 4374685) -> plot_S315
 
-# plot S092
+# plot S982
 
-ggplot(subset(all_points,`Plot #`=="S092"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S092") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(692065, 692185) + ylim (4387965, 4388090) -> plot_S092
+ggplot(subset(all_points,`Plot #`=="S982"), aes(Longitude, Latitude, color=Species, label=tree_id)) + geom_point(aes(size=DBH)) + scale_size_continuous(range = c(1, 6)) + coord_equal(expand=FALSE) + theme_classic() + geom_text_repel(color="black", size=2.5, vjust="outward", hjust ="right") + ggtitle ("Plot S982") + theme(plot.title = element_text(hjust = 0.5)) + geom_point(shape=1, aes(size=DBH), colour = "black")  + scale_colour_viridis_d() + xlim(671700, 671740) + ylim (4379560, 4379630) -> plot_S982
 
 # export plots to pdf
 
-pdf(file="C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\StemMap9_ggplots.pdf",height = 8, width = 8)
-plot(plot_S009)
-plot(plot_S030)
-plot(plot_S040)
-plot(plot_S048)
-plot(plot_S053)
-plot(plot_S062)
-plot(plot_S063)
-plot(plot_S073)
-plot(plot_S085)
-plot(plot_S092)
+pdf(file="C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\StemMap10_ggplots.pdf",height = 8, width = 8)
+plot(plot_S036)
+plot(plot_S042)
+plot(plot_S046)
+plot(plot_S051)
+plot(plot_S055)
+plot(plot_S089)
+plot(plot_S093)
+plot(plot_S314)
+plot(plot_S315)
+plot(plot_S982)
 dev.off()
-

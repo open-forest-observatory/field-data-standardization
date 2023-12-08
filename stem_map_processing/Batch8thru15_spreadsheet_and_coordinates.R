@@ -715,13 +715,15 @@ S017 <- S017 [-c(1:19, 22:23)]
 # st_crs(S017)
 # EPSG 4326
 
-S043 <- read_sf("TNC.Stem_Batch_14\\Batch14\\Post_Processed_GPS\\S043\\S-043.shp") THERE IS AN ERROR IN THIS SHAPEFILE THERE ARE TWO POINTS
+S043 <- read_sf("TNC.Stem_Batch_14\\Batch14\\Post_Processed_GPS\\S043\\S-043.shp")
+
+S043 <- S043 [-1,]
 
 S043= S043 %>% mutate(Name = 'S043')
 
 S043 <- S043 [-c(1:19, 22:23)]
 
-# st_crs(S013)
+# st_crs(S043)
 # EPSG 4326
 
 S086 <- read_sf("TNC.Stem_Batch_14\\Batch14\\Post_Processed_GPS\\S086\\S086_final.shp") 
@@ -746,21 +748,12 @@ S506 <- read_sf("TNC.Stem_Batch_14\\Batch14\\Post_Processed_GPS\\S-506\\S506.shp
 
 S506= S506 %>% mutate(Name = 'S506')
 
-S506 <- S506 [-c(1:19, 22:23)]
+S506 <- S506 [-c(1:18, 21:22)]
 
 # st_crs(S506)
 # EPSG 4326
 
 # Combine all plots
-
-I also did not do this part because of the fucked up shapefile from earlier
-
-
-
-
-
-
-
 
 Batch14plotsWGS84 <- rbind(S049, S004, S010, S011, S013, S017, S043, S086, S311, S506)
 
@@ -771,9 +764,6 @@ st_write(Batch14plotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-stand
 Batch14plotsUTM10N <- Batch14plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch14plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_14\\Stem_Batch_14_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
-
-
-
 
 #### Batch 15 ####
 
@@ -858,55 +848,6 @@ st_write(Batch15plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-stan
 
 plots1thru7WGS84 <- plots1thru7WGS84 [-c(2)]
 
-
-
-
-
-I AM DOING THIS WITHOUT BATCH 14, COME BACK AND DO BATCH 14 LATER
-
-
-
-
-
-
-
-
-THIS IS WHAT I DID
-
-
-
-
-
-
-
-combinedplotsWGS84 <- rbind(plots1thru7WGS84, Batch8plotsWGS84, Batch9plotsWGS84, Batch10plotsWGS84, Batch11plotsWGS84, Batch12plotsWGS84, Batch13plotsWGS84, Batch15plotsWGS84)
-
-combinedplotsUTM10N <- rbind((plots1thru7WGS84 %>% st_transform(32610)), Batch8plotsUTM10N, Batch9plotsUTM10N, Batch10plotsUTM10N, Batch11plotsUTM10N, Batch12plotsUTM10N, Batch13plotsUTM10N, Batch15plotsUTM10N)
-
-st_write(combinedplotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcenters_EXCEPTBATCH14_WGS84.kml"),delete_dsn=TRUE)
-
-st_write(combinedplotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcenters_EXCEPTBATCH14_UTM10N.kml"),delete_dsn=TRUE)
-
-
-
-
-
-
-
-
-
-
-
-
-THIS IS WHAT I NEED TO COME BACK AND RERUN ONCE BATCH 14 IS AVAILABLE 
-
-
-
-
-
-
-
-
 combinedplotsWGS84 <- rbind(plots1thru7WGS84, Batch8plotsWGS84, Batch9plotsWGS84, Batch10plotsWGS84, Batch11plotsWGS84, Batch12plotsWGS84, Batch13plotsWGS84, Batch14plotsWGS84, Batch15plotsWGS84)
 
 combinedplotsUTM10N <- rbind((plots1thru7WGS84 %>% st_transform(32610)), Batch8plotsUTM10N, Batch9plotsUTM10N, Batch10plotsUTM10N, Batch11plotsUTM10N, Batch12plotsUTM10N, Batch13plotsUTM10N, Batch14plotsUTM10N, Batch15plotsUTM10N)
@@ -914,17 +855,6 @@ combinedplotsUTM10N <- rbind((plots1thru7WGS84 %>% st_transform(32610)), Batch8p
 st_write(combinedplotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml"),delete_dsn=TRUE)
 
 st_write(combinedplotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersUTM10N.kml"),delete_dsn=TRUE)
-
-
-
-
-
-
-
-
-
-
-
 
 #### Combine Batches 8-15 spreadsheets ####
 
@@ -1045,6 +975,36 @@ combinedplotsUTM10N_coordinates <- combinedplotsUTM10N_coordinates %>% rename (`
 
 # Batch 8
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+This is where I stopped again because there are weird things happening with batch 14 data 
+
+
+
+
+
+
+
+
+
+
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-023'] <- 'S023'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-028'] <- 'S028'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-032'] <- 'S032'
@@ -1086,6 +1046,9 @@ combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-314'] <- 'S314'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-315'] <- 'S315'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-982'] <- 'S982'
 
+combinedtrees$`Plot #`[combinedtrees$`Plot #` == 's093'] <- 'S093'
+combinedtrees$`Plot #`[combinedtrees$`Plot #` == 's982'] <- 'S982'
+
 # Batch 11
 
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-001'] <- 'S001'
@@ -1124,6 +1087,8 @@ combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-312'] <- 'S312'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-316'] <- 'S316'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-502'] <- 'S502'
 combinedtrees$`Plot #`[combinedtrees$`Plot #` == 'S-935'] <- 'S935'
+
+combinedtrees$`Plot #`[combinedtrees$`Plot #` == 's054'] <- 'S054'
 
 # Batch 14
 
