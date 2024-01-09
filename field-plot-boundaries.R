@@ -280,3 +280,112 @@ for(i in 1:nrow(units_spatial)) {
   plot_id_current = polygon_current$plot_id_ofo
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
+
+#### San Jacinto Forest Geo ####
+
+# x coordinate centroid is the 16s
+
+# y coordinate centroid is the Fs
+
+# therefore F16 is the centroid of the whole plot
+
+# import data
+
+SanJacintosubplots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0008\\data\\SJFDP_Env_4ha_20230504.csv")
+
+# remove extra columns that aren't subplot ID, lat, and long
+
+SanJacintoCenter <- SanJacintosubplots[-c(2:5)]
+
+SanJacintoCenter <- SanJacintoCenter[c(1:3)]
+
+# remove extra rows that aren't F16
+
+SanJacintoCenter <- SanJacintoCenter[-c(1:60, 62:121),]
+
+SanJacintoCenter_sp <- st_as_sf(SanJacintoCenter, coords = c("Lat", "Long"), crs = 4326, remove=F)
+
+# this is a square plot; the center point is the centroid. the edges are 100 m away from this center point in 4 directions (NOT cardinal directions, the plot is not oriented along a N-S-E-W axis). the corners are A11, A21, K11, and K21.
+
+# make a data frame with the polygon corners
+
+SanJacintoCorners <- SanJacintosubplots[-c(2:5)]
+
+SanJacintoCorners <- SanJacintoCorners[c(1:3)]
+
+SanJacintoCorners <- SanJacintoCorners[-c(2:10, 12:110, 112:120),]
+
+SanJacintoCorners <- SanJacintoCorners %>% arrange(factor(Quad, levels = c('A11', 'K11', 'K21', 'A21')))
+
+SanJacintoCornerClose <- SanJacintoCorners[-c(2:4),]
+
+SanJacintoCorners <- rbind(SanJacintoCorners, SanJacintoCornerClose)
+
+SanJacintoCornersPoints <- SanJacintoCorners [-(1)]
+
+# create polygon in sf package
+
+SanJacintoPolygon = st_polygon(
+  list(
+    cbind(
+      SanJacintoCorners$Long[c(1,2,3,4,5)], 
+      SanJacintoCorners$Lat[c(1,2,3,4,5)])
+  )
+)
+
+SanJacintoPolygon = st_sfc(SanJacintoPolygon, crs=4326)
+
+SanJacintoPolygon = st_as_sf (SanJacintoPolygon)
+
+# add OFO plot ID
+
+SanJacintoPolygon <- SanJacintoPolygon %>%
+  add_column(plot_id_ofo = "0081")
+
+# Export polygon
+
+st_write(SanJacintoPolygon, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0081.gpkg")
+
+#### Lamping ####
+
+# import plot data
+
+Lampingplots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Lamping_UAS_StemMap_boundarys\\doc.kml")
+
+# st_crs(Lampingplots)
+# plot KML is in 4326
+
+Lampingplots <- Lampingplots [-(4),]
+
+Lampingplots <- Lampingplots [-(2)]
+
+# add ofo plot IDs
+
+Lampingplots <- Lampingplots %>%
+  add_column(plot_id_ofo = "")
+
+Lampingplots$Name[Lampingplots$Name == 'OW'] <- 'SJER'
+
+Lampingplots$Name[Lampingplots$Name == 'MC'] <- 'MC1'
+
+Lampingplots$plot_id_ofo[Lampingplots$Name == 'BS2'] <- '0082'
+
+Lampingplots$plot_id_ofo[Lampingplots$Name == 'MC1'] <- '0083'
+
+Lampingplots$plot_id_ofo[Lampingplots$Name == 'SJER'] <- '0084'
+
+Lampingplots$plot_id_ofo[Lampingplots$Name == 'TO1'] <- '0085'
+
+Lampingplots$plot_id_ofo[Lampingplots$Name == 'TO2'] <- '0086'
+
+Lampingplots$plot_id_ofo[Lampingplots$Name == 'UN3'] <- '0087'
+
+Lampingplots <- Lampingplots [-(1)]
+
+# Export
+
+for(i in 1:nrow(Lampingplots)) {
+  polygon_current <- Lampingplots[i, ]
+  plot_id_current = polygon_current$plot_id_ofo
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}

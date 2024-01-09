@@ -1,0 +1,23 @@
+---
+title: "FOCAL_early_regen_dispersal"
+author: "Emily Marie Purvis"
+date: "2024-01-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DATA MANIPULATED IN R
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+library(stringr)
+library(readxl)
+library(pracma)
+```
