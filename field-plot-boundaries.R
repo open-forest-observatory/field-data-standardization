@@ -389,3 +389,42 @@ for(i in 1:nrow(Lampingplots)) {
   plot_id_current = polygon_current$plot_id_ofo
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
+
+#### FOCAL early regen dispersal project ####
+
+#import data
+
+treedata <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_early_regen_dispersal\\20240110_FOCAL_early_regen_dispersal.csv", header = TRUE)
+
+# we don't want all of these columns, just plot ID and spatial attributes
+
+treedata = subset(treedata, select = c('ofo_plot_id','centerpoint_latitude', 'centerpoint_longitude') )
+
+# and we don't need all of these rows, just one row per plot
+
+treedata <- treedata [-(2:94),]
+treedata <- treedata [-(3:21),]
+treedata <- treedata [-(4:19),]
+
+# convert to sf
+
+treedata_sf <- st_as_sf(treedata, coords = c("centerpoint_longitude", "centerpoint_latitude"), crs = 4326)
+
+# These are circular plots! Buffer circles by 30 meters-- this is the plot radius
+# First project to a projected (meters) coordinate system with equal x and y distances
+# CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+
+treedata_sf = st_transform(treedata_sf, crs = 5070)
+treedata_circles <- st_buffer(treedata_sf, dist = 30, nQuadSegs = 10)
+
+# Then back to WGS84
+
+treedata_circles <- st_transform(treedata_circles, crs = 4326)
+
+# export plot polygons
+
+for(i in 1:nrow(treedata_circles)) {
+  polygon_current <- treedata_circles[i, ]
+  plot_id_current = polygon_current$ofo_plot_id
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}
