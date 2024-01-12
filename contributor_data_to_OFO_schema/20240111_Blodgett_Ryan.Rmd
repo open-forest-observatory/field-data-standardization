@@ -1,0 +1,88 @@
+---
+title: "20240111_Blodgett_Ryan"
+author: "Emily Marie Purvis"
+date: "2024-01-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## DATA MANIPULATED IN R
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+library(stringr)
+```
+
+Load data
+
+```{r}
+
+# Set working directory
+
+setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+
+# Load data
+
+# First the tree data! Each of these data sets is a different plot
+
+plot240 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0012\\data\\analyze_240_p1.csv")
+
+plot350 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0012\\data\\analyze_350_p1.csv")
+
+plot380 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0012\\data\\analyze_380_p1.csv")
+
+plot400 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0012\\data\\analyze_400_p1.csv")
+
+# now the plot data
+
+plots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0012\\data\\plot_boundaries_sf.geojson")
+
+# st_crs(plots)
+# plot KML is in 26910
+
+```
+
+PLOT LEVEL DATA
+
+Calculate centroid of plot polygons
+
+
+```{r}
+
+#### Calculate centroid of each polygon ####
+
+# first project to WSG 84
+
+plots = st_transform(plots, crs = 4326)
+
+plots$centroid <- 0
+
+plots$centroid <- st_centroid(plots)
+
+#### calculate area of each polygon ####
+
+# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
+
+plots = st_transform(plots, crs = 5070)
+
+st_area (plots)
+
+# Add a new column to the spatial data frame for area and calculate
+
+plots$area_meters <- 0
+
+plots$area_meters = st_area (plots)
+```
+
+
+
+
+
