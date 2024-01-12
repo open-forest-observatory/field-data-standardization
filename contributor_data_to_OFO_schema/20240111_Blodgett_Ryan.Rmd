@@ -82,7 +82,142 @@ plots$area_meters <- 0
 plots$area_meters = st_area (plots)
 ```
 
+TREE LEVEL DATA
+
+Add OFO plot ID
+
+```{r}
+
+# plot ID
+
+plot240 <- plot240 %>%
+  add_column(plot_id_ofo = "0354")
+
+plot350 <- plot350 %>%
+  add_column(plot_id_ofo = "0355")
+
+plot380 <- plot380 %>%
+  add_column(plot_id_ofo = "0356")
+
+plot400 <- plot400 %>%
+  add_column(plot_id_ofo = "0357")
+
+
+```
+
+Convert tree lat and tree lon to the right crs
 
 
 
+```{r}
+
+# right now tree lat and tree lon are in UTM zone 10N (EPSG:26910)
+
+#### let's combine the UTM10N data sets into one data frame ####
+
+# remove extraneous columns
+
+plot240 <- subset(plot240, select = c(TO, SPP, STATUS, DBH_cm, utm_e_m, utm_n_m, crrad_m, plot_id_ofo) )
+
+plot350 <- subset(plot350, select = c(TO, SPP, STATUS, DBH_cm, utm_e_m, utm_n_m, crrad_m, plot_id_ofo) )
+
+plot380 <- subset(plot380, select = c(TO, SPP, STATUS, DBH_cm, utm_e_m, utm_n_m, crrad_m, plot_id_ofo) )
+
+plot400 <- subset(plot400, select = c(TO, SPP, STATUS, DBH_cm, utm_e_m, utm_n_m, crrad_m, plot_id_ofo) )
+
+# join
+
+by <- join_by(TO, SPP, STATUS, DBH_cm, utm_e_m, utm_n_m, crrad_m, plot_id_ofo)
+
+trees1 <- full_join(plot240, plot350, by)
+
+trees2 <- full_join (trees1, plot380, by)
+
+treesUTM10N <- full_join (trees2, plot400, by)
+
+#### make the regular tree dataframes into spatial dataframes ####
+
+# add ID columns to make the re-merging of WGS coordinate columns easier 
+
+treesUTM10N$ID <- seq.int(nrow(treesUTM10N))
+
+# and convert to spatial dataframes
+
+treesUTM10N_sp <- st_as_sf(treesUTM10N, coords = c("utm_e_m", "utm_n_m"), crs = 26910, remove=F)
+
+# change CRS to WGS84
+
+treesUTM10N_sp <- st_transform (treesUTM10N_sp, 4326)
+
+# Extract new coordinates
+
+treesUTM10N_sp_coords <- data.frame(treesUTM10N_sp$ID, st_coordinates(treesUTM10N_sp[,1], st_coordinates(treesUTM10N_sp[,2]))) 
+
+treesUTM10N_sp_coords <- treesUTM10N_sp_coords %>% rename (ID=treesUTM10N_sp.ID, TreeWGS_e=X, TreeWGS_n=Y)
+
+# merge back into tree dataframe
+
+treesUTM10N <- full_join(treesUTM10N, treesUTM10N_sp_coords, by="ID")
+
+```
+
+DBH is in cm :)
+
+Species to FIA codes
+
+```{r}
+
+treesUTM10N$SPP[treesUTM10N$SPP == 'SP'] <- '117' # sugar pine
+treesUTM10N$SPP[treesUTM10N$SPP == 'WF'] <- '015'# white fir
+treesUTM10N$SPP[treesUTM10N$SPP == 'IC'] <- '081' # incense cedar 
+treesUTM10N$SPP[treesUTM10N$SPP == 'BO'] <- '818' # black oak
+treesUTM10N$SPP[treesUTM10N$SPP == 'DF'] <- '202' # douglas-fir
+treesUTM10N$SPP[treesUTM10N$SPP == 'DW'] <- '202' # typo for doug fir probably, just one of these in the whole dataset
+treesUTM10N$SPP[treesUTM10N$SPP == 'TO'] <- '631' # tanoak
+treesUTM10N$SPP[treesUTM10N$SPP == 'PP'] <- '122' # ponderosa pine
+treesUTM10N$SPP[treesUTM10N$SPP == 'F'] <- '000' # unknown
+treesUTM10N$SPP[treesUTM10N$SPP == 'UKN'] <- '000' #unknown
+
+```
+
+Growth form (tree, shrub, intermediate)
+
+```{r}
+
+# only tree species in this dataset
+
+treesUTM10N <- treesUTM10N %>%
+  add_column(growth_form = "tree")
+
+```
+
+Live/dead status is already in our preferred format of L/D
+
+Crown width
+
+```{r}
+
+# we have allometric calculations for crown radii, so we can get allometric calculations for crown width by multiplying the radius by 2
+
+treesUTM10N <- treesUTM10N %>%
+  add_column(crown_width_allometric = "")
+
+for(i in 1:nrow(treesUTM10N)) {
+  treesUTM10N[i,]$crown_width_allometric = ((treesUTM10N[i,]$crrad_m) * 2)
+}
+
+```
+
+Export CSV
+
+```{r}
+
+write.csv(treesUTM10N, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Blodgett_Ryan\\20240111_Blodgett_Ryan.csv")
+
+```
+
+
+## ALTERATIONS MADE IN EXCEL
+
+none :)
 
