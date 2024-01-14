@@ -607,13 +607,13 @@ for(i in 1:nrow(combinedtrees)) {
 # Longitude UTM10N
 
 for(i in 1:nrow(combinedtrees)) {
-    combinedtrees[i,]$`TreeLongitudeUTM10N` = (combinedtrees[i,]$PlotLongitudeUTM10N) + ((sin(deg2rad(combinedtrees[i,]$TrueAzimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (m)`) * 0.3048))
+    combinedtrees[i,]$`TreeLongitudeUTM10N` = (combinedtrees[i,]$PlotLongitudeUTM10N) + ((sin(deg2rad(combinedtrees[i,]$TrueAzimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (m)`)))
 }
 
 # Latitude UTM10N
 
 for(i in 1:nrow(combinedtrees)) {
-    combinedtrees[i,]$`TreeLatitudeUTM10N` = (combinedtrees[i,]$PlotLatitudeUTM10N) + ((cos(deg2rad(combinedtrees[i,]$TrueAzimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (m)`) * 0.3048))
+    combinedtrees[i,]$`TreeLatitudeUTM10N` = (combinedtrees[i,]$PlotLatitudeUTM10N) + ((cos(deg2rad(combinedtrees[i,]$TrueAzimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (m)`)))
 }
 
 # Convert to WGS84 Coordinates

@@ -428,3 +428,43 @@ for(i in 1:nrow(treedata_circles)) {
   plot_id_current = polygon_current$ofo_plot_id
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
+
+#### Blodgett_Ryan ####
+
+# import plot data
+
+plots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0012\\data\\plot_boundaries_sf.geojson")
+
+# st_crs(plots)
+# plot crs is 26910
+
+# add ofo plot IDs
+
+plots <- plots %>%
+  add_column(plot_id_ofo = "")
+
+plots$plot_id_ofo[plots$plot_name == 'Control_240'] <- '0354'
+
+plots$plot_id_ofo[plots$plot_name == 'Mech_350'] <- '0355'
+
+plots$plot_id_ofo[plots$plot_name == 'MechBurn_380'] <- '0356'
+
+plots$plot_id_ofo[plots$plot_name == 'Burn_400'] <- '0357'
+
+# remove extraneous columns
+
+plots <- plots [-(2)]
+
+plots <- plots [-(1)]
+
+# project to WGS 84
+
+plots = st_transform(plots, crs = 4326)
+
+# Export
+
+for(i in 1:nrow(plots)) {
+  polygon_current <- plots[i, ]
+  plot_id_current = polygon_current$plot_id_ofo
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}

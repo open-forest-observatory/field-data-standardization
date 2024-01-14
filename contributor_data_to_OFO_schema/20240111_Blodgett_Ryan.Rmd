@@ -172,7 +172,7 @@ treesUTM10N$SPP[treesUTM10N$SPP == 'WF'] <- '015'# white fir
 treesUTM10N$SPP[treesUTM10N$SPP == 'IC'] <- '081' # incense cedar 
 treesUTM10N$SPP[treesUTM10N$SPP == 'BO'] <- '818' # black oak
 treesUTM10N$SPP[treesUTM10N$SPP == 'DF'] <- '202' # douglas-fir
-treesUTM10N$SPP[treesUTM10N$SPP == 'DW'] <- '202' # typo for doug fir probably, just one of these in the whole dataset
+treesUTM10N$SPP[treesUTM10N$SPP == 'DW'] <- '492' # dogwood
 treesUTM10N$SPP[treesUTM10N$SPP == 'TO'] <- '631' # tanoak
 treesUTM10N$SPP[treesUTM10N$SPP == 'PP'] <- '122' # ponderosa pine
 treesUTM10N$SPP[treesUTM10N$SPP == 'F'] <- '000' # unknown
