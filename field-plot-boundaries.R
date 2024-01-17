@@ -468,3 +468,72 @@ for(i in 1:nrow(plots)) {
   plot_id_current = polygon_current$plot_id_ofo
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
+
+#### TNC/IRI data ####
+
+# import plot centers
+
+plotcenters <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml")
+
+# we want to keep all the points that start with "L" and remove the points that start with "S"
+
+plotcenters <- plotcenters %>% arrange(desc(Name))
+
+plotcenters <- plotcenters [-(1:124),]
+
+plotcenters <- plotcenters [-(2)]
+
+# add ofo plot ID numbers
+
+plotcenters$`ofo_plot_id` <- ""
+
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L506'] <- '0088'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L511'] <- '0089'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L512'] <- '0090'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L515'] <- '0091'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L517'] <- '0092'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L525'] <- '0093'
+
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L521'] <- '0099'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L505'] <- '0096'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L504'] <- '0095'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L536'] <- '0101'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L507'] <- '0097'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L502'] <- '0094'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L529'] <- '0100'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L508'] <- '0098'
+
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L519'] <- '0102'
+
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L522'] <- '0107'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L528'] <- '0104'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L524'] <- '0103'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L520'] <- '0106'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L535'] <- '0108'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L539'] <- '0109'
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L534'] <- '0105'
+
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L092'] <- '0110'
+
+plotcenters$`ofo_plot_id`[plotcenters$`Name` == 'L527'] <- '0111'
+
+plotcenters <- plotcenters [-(1)]
+
+# These are circular plots! Buffer circles by 30.48 meters-- this is the plot radius
+# First project to a projected (meters) coordinate system with equal x and y distances
+# CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+
+plotcenters = st_transform(plotcenters, crs = 5070)
+plotcenters_circles <- st_buffer(plotcenters, dist = 30.48, nQuadSegs = 10)
+
+# Then back to WGS84
+
+plotcenters_circles <- st_transform(plotcenters_circles, crs = 4326)
+
+# export plot polygons
+
+for(i in 1:nrow(plotcenters_circles)) {
+  polygon_current <- plotcenters_circles[i, ]
+  plot_id_current = polygon_current$ofo_plot_id
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}

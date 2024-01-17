@@ -13,7 +13,7 @@ library(pracma)
 
 # Load batches 1-7 data
 
-plots1thru7WGS84 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml")
+plots1thru7WGS84 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\partially_complete_data_sets\\batch1thru7updatedplotcentersWGS84.kml")
 
 #### Now the updated GPS coordinates for Batches 8-15 ####
 
@@ -127,6 +127,8 @@ Batch8plotsUTM10N <- Batch8plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch8plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_8\\Stem_Batch_8_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
 
+plots8 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_8\\Stem_Batch_8_plotcoordinatesUTM10N.gpkg")
+
 #### Batch 9 ####
 
 # Import plot coordinates
@@ -232,6 +234,8 @@ st_write(Batch9plotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standa
 Batch9plotsUTM10N <- Batch9plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch9plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Stem_Batch_9_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
+
+plots9 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Stem_Batch_9_plotcoordinatesUTM10N.gpkg")
 
 #### Batch 10 ####
 
@@ -339,6 +343,8 @@ Batch10plotsUTM10N <- Batch10plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch10plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\Stem_Batch_10_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
 
+plots10 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\Stem_Batch_10_plotcoordinatesUTM10N.gpkg")
+
 #### Batch 11 ####
 
 # Import plot coordinates
@@ -444,6 +450,8 @@ st_write(Batch11plotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-stand
 Batch11plotsUTM10N <- Batch11plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch11plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_11\\Stem_Batch_11_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
+
+plots11 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_11\\Stem_Batch_11_plotcoordinatesUTM10N.gpkg")
 
 #### Batch 12 ####
 
@@ -551,6 +559,8 @@ Batch12plotsUTM10N <- Batch12plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch12plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_12\\Stem_Batch_12_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
 
+plots12 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_12\\Stem_Batch_12_plotcoordinatesUTM10N.gpkg")
+
 #### Batch 13 ####
 
 # Import plot coordinates
@@ -656,6 +666,8 @@ st_write(Batch13plotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-stand
 Batch13plotsUTM10N <- Batch13plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch13plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_13\\Stem_Batch_13_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
+
+plots13 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_13\\Stem_Batch_13_plotcoordinatesUTM10N.gpkg")
 
 #### Batch 14 ####
 
@@ -765,6 +777,8 @@ Batch14plotsUTM10N <- Batch14plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch14plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_14\\Stem_Batch_14_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
 
+plots14 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_14\\Stem_Batch_14_plotcoordinatesUTM10N.gpkg")
+
 #### Batch 15 ####
 
 # Import plot coordinates
@@ -844,17 +858,51 @@ Batch15plotsUTM10N <- Batch15plotsWGS84 %>% st_transform(32610)
 
 st_write(Batch15plotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_15\\Stem_Batch_15_plotcoordinatesUTM10N.gpkg"),delete_dsn=TRUE)
 
+plots15 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_15\\Stem_Batch_15_plotcoordinatesUTM10N.gpkg")
+
+## Batch L527
+
+plotsL527 <- read_sf ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_L527\\Stem_Batch_L527_plotcoordinatesWGS84.gpkg")
+
 #### Combining all the batches ####
 
 plots1thru7WGS84 <- plots1thru7WGS84 [-c(2)]
 
-combinedplotsWGS84 <- rbind(plots1thru7WGS84, Batch8plotsWGS84, Batch9plotsWGS84, Batch10plotsWGS84, Batch11plotsWGS84, Batch12plotsWGS84, Batch13plotsWGS84, Batch14plotsWGS84, Batch15plotsWGS84)
+# combinedplotsWGS84 <- rbind(plots1thru7WGS84, Batch8plotsWGS84, Batch9plotsWGS84, Batch10plotsWGS84, Batch11plotsWGS84, Batch12plotsWGS84, Batch13plotsWGS84, Batch14plotsWGS84, Batch15plotsWGS84)
 
-combinedplotsUTM10N <- rbind((plots1thru7WGS84 %>% st_transform(32610)), Batch8plotsUTM10N, Batch9plotsUTM10N, Batch10plotsUTM10N, Batch11plotsUTM10N, Batch12plotsUTM10N, Batch13plotsUTM10N, Batch14plotsUTM10N, Batch15plotsUTM10N)
+plots8 <- plots8 %>% st_transform(4326)
+plots9 <- plots9 %>% st_transform(4326)
+plots10 <- plots10 %>% st_transform(4326)
+plots11 <- plots11 %>% st_transform(4326)
+plots12 <- plots12 %>% st_transform(4326)
+plots13 <- plots13 %>% st_transform(4326)
+plots14 <- plots14 %>% st_transform(4326)
+plots15 <- plots15 %>% st_transform(4326)
+plots1thru7WGS84 <- plots1thru7WGS84 %>% rename(geom=geometry)
+
+combinedplotsWGS84 <- rbind(plots1thru7WGS84, plots8, plots9, plots10, plots11, plots12, plots13, plots14, plots15, plotsL527)
+
+# combinedplotsUTM10N <- rbind((plots1thru7WGS84 %>% st_transform(32610)), Batch8plotsUTM10N, Batch9plotsUTM10N, Batch10plotsUTM10N, Batch11plotsUTM10N, Batch12plotsUTM10N, Batch13plotsUTM10N, Batch14plotsUTM10N, Batch15plotsUTM10N)
 
 st_write(combinedplotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml"),delete_dsn=TRUE)
 
-st_write(combinedplotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersUTM10N.kml"),delete_dsn=TRUE)
+# st_write(combinedplotsUTM10N, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersUTM10N.kml"),delete_dsn=TRUE)
+
+#### Going back in to add Batch L527 to this kml ####
+
+BatchL527plotsWGS84 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_L527\\Stem_Batch_L527_plotcoordinatesWGS84.gpkg") 
+
+Batch1thru15plotsWGS84 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml") 
+
+Batch1thru15plotsWGS84 <- Batch1thru15plotsWGS84 [-c(2)]
+
+Batch1thru15plotsWGS84 <- Batch1thru15plotsWGS84 %>% rename (geom=geometry)
+
+combinedplotsWGS84 <- rbind(BatchL527plotsWGS84, Batch1thru15plotsWGS84)
+
+st_write(combinedplotsWGS84, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml"),delete_dsn=TRUE)
+
+
 
 #### Combine Batches 8-15 spreadsheets ####
 

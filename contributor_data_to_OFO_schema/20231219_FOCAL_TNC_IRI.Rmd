@@ -62,6 +62,8 @@ Batch14trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-stand
 
 Batch15trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_15\\Batch15\\Plot_Data\\Stem_Batch15_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
+BatchL527trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_L527\\L-527\\Data\\L-527.xlsx"),sheet=1,col_names = TRUE)
+
 # Load plot center data
 
 plotcenters <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml")
@@ -99,9 +101,11 @@ Batch14trees <- Batch14trees %>% rename(`Plot#`=`Plot #`)
 
 Batch15trees <- Batch15trees %>% rename(`Plot#`=`Plot #`)
 
+BatchL527trees <- BatchL527trees %>% rename(`Plot#`=`Plot #`)
+
 # combine 
 
-combinedtrees <- rbind(Batch1trees, Batch2trees, Batch3trees, Batch4trees, Batch5trees, Batch6trees, Batch7trees, Batch8trees, Batch9trees, Batch10trees, Batch11trees, Batch12trees, Batch13trees, Batch14trees, Batch15trees)
+combinedtrees <- rbind(Batch1trees, Batch2trees, Batch3trees, Batch4trees, Batch5trees, Batch6trees, Batch7trees, Batch8trees, Batch9trees, Batch10trees, Batch11trees, Batch12trees, Batch13trees, Batch14trees, Batch15trees, BatchL527trees)
 
 # Rename columns to be more descriptive
 
@@ -133,184 +137,40 @@ Plot ID
 
 ```{r}
 
-combinedtrees$`ofo_plot_id` <- ""
+combinedtrees$`ofo_plot_id` <- "0"
 
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L506'] <- '0088'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L511'] <- '0089'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L512'] <- '0090'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L515'] <- '0091'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L517'] <- '0092'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L525'] <- '0093'
 
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L521'] <- '0099'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L505'] <- '0096'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L504'] <- '0095'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L536'] <- '0101'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L507'] <- '0097'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L502'] <- '0094'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L529'] <- '0100'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L508'] <- '0098'
 
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L519'] <- '0102'
 
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L522'] <- '0107'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L528'] <- '0104'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L524'] <- '0103'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L520'] <- '0106'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L535'] <- '0108'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L539'] <- '0109'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L534'] <- '0105'
 
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L092'] <- '0110'
 
-
-
-
-
-
-
-
-
-
-
-
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L506'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L511'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L512'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L515'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L517'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L525'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S107'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S109'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S113'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S118'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L521'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L505'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L504'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L536'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L507'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L502'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S038'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L529'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L508'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S313'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L519'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S087'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S084'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S080'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S083'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S097'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S038'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S075'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S973'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S015'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L522'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L528'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S091'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S907'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L524'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L520'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S305'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L535'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L539'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L534'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L092'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S100'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S103'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S099'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S105'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S111'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S098'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S101'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S108'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S106'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S119'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S965'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S104'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S110'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S112'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S114'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S115'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S117'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S120'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S503'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S303'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S931'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S037'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S058'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S065'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S066'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S070'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S076'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S989'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S071'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S023'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S028'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S032'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S079'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S302'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S308'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S310'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S903'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S945'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S960'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S009'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S030'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S040'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S048'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S053'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S062'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S063'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S073'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S085'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S092'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S036'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S042'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S046'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S051'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S055'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S089'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S093'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S314'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S315'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S982'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S001'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S007'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S008'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S307'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S505'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S940'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S021'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S022'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S026'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S034'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S045'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S061'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S069'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S096'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S507'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S508'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S003'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S006'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S014'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S044'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S047'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S054'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S312'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S316'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S502'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S935'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S049'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S004'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S010'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S011'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S013'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S017'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S043'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S086'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S311'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S506'] <- ''
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S005'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S018'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S020'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S024'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S041'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S309'] <- ''
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'S501'] <- ''
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L527'] <- '0111'
 
 ```
+
 
 Tree lat and long
 
@@ -565,6 +425,10 @@ combinedtrees$`Plot#`[combinedtrees$`Plot#` == 'S-024'] <- 'S024'
 combinedtrees$`Plot#`[combinedtrees$`Plot#` == 'S-041'] <- 'S041'
 combinedtrees$`Plot#`[combinedtrees$`Plot#` == 'S-309'] <- 'S309'
 combinedtrees$`Plot#`[combinedtrees$`Plot#` == 'S-501'] <- 'S501'
+
+# Batch L527
+
+combinedtrees$`Plot#`[combinedtrees$`Plot#` == 'L-527'] <- 'L527'
 
 # remove duplicate plots from plot center data frames
 
@@ -852,11 +716,37 @@ combinedtrees$`Notes`[is.na(combinedtrees$`Notes`)] <- ''
 
 ```
 
-Export CSV
+Export CSV with all data
 
 ```{r}
 
-write.csv(combinedtrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20231222_IRItoOFO.csv")
+write.csv(combinedtrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\IRItoOFO_ALLplots.csv")
+
+```
+
+Drop rows without an OFO plot ID number-- this will get rid of all the trees in the small plots that aren't being incorporated in this dataset
+
+```{r}
+
+largeplots <- combinedtrees[combinedtrees$ofo_plot_id !=0,]
+
+```
+
+Export CSV with only large plot data
+
+```{r}
+
+write.csv(largeplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20231222_IRItoOFO_largeplots.csv")
+
+```
+
+Drop large plots to save CSV of just small plots
+
+```{r}
+
+smallplots <- combinedtrees[combinedtrees$ofo_plot_id == 0,]
+
+write.csv(smallplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20231222_IRItoOFO_smallplots.csv")
 
 ```
 
