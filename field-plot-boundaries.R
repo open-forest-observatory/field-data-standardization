@@ -443,13 +443,13 @@ plots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\
 plots <- plots %>%
   add_column(plot_id_ofo = "")
 
-plots$plot_id_ofo[plots$plot_name == 'Control_240'] <- '0354'
+plots$plot_id_ofo[plots$plot_name == 'Control_240'] <- '0115'
 
-plots$plot_id_ofo[plots$plot_name == 'Mech_350'] <- '0355'
+plots$plot_id_ofo[plots$plot_name == 'Mech_350'] <- '0116'
 
-plots$plot_id_ofo[plots$plot_name == 'MechBurn_380'] <- '0356'
+plots$plot_id_ofo[plots$plot_name == 'MechBurn_380'] <- '0117'
 
-plots$plot_id_ofo[plots$plot_name == 'Burn_400'] <- '0357'
+plots$plot_id_ofo[plots$plot_name == 'Burn_400'] <- '0118'
 
 # remove extraneous columns
 

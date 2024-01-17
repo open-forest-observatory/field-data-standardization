@@ -91,16 +91,16 @@ Add OFO plot ID
 # plot ID
 
 plot240 <- plot240 %>%
-  add_column(plot_id_ofo = "0354")
+  add_column(plot_id_ofo = "0115")
 
 plot350 <- plot350 %>%
-  add_column(plot_id_ofo = "0355")
+  add_column(plot_id_ofo = "0116")
 
 plot380 <- plot380 %>%
-  add_column(plot_id_ofo = "0356")
+  add_column(plot_id_ofo = "0117")
 
 plot400 <- plot400 %>%
-  add_column(plot_id_ofo = "0357")
+  add_column(plot_id_ofo = "0118")
 
 
 ```

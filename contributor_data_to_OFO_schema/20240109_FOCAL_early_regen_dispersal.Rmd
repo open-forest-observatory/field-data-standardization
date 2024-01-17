@@ -44,11 +44,11 @@ treedata$`ofo_plot_id` <- ""
 for(i in 1:nrow(treedata)) {
   if(treedata$fire[i] == 'CA-SM05') {
     if(treedata$stem_map_id[i] == '4') {
-      treedata[i,]$ofo_plot_id = '0352'
+      treedata[i,]$ofo_plot_id = '0113'
     }
-    else (treedata[i,]$ofo_plot_id = '0353')
+    else (treedata[i,]$ofo_plot_id = '0114')
   }
-else (treedata[i,]$ofo_plot_id = '0351')
+else (treedata[i,]$ofo_plot_id = '0112')
 }
 
 ```
