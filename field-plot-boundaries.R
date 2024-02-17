@@ -415,7 +415,7 @@ treedata_sf <- st_as_sf(treedata, coords = c("centerpoint_longitude", "centerpoi
 # CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
 
 treedata_sf = st_transform(treedata_sf, crs = 5070)
-treedata_circles <- st_buffer(treedata_sf, dist = 30, nQuadSegs = 10)
+treedata_circles <- st_buffer(treedata_sf, dist = c(50,30, 30), nQuadSegs = 10) # First plot (#112 is 50m radius), other 30m
 
 # Then back to WGS84
 
