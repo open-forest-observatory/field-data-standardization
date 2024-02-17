@@ -107,8 +107,6 @@ plot400 <- plot400 %>%
 
 Convert tree lat and tree lon to the right crs
 
-
-
 ```{r}
 
 # right now tree lat and tree lon are in UTM zone 10N (EPSG:26910)
@@ -158,6 +156,8 @@ treesUTM10N_sp_coords <- treesUTM10N_sp_coords %>% rename (ID=treesUTM10N_sp.ID,
 # merge back into tree dataframe
 
 treesUTM10N <- full_join(treesUTM10N, treesUTM10N_sp_coords, by="ID")
+
+# st_write(treesUTM10N_sp, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Blodgett_Ryan\\processed_tree_coords.gpkg")
 
 ```
 
@@ -212,7 +212,7 @@ Export CSV
 
 ```{r}
 
-write.csv(treesUTM10N, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Blodgett_Ryan\\20240111_Blodgett_Ryan.csv")
+write.csv(treesUTM10N, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Blodgett_Ryan\\20240214_Blodgett_Ryan.csv")
 
 ```
 

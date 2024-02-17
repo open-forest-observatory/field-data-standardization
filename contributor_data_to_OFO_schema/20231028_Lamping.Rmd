@@ -29,32 +29,65 @@ Load data
 
 setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
 
-# Load data
+# Load data. 
 
-# First the tree data! Each of these data sets is a different plot
+# First the stem map data. Each of these data sets is a different plot
 
-BS2 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\BS2_StemMap.csv")
+BS2 <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\BS2.stemmap.shp")
 
-MC1 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\MC1_StemMap.csv")
+# BS2 is in 26911 EPSG
 
-SJER <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\SJER_StemMap.csv")
+MC1 <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\MC1.stemmap.shp")
 
-TO1 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\TO1_StemMap.csv")
+# MC1 is in 26910 EPSG
 
-TO2 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\TO2_StemMap.csv")
+OW2 <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\OW2.stemmap.shp")
 
-UN3 <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Stem_maps_Lamping_et_al_2021\\UN3_StemMap.csv")
+# OW2 is in 26911 EPSG
 
-# now the plot data
+TO1 <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\TO1.stemmap.shp")
 
-plots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Lamping_UAS_StemMap_boundarys\\doc.kml")
+# TO1 is in 26910 EPSG
 
-# st_crs(plots)
-# plot KML is in 4326
+TO2 <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\TO2.stemmap.shp")
+
+# TO2 is in 26910 EPSG
+
+UN3 <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\UN3.stemmap.shp")
+
+# UN3 is in 26911 EPSG
+
+# now the plot data. each of these data sets is a different plot. 
+
+BS2plot<- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\BS2_plot.shp")
+
+# BS2 is in 26911 EPSG
+
+MC1plot <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\MC1_plot.shp")
+
+# MC1 is in 26910 EPSG
+
+OW2plot <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\OW2_plot.shp")
+
+# OW2 is in 26911 EPSG
+
+TO1plot <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\TO1_plot.shp")
+
+# TO11 is in 26910 EPSG
+
+TO2plot <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\TO2_plot.shp")
+
+# TO2 is in 26910 EPSG
+
+UN3plot <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Updated\\Stemmaps_HZald_JLamping_OFO\\Stemmaps_HZald_JLamping_OFO\\UN3_plot.shp")
+
+# UN3 is in 26911 EPSG
 
 ```
 
 PLOT LEVEL DATA
+
+Plot area is in each plot shapefile
 
 Calculate centroid of plot polygons
 
@@ -62,23 +95,42 @@ Calculate centroid of plot polygons
 
 #### Calculate centroid of each polygon ####
 
-plots$centroid <- 0
+# BS2
 
-plots$centroid <- st_centroid(plots)
+BS2plotcentroid <- st_transform(BS2plot, 4326)
 
-#### calculate area of each polygon ####
+BS2plotcentroid$centroid <- st_centroid(BS2plotcentroid)
 
-# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
+# MC1
 
-plots = st_transform(plots, crs = 5070)
+MC1plotcentroid <- st_transform(MC1plot, 4326)
 
-st_area (plots)
+MC1plotcentroid$centroid <- st_centroid(MC1plotcentroid)
 
-# Add a new column to the spatial data frame for area and calculate
+# OW2
 
-plots$area_meters <- 0
+OW2plotcentroid <- st_transform(OW2plot, 4326)
 
-plots$area_meters = st_area (plots)
+OW2plotcentroid$centroid <- st_centroid(OW2plotcentroid)
+
+# TO1
+
+TO1plotcentroid <- st_transform(TO1plot, 4326)
+
+TO1plotcentroid$centroid <- st_centroid(TO1plotcentroid)
+
+# TO2
+
+TO2plotcentroid <- st_transform(TO2plot, 4326)
+
+TO2plotcentroid$centroid <- st_centroid(TO2plotcentroid)
+
+# UN3
+
+UN3plotcentroid <- st_transform(UN3plot, 4326)
+
+UN3plotcentroid$centroid <- st_centroid(UN3plotcentroid)
+
 ```
 
 TREE LEVEL DATA
@@ -95,7 +147,7 @@ BS2 <- BS2 %>%
 MC1 <- MC1 %>%
   add_column(plot_id_ofo = "0083")
 
-SJER <- SJER %>%
+OW2 <- OW2 %>%
   add_column(plot_id_ofo = "0084")
 
 TO1 <- TO1 %>%
@@ -114,81 +166,71 @@ Convert tree lat and tree lon to the right crs
 
 ```{r}
 
-# right now tree lat and tree lon are in UTM! MC1, TO1, and TO2 are NAD83 UTM zone 10N (EPSG:26910); BS2, UN3, and SJER are NAD83 UTM zone 11N (EPSG:26911)
+# right now tree lat and tree lon are in UTM! MC1, TO1, and TO2 are NAD83 UTM zone 10N (EPSG:26910); BS2, UN3, and OW2 are NAD83 UTM zone 11N (EPSG:26911)
 
-#### let's combine the UTM10N data sets into one data frame ####
+# each spatial data frame has tree coordinates both as geometric points (in UTM 10N or 11N), AND tree coordinates in our desired EPSG (4326, WGS 84) in columns. we need to get rid of the "spatial" parts of these data frames to remove incompatibilities with combining them, then we can combine the data frames into one data.frame to work with. 
 
-by <- join_by(name, SPECIES, STATUS, DBH, HEIGHT, CANPOS, DRIPLINE, COMMENTS, XUTM, YUTM, elevation, plot_id_ofo)
+#### remove the spatial aspect of each stem map ####
 
-treesUTM10N <- full_join(MC1, TO1, by)
+BS2 <- st_drop_geometry(BS2)
 
-treesUTM10N <- full_join (treesUTM10N, TO2, by)
+MC1 <- st_drop_geometry(MC1)
 
-#### and the UTM11N data sets into one dataframe ####
+OW2 <- st_drop_geometry(OW2)
 
-treesUTM11N <- full_join(BS2, UN3, by)
+TO1 <- st_drop_geometry(TO1)
 
-treesUTM11N <- transform(treesUTM11N, name = as.character(name))
+TO2 <- st_drop_geometry(TO2)
 
-# two of the SJER trees have nonsensical heights (one is "B" and one is "-"); I need this column to be numeric so I'm forcing it into numeric format and then replacing the resulting two "NA"s with blanks
+UN3 <- st_drop_geometry(UN3)
 
-SJER <- transform(SJER, HEIGHT = as.numeric(HEIGHT))
+#### let's combine the individual stem maps into one data frame ####
 
-# now I can join all the UTM11N data together
+# first remove extraneous columns from the data.frames
 
-treesUTM11N <- full_join (treesUTM11N, SJER, by)
+joinby <- c("tree", "status", "species", "dbh", "height", "canpos", "comments", "latitude", "longitude", "plot_id_ofo")
 
-treesUTM11N$HEIGHT[is.na(treesUTM11N$HEIGHT)] <- ""
+BS2 = BS2[,(names(BS2) %in% joinby)]
 
-#### make the regular tree dataframes into spatial dataframes ####
+MC1 = MC1[,(names(MC1) %in% joinby)]
 
-# first remove trees that have been bulldozed and no longer have coordinates
+OW2 = OW2[,(names(OW2) %in% joinby)]
 
-treesUTM10N <- treesUTM10N %>% drop_na(XUTM)
+TO1 = TO1[,(names(TO1) %in% joinby)]
 
-# add ID columns to make the re-merging of WGS coordinate columns easier 
+TO2 = TO2[,(names(TO2) %in% joinby)]
 
-treesUTM10N$ID <- seq.int(nrow(treesUTM10N))
+UN3 = UN3[,(names(UN3) %in% joinby)]
 
-treesUTM11N$ID <- seq.int(nrow(treesUTM11N))
+# then make sure all the remaining columns are in the same format
 
-# and convert to spatial dataframes
+BS2$tree <- as.character(BS2$tree)
 
-treesUTM10N_sp <- st_as_sf(treesUTM10N, coords = c("XUTM", "YUTM"), crs = 26910, remove=F)
+MC1$tree <- as.character(MC1$tree)
 
-treesUTM11N_sp <- st_as_sf(treesUTM11N, coords = c("XUTM", "YUTM"), crs = 26911, remove=F)
+TO1$tree <- as.character(TO1$tree)
 
-# change CRS to WGS84
+TO2$tree <- as.character(TO2$tree)
 
-treesUTM10N_sp <- st_transform (treesUTM10N_sp, 4326)
+UN3$tree <- as.character(UN3$tree)
 
-treesUTM11N_sp <- st_transform (treesUTM11N_sp, 4326)
+# then join
 
-# Extract new coordinates
+by = join_by(tree, status, species, dbh, height, canpos, comments, latitude, longitude, plot_id_ofo)
 
-treesUTM10N_sp_coords <- data.frame(treesUTM10N_sp$ID, st_coordinates(treesUTM10N_sp[,1], st_coordinates(treesUTM10N_sp[,2]))) 
+alltrees <- full_join(BS2, MC1, by)
 
-treesUTM10N_sp_coords <- treesUTM10N_sp_coords %>% rename (ID=treesUTM10N_sp.ID, TreeWGSX=X, TreeWGSY=Y)
+alltrees <- full_join (alltrees, OW2, by)
 
-treesUTM11N_sp_coords <- data.frame(treesUTM11N_sp$ID, st_coordinates(treesUTM11N_sp[,1], st_coordinates(treesUTM11N_sp[,2]))) 
+alltrees <- full_join (alltrees, TO1, by)
 
-treesUTM11N_sp_coords <- treesUTM11N_sp_coords %>% rename (ID=treesUTM11N_sp.ID, TreeWGSX=X, TreeWGSY=Y)
+alltrees <- full_join (alltrees, TO2, by)
 
-# merge back into tree dataframe
+alltrees <- full_join (alltrees, UN3, by)
 
-treesUTM10N <- full_join(treesUTM10N, treesUTM10N_sp_coords, by="ID")
+#### remove trees that don't have coordinates ####
 
-treesUTM11N <- full_join(treesUTM11N, treesUTM11N_sp_coords, by="ID")
-
-# and combine the new WGS84 dataframes
-
-by <- join_by(name, SPECIES, STATUS, DBH, HEIGHT, CANPOS, DRIPLINE, COMMENTS, XUTM, YUTM, elevation, plot_id_ofo, ID, TreeWGSX, TreeWGSY)
-
-treesUTM10N <- transform(treesUTM10N, name = as.character(name))
-
-treesUTM10N <- transform(treesUTM10N, HEIGHT = as.character(HEIGHT))
-
-alltrees <- full_join(treesUTM10N, treesUTM11N, by)
+alltrees <- alltrees %>% filter (!(latitude == 0))
 
 ```
 
@@ -196,102 +238,63 @@ DBH is in cm and height is in m :)
 
 ```{r}
 
-# there are two trees with "NA" heights-- getting rid of these NAs
+# there are multiple trees with heights and/or dbhs of 0
 
-alltrees$HEIGHT[is.na(alltrees$HEIGHT)] <- ""
+# alltreestest$height[alltreestest$height == 0] <- ""
 
 ```
 
-
-Tree species to FIA codes
-		Species Code			Species Name
-			 PILA				Pinus lambertiana
-			 ABCO				Abies concolor
-			 PIJE				Pinus Jeffreyi
-			 CADE				Calocedrus decurrens
-			 ABMA				Abies magnifica
-			 QUKE				Quercus kelloggii
-			 ABGR				Abies grandis
-			 PSME				Pseudotsuga menziesii
-			 CETH				Ceanothus thyrsiflorus
-			 NODE				Notholithocarpus densiflorus
-			 UMCA				Umbellularia californica
-			 RHMA				Rhamnus sp.		
-			 ARME				Arbutus menziesii
-			 ACMA				Acer macrophyllum
-			 FRLA				Fraxinus latifolia
-			 FRPU				Fraxinus purshiana
-			 SESE 				Sequoia sempervirens
-			 SASP				Salix sp.
-			 CONU 				Cornus nuttallii
-			 COSP				Cornus nttallii
-			 ALRU				Alnus rubra
-			 QUWI				Quercus wislizenii
-			 PISA 				Pinus sabiniana
-			 RHCA				Rhamnus californica
-			 ARBU 				Arbutus sp.
-			 AECA				Aesculus californica
-			 QUDU				Quercus douglassii
-			 RHPU				Rhamnus purshiana
-			 ACSP				Acer sp.
-			 TSHE 				Tsuga heterophylla
-			 PISP				Pinus sp.
+Tree species to numeric codes
 
 ```{r}
 
-alltrees$SPECIES[alltrees$SPECIES == 'PILA'] <- '117'
-alltrees$SPECIES[alltrees$SPECIES == 'ABCO'] <- '015'
-alltrees$SPECIES[alltrees$SPECIES == 'PIJE'] <- '116'
-alltrees$SPECIES[alltrees$SPECIES == 'CADE'] <- '081'
-alltrees$SPECIES[alltrees$SPECIES == 'ABMA'] <- '020'
-alltrees$SPECIES[alltrees$SPECIES == 'QUKE'] <- '818'
-alltrees$SPECIES[alltrees$SPECIES == 'ABGR'] <- '017'
-alltrees$SPECIES[alltrees$SPECIES == 'PSME'] <- '202'
-alltrees$SPECIES[alltrees$SPECIES == 'NODE'] <- '631'
-alltrees$SPECIES[alltrees$SPECIES == 'LIDE'] <- '631'
-alltrees$SPECIES[alltrees$SPECIES == 'UMCA'] <- '981'
-alltrees$SPECIES[alltrees$SPECIES == 'ARME'] <- '361'
-alltrees$SPECIES[alltrees$SPECIES == 'ASME'] <- '361'
-alltrees$SPECIES[alltrees$SPECIES == 'ACMA'] <- '312'
-alltrees$SPECIES[alltrees$SPECIES == 'FRLA'] <- '542'
-alltrees$SPECIES[alltrees$SPECIES == 'SESE'] <- '211'
-alltrees$SPECIES[alltrees$SPECIES == 'CONU'] <- '492'
-alltrees$SPECIES[alltrees$SPECIES == 'COSP'] <- '492'
-alltrees$SPECIES[alltrees$SPECIES == 'ALRU'] <- '351'
-alltrees$SPECIES[alltrees$SPECIES == 'QUWI'] <- '839'
-alltrees$SPECIES[alltrees$SPECIES == 'PISA'] <- '127'
-alltrees$SPECIES[alltrees$SPECIES == 'AECA'] <- '333'
-alltrees$SPECIES[alltrees$SPECIES == 'QUDU'] <- '807'
-alltrees$SPECIES[alltrees$SPECIES == 'ACSP'] <- '310'
-alltrees$SPECIES[alltrees$SPECIES == 'TSHE'] <- '263'
-alltrees$SPECIES[alltrees$SPECIES == 'PISP'] <- '100'
-alltrees$SPECIES[alltrees$SPECIES == 'SASP'] <- '920'
-alltrees$SPECIES[alltrees$SPECIES == 'UNKN'] <- '000'
-alltrees$SPECIES[alltrees$SPECIES == 'ARBU'] <- '361'
-alltrees$SPECIES[alltrees$SPECIES == 'RHCA'] <- '7200' # Rhamnus californica/Frangula californica
-alltrees$SPECIES[alltrees$SPECIES == 'FRPU'] <- 'FRPU7' # Frangula/Rhamnus purshiana
-alltrees$SPECIES[alltrees$SPECIES == 'RHPU'] <- 'FRPU7' # Frangula/Rhamnus purshiana
-alltrees$SPECIES[alltrees$SPECIES == 'RMCA'] <- '7200 or 361' #Frangula californica; sometimes madrones were accidentally labelled with this 
+alltrees$species[alltrees$species == 'PILA'] <- '117'
+alltrees$species[alltrees$species == 'ABCO'] <- '015'
+alltrees$species[alltrees$species == 'PIJE'] <- '116'
+alltrees$species[alltrees$species == 'CADE'] <- '081'
+alltrees$species[alltrees$species == 'CADE27'] <- '081'
+alltrees$species[alltrees$species == 'ABMA'] <- '020'
+alltrees$species[alltrees$species == 'QUKE'] <- '818'
+alltrees$species[alltrees$species == 'ABGR'] <- '017'
+alltrees$species[alltrees$species == 'PSME'] <- '202'
+alltrees$species[alltrees$species == 'NODE'] <- '631'
+alltrees$species[alltrees$species == 'NODE3'] <- '631'
+alltrees$species[alltrees$species == 'LIDE'] <- '631'
+alltrees$species[alltrees$species == 'UMCA'] <- '981'
+alltrees$species[alltrees$species == 'ARME'] <- '361'
+alltrees$species[alltrees$species == 'ASME'] <- '361'
+alltrees$species[alltrees$species == 'ACMA'] <- '312'
+alltrees$species[alltrees$species == 'FRLA'] <- '542'
+alltrees$species[alltrees$species == 'SESE'] <- '211'
+alltrees$species[alltrees$species == 'CONU'] <- '492'
+alltrees$species[alltrees$species == 'CONU4'] <- '492'
+alltrees$species[alltrees$species == 'COSP'] <- '492'
+alltrees$species[alltrees$species == 'ALRU'] <- '351'
+alltrees$species[alltrees$species == 'QUWI'] <- '839'
+alltrees$species[alltrees$species == 'PISA'] <- '127'
+alltrees$species[alltrees$species == 'AECA'] <- '333'
+alltrees$species[alltrees$species == 'QUDU'] <- '807'
+alltrees$species[alltrees$species == 'ACSP'] <- '310'
+alltrees$species[alltrees$species == 'TSHE'] <- '263'
+alltrees$species[alltrees$species == 'PISP'] <- '100'
+alltrees$species[alltrees$species == 'SASP'] <- '920'
+alltrees$species[alltrees$species == 'UNKN'] <- '000'
+alltrees$species[alltrees$species == 'unkn'] <- '000'
+alltrees$species[alltrees$species == 'ARBU'] <- '361'
+alltrees$species[alltrees$species == 'SESE3'] <- '211'
+alltrees$species[alltrees$species == 'SALIX'] <- '920'
+alltrees$species[alltrees$species == 'QUWI2'] <- '839'
+alltrees$species[alltrees$species == 'QUDO'] <- '807'
+alltrees$species[alltrees$species == 'PINUS'] <- '100'
+alltrees$species[alltrees$species == 'PISA2'] <- '127'
+alltrees$species[alltrees$species == 'QUMO2'] <- '899' #Quercus x moreha, Oracle oak, hybrid of Q. kelloggii and Q. wislizeni. # NOTE: WE MADE UP THIS CODE, IT'S NOT AN OFFICIAL FIA CODE
+alltrees$species[alltrees$species == 'ALRU2'] <- '351'
+alltrees$species[alltrees$species == 'ACMA3'] <- '312'
+alltrees$species[alltrees$species == 'ACACIA'] <- '1001' # unknown acacia species # NOTE: WE MADE UP THIS CODE, IT'S NOT AN OFFICIAL FIA CODE
 
-# unsuccessfully trying to label RMCAs above 11 meters tall as madrones
+# there are some NAs, replacing with blanks
 
-# for(i in 1:nrow(alltrees)) {
-#   if(alltrees$SPECIES [i] == 'RMCA') {
-#     if (alltrees$HEIGHT[i] > 11) {
-#       alltrees$SPECIES [i] == 361      # RMCA trees over 11m tall are pacific madrones
-#     }
-#   }
-# }
-
-
-# for(i in 1:nrow(alltrees)) {
-#   if((alltrees$SPECIES [i] == 'RMCA') & (alltrees$HEIGHT[i] > 11)) {
-#       alltrees$SPECIES [i] == 361      # RMCA trees over 11m tall are pacific madrones
-#   }
-# }
-
-
-# alltrees$SPECIES[alltrees$SPECIES == 'RMCA' && alltrees$HEIGHT > 11] <- '361'
+alltrees$species[is.na(alltrees$species)] <- ''
 
 ```
 
@@ -302,48 +305,62 @@ Growth form (tree, shrub, intermediate)
 alltrees <- alltrees %>%
   add_column(growth_form = "")
 
-alltrees$growth_form[alltrees$SPECIES == '117'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '015'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '116'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '081'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '020'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '818'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '017'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '202'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '631'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '981'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '361'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '312'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '542'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '211'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '492'] <- 'intermediate'
-alltrees$growth_form[alltrees$SPECIES == '351'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '839'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '127'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '333'] <- 'intermediate'
-alltrees$growth_form[alltrees$SPECIES == '807'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '310'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '263'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '100'] <- 'tree'
-alltrees$growth_form[alltrees$SPECIES == '920'] <- 'intermediate'
-alltrees$growth_form[alltrees$SPECIES == '000'] <- 'intermediate' # unknowns could be either tree or shrub
-alltrees$growth_form[alltrees$SPECIES == '7200 or 361'] <- 'intermediate'
-alltrees$growth_form[alltrees$SPECIES == '7200'] <- 'intermediate'
-alltrees$growth_form[alltrees$SPECIES == 'FRPU7'] <- 'intermediate'
+alltrees$growth_form[alltrees$species == '117'] <- 'tree'
+alltrees$growth_form[alltrees$species == '015'] <- 'tree'
+alltrees$growth_form[alltrees$species == '116'] <- 'tree'
+alltrees$growth_form[alltrees$species == '081'] <- 'tree'
+alltrees$growth_form[alltrees$species == '020'] <- 'tree'
+alltrees$growth_form[alltrees$species == '818'] <- 'tree'
+alltrees$growth_form[alltrees$species == '017'] <- 'tree'
+alltrees$growth_form[alltrees$species == '202'] <- 'tree'
+alltrees$growth_form[alltrees$species == '631'] <- 'tree'
+alltrees$growth_form[alltrees$species == '981'] <- 'tree'
+alltrees$growth_form[alltrees$species == '361'] <- 'tree'
+alltrees$growth_form[alltrees$species == '312'] <- 'tree'
+alltrees$growth_form[alltrees$species == '542'] <- 'tree'
+alltrees$growth_form[alltrees$species == '211'] <- 'tree'
+alltrees$growth_form[alltrees$species == '492'] <- 'intermediate'
+alltrees$growth_form[alltrees$species == '351'] <- 'tree'
+alltrees$growth_form[alltrees$species == '839'] <- 'tree'
+alltrees$growth_form[alltrees$species == '127'] <- 'tree'
+alltrees$growth_form[alltrees$species == '333'] <- 'intermediate'
+alltrees$growth_form[alltrees$species == '807'] <- 'tree'
+alltrees$growth_form[alltrees$species == '310'] <- 'tree'
+alltrees$growth_form[alltrees$species == '263'] <- 'tree'
+alltrees$growth_form[alltrees$species == '100'] <- 'tree'
+alltrees$growth_form[alltrees$species == '920'] <- 'intermediate'
+alltrees$growth_form[alltrees$species == '000'] <- '' # unknowns could be either tree or shrub so we'll leave it blank
+alltrees$growth_form[alltrees$species == '211'] <- 'tree'
+alltrees$growth_form[alltrees$species == '920'] <- 'intermediate'
+alltrees$growth_form[alltrees$species == '839'] <- 'tree'
+alltrees$growth_form[alltrees$species == '807'] <- 'tree'
+alltrees$growth_form[alltrees$species == '100'] <- 'tree'
+alltrees$growth_form[alltrees$species == '127'] <- 'tree'
+alltrees$growth_form[alltrees$species == '899'] <- 'tree'
+alltrees$growth_form[alltrees$species == '351'] <- 'tree'
+alltrees$growth_form[alltrees$species == '312'] <- 'tree'
+alltrees$growth_form[alltrees$species == '1001'] <- 'intermediate'
+alltrees$growth_form[alltrees$species == 'FRPU7'] <- 'intermediate'
+alltrees$growth_form[alltrees$species == 'ARVI4'] <- 'shrub'
+alltrees$growth_form[alltrees$species == 'RHCR'] <- 'shrub'
+alltrees$growth_form[alltrees$species == 'FRCAC5'] <- 'shrub'
+
+# trees with NA species will have a blank growth form
+alltrees$growth_form[is.na(alltrees$species)] <- ''
 
 ```
 
 
-Status 1/2 to live/dead
+Status live/dead to L/D
 
 ```{r}
 
-# 1 is live, 2 is dead
+alltrees$status[alltrees$status == 'live'] <- 'L'
+alltrees$status[alltrees$status == 'dead'] <- 'D'
 
-# codes to L and D
+# there are some NAs, replacing with blanks
 
-alltrees$STATUS[alltrees$STATUS == '1'] <- 'L'
-alltrees$STATUS[alltrees$STATUS == '2'] <- 'D'
+alltrees$status[is.na(alltrees$status)] <- ''
 
 ```
 
@@ -354,15 +371,15 @@ D = Dominant 	C = Co-dominant	I = Intermediate S = Subcanopy	O = Open Growth/Iso
 
 # 1 (open grown or isolated), 2 (dominant), 3 (codominant), 4 (intermediate), 5 (overtopped)
 
-alltrees$CANPOS[alltrees$CANPOS == 'D'] <- '2'
-alltrees$CANPOS[alltrees$CANPOS == 'C'] <- '3'
-alltrees$CANPOS[alltrees$CANPOS == 'I'] <- '4'
-alltrees$CANPOS[alltrees$CANPOS == 'S'] <- '5'
-alltrees$CANPOS[alltrees$CANPOS == 'O'] <- '1'
+alltrees$canpos[alltrees$canpos == 'dominant'] <- '2'
+alltrees$canpos[alltrees$canpos == 'codominant'] <- '3'
+alltrees$canpos[alltrees$canpos == 'intermediate'] <- '4'
+alltrees$canpos[alltrees$canpos == 'suppressed'] <- '5'
+alltrees$canpos[alltrees$canpos == 'open'] <- '1'
 
-# a bunch are labelled A mistakenly. what are they supposed to be? I'm not sure. because a bunch are blank anyways I'm going to get rid of these As
+# there are some NAs, replacing with blanks
 
-alltrees$CANPOS[alltrees$CANPOS == 'A'] <- ''
+alltrees$canpos[is.na(alltrees$canpos)] <- ''
 
 ```
 
@@ -374,12 +391,12 @@ Calculate overhead visibility from canopy position
 alltrees <- alltrees %>%
   add_column(ohvis = "")
 
-alltrees$CANPOS <- as.numeric(alltrees$CANPOS)
+alltrees$canpos <- as.numeric(alltrees$canpos)
 
 # calculate ohvis from canopy position
 
 alltrees$ohvis <- case_match(
-  alltrees$CANPOS,
+  alltrees$canpos,
   c(1, 2, 3) ~ "TRUE",
   c(4, 5) ~ "FALSE",
   .default = ""
@@ -387,7 +404,7 @@ alltrees$ohvis <- case_match(
 
 # introduced NAs into CANPOS column when I switched it to numeric, get rid of those now
 
-alltrees$CANPOS[is.na(alltrees$CANPOS)] <- ""
+alltrees$canpos[is.na(alltrees$canpos)] <- ""
 
 ```
 
@@ -395,31 +412,33 @@ Notes to damage codes
 
 ```{r}
 
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "crushed tops from fallen tree", "50019")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "windsnap", "50013")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "topped", "60001")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "TOPPED", "60001")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "SWEEP", "90006")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "sweep", "90006")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "snapped", "90001")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "snap top", "90001")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "top kill", "90002")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "stump", "DELETE FROM DATA")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "heavy lean", "90006")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "lean", "90006")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "fallen", "DELETE FROM DATA")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "forks", "90004")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "FORKS", "90004")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "fork", "90004")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "FORK", "90004")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "SPLITS", "90004")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "DEAD TOP", "90002")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "dead top", "90002")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "bulldozed", "70008")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "broken top", "90001")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "arching", "90006")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "arches", "90006")
-alltrees$COMMENTS <- str_replace(alltrees$COMMENTS, "arched", "90006")
+alltrees$comments[is.na(alltrees$comments)] <- ""
+
+alltrees$comments <- str_replace(alltrees$comments, "crushed tops from fallen tree", "50019")
+alltrees$comments <- str_replace(alltrees$comments, "windsnap", "50013")
+alltrees$comments <- str_replace(alltrees$comments, "topped", "60001")
+alltrees$comments <- str_replace(alltrees$comments, "TOPPED", "60001")
+alltrees$comments <- str_replace(alltrees$comments, "SWEEP", "90006")
+alltrees$comments <- str_replace(alltrees$comments, "sweep", "90006")
+alltrees$comments <- str_replace(alltrees$comments, "snapped", "90001")
+alltrees$comments <- str_replace(alltrees$comments, "snap top", "90001")
+alltrees$comments <- str_replace(alltrees$comments, "top kill", "90002")
+alltrees$comments <- str_replace(alltrees$comments, "stump", "DELETE FROM DATA")
+alltrees$comments <- str_replace(alltrees$comments, "heavy lean", "90006")
+alltrees$comments <- str_replace(alltrees$comments, "lean", "90006")
+alltrees$comments <- str_replace(alltrees$comments, "fallen", "DELETE FROM DATA")
+alltrees$comments <- str_replace(alltrees$comments, "forks", "90004")
+alltrees$comments <- str_replace(alltrees$comments, "FORKS", "90004")
+alltrees$comments <- str_replace(alltrees$comments, "fork", "90004")
+alltrees$comments <- str_replace(alltrees$comments, "FORK", "90004")
+alltrees$comments <- str_replace(alltrees$comments, "SPLITS", "90004")
+alltrees$comments <- str_replace(alltrees$comments, "DEAD TOP", "90002")
+alltrees$comments <- str_replace(alltrees$comments, "dead top", "90002")
+alltrees$comments <- str_replace(alltrees$comments, "bulldozed", "70008")
+alltrees$comments <- str_replace(alltrees$comments, "broken top", "90001")
+alltrees$comments <- str_replace(alltrees$comments, "arching", "90006")
+alltrees$comments <- str_replace(alltrees$comments, "arches", "90006")
+alltrees$comments <- str_replace(alltrees$comments, "arched", "90006")
 
 ```
 
@@ -434,8 +453,6 @@ write.csv(alltrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\L
 
 
 ## ALTERATIONS MADE IN EXCEL
-
-Manually assigned "madrone" to individuals in the madrone/coffeeberry confusion group above 5 m tall
 
 Manually moved damage codes into new column
 

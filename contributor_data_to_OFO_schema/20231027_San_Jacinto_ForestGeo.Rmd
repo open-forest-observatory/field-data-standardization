@@ -36,7 +36,7 @@ subplots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-d
 
 ```
 
-We want to any stems that aren't main stems-- spatial data was not collected on them
+We want to delete any stems that aren't main stems-- spatial data was not collected on them. 
 
 ```{r}
 
@@ -54,13 +54,12 @@ Calculate plot centroid
 
 # y coordinate centroid is the Fs
 
-# therefore F16 is the centroid of the whole plot
+# therefore F16 is the centroid of the whole plot-- F16 coordinates taken from the subplot data.frame
 
 ```
 
 Add OFO plot ID and subplot IDs
 
-OH NO PROBLEMS:
 - some plants were shot from quadrat corners outside the grid (e.g. the Ks and the 21s)
 - some plants were measured from along the grid line with a tape measure (e.g. not shot from a quadrat corner)
 
@@ -85,21 +84,9 @@ subplots <- subplots %>%
 
 # okay so the subplots for this dataset are confusing! the quadrats are named by the point of the lower left corner. however, we are defining subplots based on what quadrat corner they were measured from, not what quadrat corner they are in. as a result, 1. subplots may overlap and 2. plants may not be in the "actual" subplot of the corner they were measured from.
 
-# if there is an "RF_grid_corner" value in the tree datasheet, that's the subplot. if there is no "RF_grid_corner," the subplot is the "Quad" value
-
 # sort in descending order
 
 subplots <- arrange(subplots, Quad)
-
-# remove subplots not used for our purposes here
-
-# first the 21s
-
-# subplots <- subset(subplots, Quad!="A21" & Quad!="B21" & Quad!="C21" & Quad!="D21" & Quad!="E21" & Quad!="F21" & Quad!="G21" & Quad!="H21" & Quad!="I21" & Quad!="J21")
-
-# then the Ks
-
-# subplots <- subset(subplots, Quad!="K11" & Quad!="K12" & Quad!="K13" & Quad!="K14" & Quad!="K15" & Quad!="K16" & Quad!="K17" & Quad!="K18" & Quad!="K19" & Quad!="K20" & Quad!="K21")
 
 # add subplot ID numbers to each quadrat
 
@@ -107,7 +94,7 @@ for(i in 1:nrow(subplots)) {
 subplots$subplot_id_ofo[i] <- i + 211
 }
 
-# change some column names and get rid of some columsn in the subplot data sheet to prepare to merge it into the tree data sheet
+# change some column names and get rid of some columns in the subplot data sheet to prepare to merge it into the tree data sheet
 
 subplots <- subset(subplots, select = c(Quad, Lat, Long, subplot_id_ofo))
 
@@ -120,11 +107,69 @@ subplots <- subplots %>% rename("QuadLat" = "Lat") %>% rename("QuadLong" = "Long
 trees <- trees %>% 
        rename("Quad" = "RF_Grid_Corner")
 
+# if there is an "RF_grid_corner" value in the tree datasheet, that's the subplot. if there is no "RF_grid_corner," the subplot is the "Quad" value
+
+trees$subplot_id_ofo[trees$Quad == 'A11'] <- '212'
+trees$subplot_id_ofo[trees$Quad == 'A12'] <- '213'
+trees$subplot_id_ofo[trees$Quad == 'A13'] <- '214'
+trees$subplot_id_ofo[trees$Quad == 'A14'] <- '215'
+trees$subplot_id_ofo[trees$Quad == 'A15'] <- '216'
+trees$subplot_id_ofo[trees$Quad == 'A16'] <- '217'
+trees$subplot_id_ofo[trees$Quad == 'A17'] <- '218'
+trees$subplot_id_ofo[trees$Quad == 'A18'] <- '219'
+trees$subplot_id_ofo[trees$Quad == 'A19'] <- '220'
+trees$subplot_id_ofo[trees$Quad == 'A20'] <- '221'
+trees$subplot_id_ofo[trees$Quad == 'A21'] <- '222'
+
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A11'] <- '212'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A12'] <- '213'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A13'] <- '214'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A14'] <- '215'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A15'] <- '216'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A16'] <- '217'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A17'] <- '218'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A18'] <- '219'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A19'] <- '220'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A20'] <- '221'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'A21'] <- '222'
+
+trees$subplot_id_ofo[trees$Quad == 'B11'] <- '223'
+trees$subplot_id_ofo[trees$Quad == 'B12'] <- '224'
+trees$subplot_id_ofo[trees$Quad == 'B13'] <- '225'
+trees$subplot_id_ofo[trees$Quad == 'B14'] <- '226'
+trees$subplot_id_ofo[trees$Quad == 'B15'] <- '227'
+trees$subplot_id_ofo[trees$Quad == 'B16'] <- '228'
+trees$subplot_id_ofo[trees$Quad == 'B17'] <- '229'
+trees$subplot_id_ofo[trees$Quad == 'B18'] <- '230'
+trees$subplot_id_ofo[trees$Quad == 'B19'] <- '231'
+trees$subplot_id_ofo[trees$Quad == 'B20'] <- '232'
+trees$subplot_id_ofo[trees$Quad == 'B21'] <- '233'
+
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B11'] <- '223'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B12'] <- '224'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B13'] <- '225'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B14'] <- '226'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B15'] <- '227'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B16'] <- '228'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B17'] <- '229'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B18'] <- '230'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B19'] <- '231'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B20'] <- '232'
+trees$subplot_id_ofo[is.na(trees$Quad) & trees$Quadrat == 'B21'] <- '233'
+
 ```
 
 Tree lat and tree lon
 
 ```{r}
+
+# arctanxy
+
+# HD combined
+
+# AZ combined
+
+# HD computed
 
 ```
 
@@ -148,8 +193,11 @@ trees$Code[trees$Code == 'UNKN'] <- '000'
 trees$Code[trees$Code == 'QUEWIS'] <- '839'
 trees$Code[trees$Code == 'QUECHR'] <- '805'
 trees$Code[trees$Code == 'PINCOU'] <- '109'
-trees$Code[trees$Code == 'QUEXMO'] <- '800' # the Quercus x moreha (Q. kelloggii x wislizeni) is being labelled as Quercus spp.
+trees$Code[trees$Code == 'QUEXMO'] <- '899' # the Quercus x moreha (Q. kelloggii x wislizeni)
 
+# shrubs without numeric codes left with USDA alphabetical codes; all were double checked against USDA site before continuing
+
+# rename this column so it's more clear what it describes
 
 trees <- trees %>% 
        rename("SpeciesCode" = "Code")
@@ -164,7 +212,7 @@ Status Live/Dead
 trees$Status[trees$Status == 'DS'] <- 'D'
 trees$Status[trees$Status == 'LI'] <- 'L'
 
-# remove trees that are dead and down
+# remove trees that are dead and down from the data set-- we only want standing individuals
 
 trees <- subset(trees, Status!="Dt")
 ```
@@ -212,11 +260,47 @@ trees$horiz_distance_pith[is.na(trees$horiz_distance_pith)] <- ""
 
 ```
 
+Export
 
+```{r}
 
+write.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\San_Jacinto_ForestGeo\\20231110_SanJacintoForestGeo.csv")
 
+```
 
 
 ## ALTERATIONS MADE IN EXCEL
 
 Manually separated damage codes into damage code columns 
+
+
+## LATER EDITS MADE IN R (2024, Feb 16th)
+
+We also want to delete any stems measured below 1.3m (regular DBH height)
+
+```{r}
+
+# load former spreadsheet
+
+trees <- read.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\San_Jacinto_ForestGeo\\20231110_SanJacintoForestGeo.csv")
+
+# remove stems measured below DBH
+
+trees<- subset(trees, POM>=1.3)
+
+# remove NAs that were introduced when the spreadsheet was loaded
+
+trees$AZ[is.na(trees$AZ)] <- ''
+trees$AZ_combined[is.na(trees$AZ_combined)] <- ''
+trees$HD_combined[is.na(trees$HD_combined)] <- ''
+trees$Damage[is.na(trees$Damage)] <- ''
+trees$Damage.1[is.na(trees$Damage.1)] <- ''
+trees$Damage.2[is.na(trees$Damage.2)] <- ''
+trees$Damage.3[is.na(trees$Damage.3)] <- ''
+
+# write new file
+
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\San_Jacinto_ForestGeo\\20240216_SanJacintoForestGeo.csv")
+
+```
+

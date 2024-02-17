@@ -84,7 +84,7 @@ for(i in 1:nrow(plotdata_circles)) {
 
 #### Calculate area of each polygon ####
 
-polygons <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0004\\data\\plot_bounds_v3_manuallyCorrected.gpkg", crs = 4326)
+polygons <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0004\\data\\updated\\plot_bounds_v4.gpkg", crs = 4326)
 
 # First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
 
@@ -107,6 +107,12 @@ polygons = st_transform(polygons, crs = 4326)
 polygons$centroid <- 0
 
 polygons$centroid <- st_centroid(polygons)
+
+#### Export csv of attribute table ####
+
+# polygons_csv <- st_drop_geometry(polygons)
+
+# write.csv(polygons_csv, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL.dispersal.kernel.project\\20240216_FOCAL_dispersal_kernel_polygons.csv")
 
 #### Export each plot polygon individually ####
 
@@ -350,7 +356,7 @@ st_write(SanJacintoPolygon, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_sta
 
 # import plot data
 
-Lampingplots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Lamping_UAS_StemMap_boundarys\\doc.kml")
+Lampingplots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Original\\Lamping_UAS_StemMap_boundarys\\doc.kml")
 
 # st_crs(Lampingplots)
 # plot KML is in 4326
@@ -381,6 +387,14 @@ Lampingplots$plot_id_ofo[Lampingplots$Name == 'TO2'] <- '0086'
 Lampingplots$plot_id_ofo[Lampingplots$Name == 'UN3'] <- '0087'
 
 Lampingplots <- Lampingplots [-(1)]
+
+# Add 15m buffer-- first need to change to a coordinate system that's projected in meters with equal x and y distances: CONUS Albers Equal Area (EPSG: 5070). Then add the 15m buffer, then switch back to the WGS84 coordinate system
+
+Lampingplots = st_transform(Lampingplots, crs = 5070)
+
+Lampingplots <- st_buffer(Lampingplots, dist = 15)
+
+Lampingplots = st_transform(Lampingplots, crs = 4326)
 
 # Export
 
@@ -537,3 +551,104 @@ for(i in 1:nrow(plotcenters_circles)) {
   plot_id_current = polygon_current$ofo_plot_id
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
+
+#### Johnston OSU ####
+
+# There is lots of uncertainty in these coordinates and plots!!!!!!!!!!!
+
+# Define plot bounds by buffering out the trees (10 m?), merging the resulting circles, and buffering back in the same amount. This will at least give ballparks to visualize with for now.
+
+# Load tree point data
+
+Johnston14_trees <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site14trees.gpkg")
+
+Johnston15_trees <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site15trees.gpkg")
+
+Johnston11_trees <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site11trees.gpkg")
+
+Johnston10_trees <- st_read ("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\OSU.stem_data\\stem_data_site10trees.gpkg")
+
+# add a new column with the right plot ID
+
+Johnston14_trees <- Johnston14_trees %>%
+  add_column(plot_id_ofo = "0053")
+
+Johnston15_trees <- Johnston15_trees %>%
+  add_column(plot_id_ofo = "0054")
+
+Johnston11_trees <- Johnston11_trees %>%
+  add_column(plot_id_ofo = "0055")
+
+Johnston10_trees <- Johnston10_trees %>%
+  add_column(plot_id_ofo = "0056")
+
+# remove unneeded columns; only want ofo plot ID and geometry
+
+Johnston14_trees = subset(Johnston14_trees, select = c("plot_id_ofo", "geom"))
+
+Johnston15_trees = subset(Johnston15_trees, select = c("plot_id_ofo", "geom"))
+
+Johnston11_trees = subset(Johnston11_trees, select = c("plot_id_ofo", "geom"))
+
+Johnston10_trees = subset(Johnston10_trees, select = c("plot_id_ofo", "geom"))
+
+# Buffer out the trees-- first need to change to a coordinate system that's projected in meters with equal x and y distances: CONUS Albers Equal Area (EPSG: 5070).
+
+Johnston14_trees = st_transform(Johnston14_trees, crs = 5070)
+Johnston14_trees_buffers <- st_buffer(Johnston14_trees, dist = 10)
+# results in a multipolygon. buffered out to 30m and still a multipolygon. kept it at 10m for now. 
+# Johnston14_trees_buffers <- st_buffer(Johnston14_trees, dist = 30)
+
+Johnston15_trees = st_transform(Johnston15_trees, crs = 5070)
+Johnston15_trees_buffers <- st_buffer(Johnston15_trees, dist = 10)
+
+Johnston11_trees = st_transform(Johnston11_trees, crs = 5070)
+Johnston11_trees_buffers <- st_buffer(Johnston11_trees, dist = 10)
+
+Johnston10_trees = st_transform(Johnston10_trees, crs = 5070)
+Johnston10_trees_buffers <- st_buffer(Johnston10_trees, dist = 10)
+
+# Merge the resulting circles
+
+Johnston14_trees_buffers_merged <- st_union(Johnston14_trees_buffers, by_feature = FALSE, is_coverage = FALSE)
+plot (Johnston14_trees_buffers_merged) 
+
+Johnston15_trees_buffers_merged <- st_union(Johnston15_trees_buffers, by_feature = FALSE, is_coverage = FALSE)
+plot (Johnston15_trees_buffers_merged)
+
+Johnston11_trees_buffers_merged <- st_union(Johnston11_trees_buffers, by_feature = FALSE, is_coverage = FALSE)
+plot (Johnston11_trees_buffers_merged)
+
+Johnston10_trees_buffers_merged <- st_union(Johnston10_trees_buffers, by_feature = FALSE, is_coverage = FALSE)
+plot (Johnston10_trees_buffers_merged)
+
+# Buffer back in 
+
+Johnston14_trees_buffers_merged_unbuffered <- st_buffer(Johnston14_trees_buffers_merged, dist = -10)
+
+Johnston15_trees_buffers_merged_unbuffered <- st_buffer(Johnston15_trees_buffers_merged, dist = -10)
+plot(Johnston15_trees_buffers_merged_unbuffered)
+
+Johnston11_trees_buffers_merged_unbuffered <- st_buffer(Johnston11_trees_buffers_merged, dist = -10)
+
+Johnston10_trees_buffers_merged_unbuffered <- st_buffer(Johnston10_trees_buffers_merged, dist = -10)
+
+# Then back to WGS84
+
+Johnston14_trees_buffers_merged_unbuffered = st_transform(Johnston14_trees_buffers_merged_unbuffered, crs = 4326)
+
+Johnston15_trees_buffers_merged_unbuffered = st_transform(Johnston15_trees_buffers_merged_unbuffered, crs = 4326)
+
+Johnston11_trees_buffers_merged_unbuffered = st_transform(Johnston11_trees_buffers_merged_unbuffered, crs = 4326)
+
+Johnston10_trees_buffers_merged_unbuffered = st_transform(Johnston10_trees_buffers_merged_unbuffered, crs = 4326)
+
+# export plot polygons
+
+st_write(Johnston14_trees_buffers_merged_unbuffered, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0053.gpkg")
+
+st_write(Johnston15_trees_buffers_merged_unbuffered, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0054.gpkg")
+
+st_write(Johnston11_trees_buffers_merged_unbuffered, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0055.gpkg")
+
+st_write(Johnston10_trees_buffers_merged_unbuffered, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0056.gpkg")

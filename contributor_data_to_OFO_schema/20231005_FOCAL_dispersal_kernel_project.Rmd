@@ -25,7 +25,10 @@ Importing tree data
 
 ```{r, ECHO=false}
 
-treedata = read.csv(data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0004\\data\\stems_v3_aligned.csv"))
+treedata = st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0004\\data\\updated\\stems_v4.gpkg")
+
+# st_crs(treedata)
+# in EPSG 4326
 
 ```
 
@@ -105,6 +108,26 @@ treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center
 treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c12')] <- '0073'
 treedata$subplot_id_ofo[(treedata$stem_map_name == 'Creek_2') & (treedata$center_id == 'c16')] <- '0074'
 
+# some trees were mapped with high precision GPS instead of with distance/azimuth. as such, they don't have subplot centers. going to create a "catchall" or "undefined" subplot for each plot for these trees.
+
+# Chips_1, Valley_1, Lassic_1, Delta_1, Lassic_2, Delta_2, Chips_2, and Delta_3
+
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_1') & (is.na(treedata$center_id))] <- '0333'
+
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Valley_1') & (is.na(treedata$center_id))] <- '0334'
+
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_1') & (is.na(treedata$center_id))] <- '0335'
+
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Delta_1') & (is.na(treedata$center_id))] <- '0336'
+
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Lassic_2') & (is.na(treedata$center_id))] <- '0337'
+
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Delta_2') & (is.na(treedata$center_id))] <- '0338'
+
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Chips_2') & (is.na(treedata$center_id))] <- '0339'
+
+treedata$subplot_id_ofo[(treedata$stem_map_name == 'Delta_3') & (is.na(treedata$center_id))] <- '0340'
+
 ```
 
 Live/dead
@@ -175,6 +198,18 @@ treedata$species[treedata$species == 'snag'] <- '000'
 treedata$species[treedata$species == 'MISSING'] <- '000'
 ```
 
+Growth form
+
+```{r}
+
+# everything measured in these plots was a tree
+
+treedata <- treedata %>%
+  add_column(growth_form = "tree")
+
+```
+
+
 Height lowest needle-- change NAs to ""
 
 ```{r}
@@ -193,10 +228,12 @@ treedata$pct_prefire_green[is.na(treedata$pct_prefire_green)] <- ""
 treedata$pct_prefire_green[treedata$pct_prefire_green == 'N/A'] <- ''
 treedata$pct_prefire_green[treedata$pct_prefire_green == 'n/A'] <- ''
 treedata$pct_prefire_green[treedata$pct_prefire_green == 'n/a'] <- ''
+treedata$pct_prefire_green[treedata$pct_prefire_green == 'NA'] <- ''
 
 treedata$pct_current_green[is.na(treedata$pct_current_green)] <- ""
 treedata$pct_current_green[treedata$pct_current_green == 'N/A'] <- ''
 treedata$pct_current_green[treedata$pct_current_green == 'n/a'] <- ''
+treedata$pct_current_green[treedata$pct_current_green == 'NA'] <- ''
 
 treedata$ht_lowest_ndl[is.na(treedata$ht_lowest_ndl)] <- ""
 treedata$distance[is.na(treedata$distance)] <- ""
@@ -212,12 +249,12 @@ Export CSV
 
 ```{r}
 
-write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL.dispersal.kernel.project\\20231005_FOCAL_dispersal_kernel_project.csv")
+write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL.dispersal.kernel.project\\20240216_FOCAL_dispersal_kernel_project.csv")
 
 ```
 
 
 ## ALTERATIONS MADE IN EXCEL
 
-Added growth_form data
+None
 
