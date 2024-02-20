@@ -238,9 +238,10 @@ DBH is in cm and height is in m :)
 
 ```{r}
 
-# there are multiple trees with heights and/or dbhs of 0
+# there are multiple trees with heights and/or dbhs of 0. Harold Zald is unclear why but gave me a list of trees with height/DBH values that should be NA instead. I went through the list and confirmed that each height/DBH of 0 is actually NA. Getting rid of those 0s here. Phew!
 
-# alltreestest$height[alltreestest$height == 0] <- ""
+alltrees$height[alltrees$height == 0] <- ""
+alltrees$dbh[alltrees$dbh == 0] <- ""
 
 ```
 
@@ -447,7 +448,7 @@ Export CSV
 
 ```{r}
 
-write.csv(alltrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20231113_Lamping.csv")
+write.csv(alltrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240220_Lamping.csv")
 
 ```
 
