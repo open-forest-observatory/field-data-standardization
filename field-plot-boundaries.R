@@ -643,12 +643,34 @@ Johnston11_trees_buffers_merged_unbuffered = st_transform(Johnston11_trees_buffe
 
 Johnston10_trees_buffers_merged_unbuffered = st_transform(Johnston10_trees_buffers_merged_unbuffered, crs = 4326)
 
+# sfc_POLYGON and sfc_MULTIPOLYGON formats that arose when merging the buffered polygons made the plot IDs disappear
+
+Johnston14_final = Johnston14_trees_buffers_merged_unbuffered %>% st_sf %>% st_cast
+
+Johnston14_final <- Johnston14_final %>%
+  add_column(plot_id_ofo = "0053")
+
+Johnston15_final = Johnston15_trees_buffers_merged_unbuffered %>% st_sf %>% st_cast
+
+Johnston15_final <- Johnston15_final %>%
+  add_column(plot_id_ofo = "0054")
+
+Johnston11_final = Johnston11_trees_buffers_merged_unbuffered %>% st_sf %>% st_cast
+
+Johnston11_final <- Johnston11_final %>%
+  add_column(plot_id_ofo = "0055")
+
+Johnston10_final = Johnston10_trees_buffers_merged_unbuffered %>% st_sf %>% st_cast
+
+Johnston10_final <- Johnston10_final %>%
+  add_column(plot_id_ofo = "0056")
+
 # export plot polygons
 
-st_write(Johnston14_trees_buffers_merged_unbuffered, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0053.gpkg")
+st_write(Johnston14_final, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0053.gpkg")
 
-st_write(Johnston15_trees_buffers_merged_unbuffered, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0054.gpkg")
+st_write(Johnston15_final, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0054.gpkg")
 
-st_write(Johnston11_trees_buffers_merged_unbuffered, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0055.gpkg")
+st_write(Johnston11_final, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0055.gpkg")
 
-st_write(Johnston10_trees_buffers_merged_unbuffered, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0056.gpkg")
+st_write(Johnston10_final, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0056.gpkg")
