@@ -131,6 +131,18 @@ UN3plotcentroid <- st_transform(UN3plot, 4326)
 
 UN3plotcentroid$centroid <- st_centroid(UN3plotcentroid)
 
+write.csv(BS2plotcentroid, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240225_BS2.csv")
+
+write.csv(MC1plotcentroid, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240225_MC1.csv")
+
+write.csv(OW2plotcentroid, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240225_OW2.csv")
+
+write.csv(TO1plotcentroid, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240225_TO1.csv")
+
+write.csv(TO2plotcentroid, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240225_TO2.csv")
+
+write.csv(UN3plotcentroid, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240225_UN3.csv")
+
 ```
 
 TREE LEVEL DATA

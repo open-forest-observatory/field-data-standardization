@@ -67,6 +67,14 @@ MOC8$centroid <- st_centroid(MOC8)
 MOC9$centroid <- st_centroid(MOC9)
 MOC10$centroid <- st_centroid(MOC10)
 MOC11$centroid <- st_centroid(MOC11)
+
+write.csv(MOC8, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.MOC\\20240225_MOC8.csv")
+
+write.csv(MOC9, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.MOC\\20240225_MOC9.csv")
+
+write.csv(MOC10, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.MOC\\20240225_MOC10.csv")
+
+write.csv(MOC11, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.MOC\\20240225_MOC11.csv")
 ```
 
 TREE LEVEL DATA

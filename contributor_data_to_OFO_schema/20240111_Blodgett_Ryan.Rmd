@@ -67,6 +67,8 @@ plots$centroid <- 0
 
 plots$centroid <- st_centroid(plots)
 
+write.csv (plots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Blodgett_Ryan\\20240225_plots.csv")
+
 #### calculate area of each polygon ####
 
 # First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 

@@ -62,6 +62,8 @@ units_spatial = st_transform(units_spatial, crs = 4326)
 units_spatial$centroid <- 0
 
 units_spatial$centroid <- st_centroid(units_spatial)
+
+write.csv(units_spatial, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\STEF.BERNAL\\20240225_STEF_BERNAL_polygons.csv")
 ```
 
 Add OFO plot ID

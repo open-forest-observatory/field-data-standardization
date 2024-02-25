@@ -227,6 +227,8 @@ plotcenters_coordinates <- plotcenters_coordinates %>% rename (PlotLongitudeWGS8
 
 plotcentersUTM10N_coordinates <- plotcentersUTM10N_coordinates %>% rename (`Plot#`=plotcentersUTM10N..Plot.., PlotLongitudeUTM10N=X, PlotLatitudeUTM10N=Y) 
 
+write.csv(plotcenters, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240225_IRItoOFO_plotcenters.csv")
+
 # make sure all plot names are in the same format
 
 # Batch 1

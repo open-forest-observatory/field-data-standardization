@@ -29,7 +29,6 @@ subplots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-da
 plotpolygon <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0005\\data\\ground_map_mask_precise.geojson")
 ```
 
-
 Calculate the area and centroid of the main plot polygon
 
 ```{r}
@@ -54,6 +53,10 @@ plotpolygon = st_transform(plotpolygon, crs = 4326)
 plotpolygon$centroid <- 0
 
 plotpolygon$centroid <- st_centroid(plotpolygon)
+
+plotpolygon$centroid
+
+write.csv(plotpolygon, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Weeks.EmeraldPoint\\20240225_plots.csv")
 ```
 Export subplot names and geometry to a csv
 
