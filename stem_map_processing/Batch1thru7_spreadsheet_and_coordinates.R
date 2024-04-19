@@ -1,6 +1,6 @@
 # Author: Emily Marie Purvis
 # Date: 11.2.2023
-# Goal: combine Batch 1-7 GPS coordinates into KML and combine Batch 1-7 spreadsheets 
+# Goal: combine Batch 1-7 GPS coordinates into KML and combine Batch 1-7 spreadsheets
 
 #### Load libraries ####
 library(tidyverse)
@@ -15,9 +15,9 @@ library(pracma)
 
 # Load data
 
-largeplot_targets <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\large-plots_for-iri.kml") 
+largeplot_targets <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\large-plots_for-iri.kml")
 
-smallplot_targets <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\small-plots_for-iri_v2.kml") 
+smallplot_targets <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\small-plots_for-iri_v2.kml")
 
 # check CRS
 # st_crs(largeplot_targets)
@@ -51,7 +51,7 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_
 
 # Import plot coordinates
 
-L506 <- read_sf('Post_Processed_GPS\\L-506_g\\L-506.shp') 
+L506 <- read_sf('Post_Processed_GPS\\L-506_g\\L-506.shp')
 
 L506 = L506 %>% mutate(`Plot#` = 'L506')
 
@@ -60,7 +60,7 @@ L506 <- L506 [-c(1:18, 21:22)]
 # st_crs(L506)
 # EPSG 4326
 
-L511 <- read_sf('Post_Processed_GPS\\L-511_g_CORRECTED\\L511.shp') 
+L511 <- read_sf('Post_Processed_GPS\\L-511_g_CORRECTED\\L511.shp')
 
 L511 = L511 %>% mutate(`Plot#` = 'L511')
 
@@ -68,7 +68,7 @@ L511 <- L511 [-c(1:18, 21:22)]
 
 # st_crs(L511)
 
-L512 <- read_sf('Post_Processed_GPS\\L-512_g\\L-512.shp') 
+L512 <- read_sf('Post_Processed_GPS\\L-512_g\\L-512.shp')
 
 L512 = L512 %>% mutate(`Plot#` = 'L512')
 
@@ -84,7 +84,7 @@ L515 <- L515 [-c(1:18, 21:22)]
 
 # st_crs(L515)
 
-L517 <- read_sf('Post_Processed_GPS\\L-517_g\\L-517.shp') 
+L517 <- read_sf('Post_Processed_GPS\\L-517_g\\L-517.shp')
 
 L517 = L517 %>% mutate(`Plot#` = 'L517')
 
@@ -92,7 +92,7 @@ L517 <- L517 [-c(1:19, 22:23)]
 
 # st_crs(L517)
 
-L525 <- read_sf('Post_Processed_GPS\\L-525_g\\L-525.shp') 
+L525 <- read_sf('Post_Processed_GPS\\L-525_g\\L-525.shp')
 
 L525 = L525 %>% mutate(`Plot#` = 'L525')
 
@@ -100,7 +100,7 @@ L525 <- L525 [-c(1:18, 21:22)]
 
 # st_crs(L525)
 
-S107 <- read_sf('Post_Processed_GPS\\S-107_g\\S-107.shp') 
+S107 <- read_sf('Post_Processed_GPS\\S-107_g\\S-107.shp')
 
 S107 = S107 %>% mutate(`Plot#` = 'S107')
 
@@ -108,7 +108,7 @@ S107 <- S107 [-c(1:19, 22:23)]
 
 # st_crs(S107)
 
-S109 <- read_sf('Post_Processed_GPS\\S-109_g\\S-109.shp') 
+S109 <- read_sf('Post_Processed_GPS\\S-109_g\\S-109.shp')
 
 S109 = S109 %>% mutate(`Plot#` = 'S109')
 
@@ -116,7 +116,7 @@ S109 <- S109 [-c(1:18, 21:22)]
 
 # st_crs(S109)
 
-S113 <- read_sf('Post_Processed_GPS\\S-113_g\\S-113.shp') 
+S113 <- read_sf('Post_Processed_GPS\\S-113_g\\S-113.shp')
 
 S113 = S113 %>% mutate(`Plot#` = 'S113')
 
@@ -124,7 +124,7 @@ S113 <- S113 [-c(1:18, 21:22)]
 
 # st_crs(S113)
 
-S118 <- read_sf('Post_Processed_GPS\\S-118_g\\S-118.shp') 
+S118 <- read_sf('Post_Processed_GPS\\S-118_g\\S-118.shp')
 
 S118 = S118 %>% mutate(`Plot#` = 'S118')
 
@@ -150,7 +150,7 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_
 
 # Import plot coordinates
 
-L502 <- read_sf('Post_Processed_GPS\\L-502_g\\L-502.shp') 
+L502 <- read_sf('Post_Processed_GPS\\L-502_g\\L-502.shp')
 
 L502 = L502 %>% mutate(`Plot#` = 'L502')
 
@@ -159,7 +159,7 @@ L502 <- L502 [-c(1:23)]
 # st_crs(L502)
 # EPSG 4326
 
-L504 <- read_sf('Post_Processed_GPS\\L-504_g\\L-504.shp') 
+L504 <- read_sf('Post_Processed_GPS\\L-504_g\\L-504.shp')
 
 L504 = L504 %>% mutate(`Plot#` = 'L504')
 
@@ -170,7 +170,7 @@ L504 <- L504 [-c(1:22)]
 # not all shapefiles have a crs, so I'm checking manually and adding if necessary
 # st_crs(L504)
 
-L505 <- read_sf('Post_Processed_GPS\\L-505_g\\L-505.shp') 
+L505 <- read_sf('Post_Processed_GPS\\L-505_g\\L-505.shp')
 
 L505 = L505 %>% mutate(`Plot#` = 'L505')
 
@@ -180,7 +180,7 @@ L505 <- L505 [-c(1:22)]
 
 # st_crs(L505)
 
-L507 <- read_sf('Post_Processed_GPS\\L-507_g\\L-507.shp') 
+L507 <- read_sf('Post_Processed_GPS\\L-507_g\\L-507.shp')
 
 L507 = L507 %>% mutate(`Plot#` = 'L507')
 
@@ -188,7 +188,7 @@ L507 <- L507 [-c(1:23)]
 
 # st_crs(L507)
 
-L508 <- read_sf('Post_Processed_GPS\\L-508_g\\L-508.shp') 
+L508 <- read_sf('Post_Processed_GPS\\L-508_g\\L-508.shp')
 
 L508 = L508 %>% mutate(`Plot#` = 'L508')
 
@@ -196,7 +196,7 @@ L508 <- L508 [-c(1:23)]
 
 # st_crs(L508)
 
-L521 <- read_sf('Post_Processed_GPS\\L-521_g\\L-521.shp') 
+L521 <- read_sf('Post_Processed_GPS\\L-521_g\\L-521.shp')
 
 L521 = L521 %>% mutate(`Plot#` = 'L521')
 
@@ -206,7 +206,7 @@ L521 <- L521 [-c(1:22)]
 
 # st_crs(L521)
 
-L529 <- read_sf('Post_Processed_GPS\\L-529_g\\L-529.shp') 
+L529 <- read_sf('Post_Processed_GPS\\L-529_g\\L-529.shp')
 
 L529 = L529 %>% mutate(`Plot#` = 'L529')
 
@@ -214,7 +214,7 @@ L529 <- L529 [-c(1:22)]
 
 # st_crs(L529)
 
-L536 <- read_sf('Post_Processed_GPS\\L-536_g\\L-536.shp') 
+L536 <- read_sf('Post_Processed_GPS\\L-536_g\\L-536.shp')
 
 L536 = L536 %>% mutate(`Plot#` = 'L536')
 
@@ -222,7 +222,7 @@ L536 <- L536 [-c(1:23)]
 
 # st_crs(L536)
 
-S038 <- read_sf('Post_Processed_GPS\\S-038_g\\S-038.shp') 
+S038 <- read_sf('Post_Processed_GPS\\S-038_g\\S-038.shp')
 
 S038 = S038 %>% mutate(`Plot#` = 'S038')
 
@@ -230,7 +230,7 @@ S038 <- S038 [-c(1:23)]
 
 # st_crs(S038)
 
-S313 <- read_sf('Post_Processed_GPS\\S-313_g\\S-313.shp') 
+S313 <- read_sf('Post_Processed_GPS\\S-313_g\\S-313.shp')
 
 S313 = S313 %>% mutate(`Plot#` = 'S313')
 
@@ -252,7 +252,7 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_
 
 # Import plot coordinates
 
-L519 <- read_sf('L-519_g\\L-519.shp') 
+L519 <- read_sf('L-519_g\\L-519.shp')
 
 L519 = L519 %>% mutate(`Plot#` = 'L519')
 
@@ -261,7 +261,7 @@ L519 <- L519 [-c(1:19, 22:23)]
 # st_crs(L519)
 # EPSG 4326
 
-S015 <- read_sf('S-015_g\\S-015.shp') 
+S015 <- read_sf('S-015_g\\S-015.shp')
 
 S015 = S015 %>% mutate(`Plot#` = 'S015')
 
@@ -270,7 +270,7 @@ S015 <- S015 [-c(1:18, 21:22)]
 # st_crs(S015)
 # EPSG 4326
 
-S074 <- read_sf('S-074_g\\S_074.shp') 
+S074 <- read_sf('S-074_g\\S_074.shp')
 
 S074 = S074 %>% mutate(`Plot#` = 'S074')
 
@@ -279,7 +279,7 @@ S074 <- S074 [-c(1:19, 22:23)]
 # st_crs(S074)
 # EPSG 4326
 
-S075 <- read_sf('S-075_g\\S-075.shp') 
+S075 <- read_sf('S-075_g\\S-075.shp')
 
 S075 = S075 %>% mutate(`Plot#` = 'S075')
 
@@ -288,47 +288,47 @@ S075 <- S075 [-c(1:19, 22:23)]
 # st_crs(S075)
 # EPSG 4326
 
-S080 <- read_sf('S-080_g\\S-080.shp') 
+S080 <- read_sf('S-080_g\\S-080.shp')
 
 S080 = S080 %>% mutate(`Plot#` = 'S080')
 
 S080 <- S080 [-c(1:18, 21:22)]
 
 # st_crs(S080)
-# S080 <- S080 %>% st_set_crs(4326)
+S080 <- S080 %>% st_set_crs(4326)
 # EPSG 4326
 
-S083 <- read_sf('S-083_g\\S-083.shp') 
+S083 <- read_sf('S-083_g\\S-083.shp')
 
 S083 = S083 %>% mutate(`Plot#` = 'S083')
 
 S083 <- S083 [-c(1:18, 21:22)]
 
 # st_crs(S083)
-# S083 <- S083 %>% st_set_crs(4326)
+S083 <- S083 %>% st_set_crs(4326)
 # EPSG 4326
 
-S084 <- read_sf('S-084_g\\S-084.shp') 
+S084 <- read_sf('S-084_g\\S-084.shp')
 
 S084 = S084 %>% mutate(`Plot#` = 'S084')
 
 S084 <- S084 [-c(1:18, 21:22)]
 
 # st_crs(S084)
-# S084 <- S084 %>% st_set_crs(4326)
+S084 <- S084 %>% st_set_crs(4326)
 # EPSG 4326
 
-S087 <- read_sf('S-087_g\\S-087.shp') 
+S087 <- read_sf('S-087_g\\S-087.shp')
 
 S087 = S087 %>% mutate(`Plot#` = 'S087')
 
 S087 <- S087 [-c(1:18, 21:22)]
 
 # st_crs(S087)
-# S087 <- S087 %>% st_set_crs(4326)
+S087 <- S087 %>% st_set_crs(4326)
 # EPSG 4326
 
-S097 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\rebatch3gpsfiles_s097\\S-097.shp') 
+S097 <- read_sf('C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\rebatch3gpsfiles_s097\\S-097.shp')
 
 S097 = S097 %>% mutate(`Plot#` = 'S097')
 
@@ -497,7 +497,7 @@ combinedtrees <- combinedtrees %>% drop_na(`Tree#`)
 
 #### Add a complete horizontal distance column ####
 
-# some of the trees were measured with horizontal distance, some with slope + slope distance, some with both. we want all trees to have horizontal distance. 
+# some of the trees were measured with horizontal distance, some with slope + slope distance, some with both. we want all trees to have horizontal distance.
 
 # create a blank column for horizontal distance
 
@@ -550,35 +550,35 @@ targetplotcentersUTM10N <- targetplotcentersUTM10N %>% rename (`Plot#`=Name)
 
 # extract coordinates
 
-updatedplotcentersWGS84_coordinates <- data.frame(updatedplotcentersWGS84$`Plot#`, st_coordinates(updatedplotcentersWGS84[,1], st_coordinates(updatedplotcentersWGS84[,2]))) 
+updatedplotcentersWGS84_coordinates <- data.frame(updatedplotcentersWGS84$`Plot#`, st_coordinates(updatedplotcentersWGS84[,1], st_coordinates(updatedplotcentersWGS84[,2])))
 
-updatedplotcentersUTM10N_coordinates <- data.frame(updatedplotcentersUTM10N$`Plot#`, st_coordinates(updatedplotcentersUTM10N[,1], st_coordinates(updatedplotcentersUTM10N[,2]))) 
+updatedplotcentersUTM10N_coordinates <- data.frame(updatedplotcentersUTM10N$`Plot#`, st_coordinates(updatedplotcentersUTM10N[,1], st_coordinates(updatedplotcentersUTM10N[,2])))
 
-targetplotcentersWGS84_coordinates <- data.frame(targetplotcentersWGS84$`Plot#`, st_coordinates(targetplotcentersWGS84[,1], st_coordinates(targetplotcentersWGS84[,2]))) 
+targetplotcentersWGS84_coordinates <- data.frame(targetplotcentersWGS84$`Plot#`, st_coordinates(targetplotcentersWGS84[,1], st_coordinates(targetplotcentersWGS84[,2])))
 
-targetplotcentersUTM10N_coordinates <- data.frame(targetplotcentersUTM10N$`Plot#`, st_coordinates(targetplotcentersUTM10N[,1], st_coordinates(targetplotcentersUTM10N[,2]))) 
+targetplotcentersUTM10N_coordinates <- data.frame(targetplotcentersUTM10N$`Plot#`, st_coordinates(targetplotcentersUTM10N[,1], st_coordinates(targetplotcentersUTM10N[,2])))
 
 # rename new columns
 
-updatedplotcentersWGS84_coordinates <- updatedplotcentersWGS84_coordinates %>% rename (`Plot#`=updatedplotcentersWGS84..Plot.., PlotLongitudeWGS84=X, PlotLatitudeWGS84=Y) 
+updatedplotcentersWGS84_coordinates <- updatedplotcentersWGS84_coordinates %>% rename (`Plot#`=updatedplotcentersWGS84..Plot.., PlotLongitudeWGS84=X, PlotLatitudeWGS84=Y)
 
 updatedplotcentersWGS84_coordinates <- updatedplotcentersWGS84_coordinates [-c(4)]
 
 updatedplotcentersWGS84_coordinates <- updatedplotcentersWGS84_coordinates %>% rename (UpdatedPlotLongitudeWGS84=PlotLongitudeWGS84, UpdatedPlotLatitudeWGS84=PlotLatitudeWGS84)
 
-updatedplotcentersUTM10N_coordinates <- updatedplotcentersUTM10N_coordinates %>% rename (`Plot#`=updatedplotcentersUTM10N..Plot.., PlotLongitudeUTM10N=X, PlotLatitudeUTM10N=Y) 
+updatedplotcentersUTM10N_coordinates <- updatedplotcentersUTM10N_coordinates %>% rename (`Plot#`=updatedplotcentersUTM10N..Plot.., PlotLongitudeUTM10N=X, PlotLatitudeUTM10N=Y)
 
 updatedplotcentersUTM10N_coordinates <- updatedplotcentersUTM10N_coordinates [-c(4)]
 
 updatedplotcentersUTM10N_coordinates <- updatedplotcentersUTM10N_coordinates %>% rename (UpdatedPlotLongitudeUTM10N=PlotLongitudeUTM10N, UpdatedPlotLatitudeUTM10N=PlotLatitudeUTM10N)
 
-targetplotcentersWGS84_coordinates <- targetplotcentersWGS84_coordinates %>% rename (`Plot#`=targetplotcentersWGS84..Plot.., PlotLongitudeWGS84=X, PlotLatitudeWGS84=Y) 
+targetplotcentersWGS84_coordinates <- targetplotcentersWGS84_coordinates %>% rename (`Plot#`=targetplotcentersWGS84..Plot.., PlotLongitudeWGS84=X, PlotLatitudeWGS84=Y)
 
 targetplotcentersWGS84_coordinates <- targetplotcentersWGS84_coordinates [-c(4)]
 
 targetplotcentersWGS84_coordinates <- targetplotcentersWGS84_coordinates %>% rename (TargetPlotLongitudeWGS84=PlotLongitudeWGS84, TargetPlotLatitudeWGS84=PlotLatitudeWGS84)
 
-targetplotcentersUTM10N_coordinates <- targetplotcentersUTM10N_coordinates %>% rename (`Plot#`=targetplotcentersUTM10N..Plot.., PlotLongitudeUTM10N=X, PlotLatitudeUTM10N=Y) 
+targetplotcentersUTM10N_coordinates <- targetplotcentersUTM10N_coordinates %>% rename (`Plot#`=targetplotcentersUTM10N..Plot.., PlotLongitudeUTM10N=X, PlotLatitudeUTM10N=Y)
 
 targetplotcentersUTM10N_coordinates <- targetplotcentersUTM10N_coordinates [-c(4)]
 
@@ -692,7 +692,7 @@ combinedtrees$`TreeLatitudeUTM10N` <- 0
 # Longitude UTM10N
 
 for(i in 1:nrow(combinedtrees)) {
-  if(combinedtrees[i,]$Batch == 3) { 
+  if(combinedtrees[i,]$Batch == 3) {
     combinedtrees[i,]$`TreeLongitudeUTM10N` = (combinedtrees[i,]$TargetPlotLongitudeUTM10N) + ((sin(deg2rad(combinedtrees[i,]$Azimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (feet)`) * 0.3048))
   }
   else {
@@ -703,7 +703,7 @@ for(i in 1:nrow(combinedtrees)) {
 # Latitude UTM10N
 
 for(i in 1:nrow(combinedtrees)) {
-  if(combinedtrees[i,]$Batch == 3) { 
+  if(combinedtrees[i,]$Batch == 3) {
     combinedtrees[i,]$`TreeLatitudeUTM10N` = (combinedtrees[i,]$TargetPlotLatitudeUTM10N) + ((cos(deg2rad(combinedtrees[i,]$Azimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (feet)`) * 0.3048))
   }
   else {
@@ -725,7 +725,7 @@ combinedtrees <- combinedtrees %>% drop_na(`TreeLongitudeUTM10N`)
 
 # make a spatial data frame
 
-treecoordinatesconversion <- data.frame(combinedtrees$tree_id, combinedtrees$TreeLongitudeUTM10N, combinedtrees$TreeLatitudeUTM10N) 
+treecoordinatesconversion <- data.frame(combinedtrees$tree_id, combinedtrees$TreeLongitudeUTM10N, combinedtrees$TreeLatitudeUTM10N)
 
 treecoordinatesconversion <- treecoordinatesconversion %>% rename (tree_id=combinedtrees.tree_id, TreeLongitudeUTM10N=combinedtrees.TreeLongitudeUTM10N, TreeLatitudeUTM10N=combinedtrees.TreeLatitudeUTM10N)
 
@@ -741,7 +741,7 @@ st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\field-da
 
 # extract the geometry features into columns of lat and long WGS84, then merge back into the tree data frame
 
-treecoordinatesconversionWGS84 <- data.frame(treecoordinatesconversion$tree_id, st_coordinates(treecoordinatesconversion[,1], st_coordinates(treecoordinatesconversion[,2]))) 
+treecoordinatesconversionWGS84 <- data.frame(treecoordinatesconversion$tree_id, st_coordinates(treecoordinatesconversion[,1], st_coordinates(treecoordinatesconversion[,2])))
 
 treecoordinatesconversionWGS84 <- treecoordinatesconversionWGS84 %>% rename (tree_id=treecoordinatesconversion.tree_id, TreeLongitudeWGS84=X, TreeLatitudeWGS84=Y)
 
@@ -753,7 +753,7 @@ combinedtrees <- full_join (combinedtrees, treecoordinatesconversionWGS84, by="t
 
 combinedtrees$`DBH (cm)` <- 0
 
-# calculate 
+# calculate
 
 combinedtrees$`DBH (cm)` = combinedtrees$`DBH (inches)` * 2.54
 

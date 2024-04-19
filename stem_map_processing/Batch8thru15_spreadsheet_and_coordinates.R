@@ -1173,7 +1173,7 @@ for(i in 1:nrow(combinedtrees)) {
 
 # give trees ID numbers
 
-combinedtrees = combinedtrees %>% mutate(tree_id = 1:nrow(combinedtrees))
+combinedtrees = combinedtrees %>% mutate(ofo_tree_id = 1:nrow(combinedtrees))
 
 # remove trees without lat/lon --> this happens when there is no horizontal distance AND either/or no percent slope/slope distance, so a horizontal distance cannot be calculated
 
@@ -1183,9 +1183,9 @@ combinedtrees <- combinedtrees %>% drop_na(`TreeLongitudeUTM10N`)
 
 # make a spatial data frame
 
-treecoordinatesconversion <- data.frame(combinedtrees$tree_id, combinedtrees$TreeLongitudeUTM10N, combinedtrees$TreeLatitudeUTM10N)
+treecoordinatesconversion <- data.frame(combinedtrees$ofo_tree_id, combinedtrees$TreeLongitudeUTM10N, combinedtrees$TreeLatitudeUTM10N)
 
-treecoordinatesconversion <- treecoordinatesconversion %>% rename (tree_id=combinedtrees.tree_id, TreeLongitudeUTM10N=combinedtrees.TreeLongitudeUTM10N, TreeLatitudeUTM10N=combinedtrees.TreeLatitudeUTM10N)
+treecoordinatesconversion <- treecoordinatesconversion %>% rename (ofo_tree_id=combinedtrees.ofo_tree_id, TreeLongitudeUTM10N=combinedtrees.TreeLongitudeUTM10N, TreeLatitudeUTM10N=combinedtrees.TreeLatitudeUTM10N)
 
 treecoordinatesconversion <- st_as_sf(treecoordinatesconversion, coords = c("TreeLongitudeUTM10N", "TreeLatitudeUTM10N"), crs = 32610, remove=F)
 
@@ -1199,11 +1199,11 @@ st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\field-da
 
 # extract the geometry features into columns of lat and long WGS84, then merge back into the tree data frame
 
-treecoordinatesconversionWGS84 <- data.frame(treecoordinatesconversion$tree_id, st_coordinates(treecoordinatesconversion[,1], st_coordinates(treecoordinatesconversion[,2])))
+treecoordinatesconversionWGS84 <- data.frame(treecoordinatesconversion$ofo_tree_id, st_coordinates(treecoordinatesconversion[,1], st_coordinates(treecoordinatesconversion[,2])))
 
-treecoordinatesconversionWGS84 <- treecoordinatesconversionWGS84 %>% rename (tree_id=treecoordinatesconversion.tree_id, TreeLongitudeWGS84=X, TreeLatitudeWGS84=Y)
+treecoordinatesconversionWGS84 <- treecoordinatesconversionWGS84 %>% rename (tree_id=treecoordinatesconversion.ofo_tree_id, TreeLongitudeWGS84=X, TreeLatitudeWGS84=Y)
 
-combinedtrees <- full_join (combinedtrees, treecoordinatesconversionWGS84, by="tree_id")
+combinedtrees <- full_join (combinedtrees, treecoordinatesconversionWGS84, by="ofo_tree_id")
 
 #### Convert DBH from inches to cm ####
 
