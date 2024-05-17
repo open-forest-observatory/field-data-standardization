@@ -96,13 +96,17 @@ treedata$`TreeLatitudeUTM10N` <- 0
 # Longitude UTM10N
 
 for(i in 1:nrow(treedata)) {
-    treedata[i,]$`TreeLongitudeUTM10N` = (treedata[i,]$PlotLongitudeUTM) + ((sin(deg2rad(treedata[i,]$azimuth))) * (treedata[i,]$`distance`))
+    treedata[i,]$`TreeLongitudeUTM10N` = 
+      (treedata[i,]$`PlotLongitudeUTM`) + 
+      ((sin(pracma::deg2rad(treedata[i,]$`azimuth`))) * ((treedata[i,]$`distance`)))
 }
 
 # Latitude UTM10N
 
 for(i in 1:nrow(treedata)) {
-    treedata[i,]$`TreeLatitudeUTM10N` = (treedata[i,]$PlotLatitudeUTM) + ((sin(deg2rad(treedata[i,]$azimuth))) * (treedata[i,]$`distance`))
+    treedata[i,]$`TreeLatitudeUTM10N` = 
+      (treedata[i,]$`PlotLatitudeUTM`) + 
+      ((cos(pracma::deg2rad(treedata[i,]$`azimuth`))) * ((treedata[i,]$`distance`)))
 }
 
 # Convert tree coordinates to WGS84
@@ -230,7 +234,7 @@ Export CSV
 
 ```{r}
 
-write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_early_regen_dispersal\\20240110_FOCAL_early_regen_dispersal.csv")
+write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_early_regen_dispersal\\20240516_FOCAL_early_regen_dispersal.csv")
 
 ```
 
