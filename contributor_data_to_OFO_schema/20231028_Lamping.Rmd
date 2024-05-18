@@ -87,8 +87,6 @@ UN3plot <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-dat
 
 PLOT LEVEL DATA
 
-Plot area is in each plot shapefile
-
 Calculate centroid of plot polygons
 
 ```{r}
@@ -173,8 +171,109 @@ UN3 <- UN3 %>%
 
 ```
 
-Convert tree lat and tree lon to the right crs
+Remove trees that fall outside of the plot polygons
 
+```{r}
+
+# load file with all plot boundaries
+
+allLampingplots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0009\\data\\Original\\Lamping_UAS_StemMap_boundarys\\doc.kml")
+
+# st_crs(allLampingplots) is 4326
+
+# filter stem maps one by one to remove trees that fall outside plot boundaries. first must switch them to the crs of the "allLampingplots" sf object, then switch them back.
+
+# BS2
+
+# st_crs(BS2) is 26911
+
+BS2_inplot <- st_transform (BS2, 4326)
+
+BS2_inplot <- st_filter(BS2_inplot, allLampingplots)
+
+# dropped 9 trees!
+
+BS2_inplot <- st_transform(BS2_inplot, 26911)
+
+# MC1
+
+# st_crs(MC1) is 26910
+
+MC1_inplot <- st_transform (MC1, 4326)
+
+MC1_inplot <- st_filter(MC1_inplot, allLampingplots)
+
+# dropped 402 trees?!?
+
+MC1_inplot <- st_transform(MC1_inplot, 26910)
+
+# OW2
+
+# st_crs(OW2) is 26911
+
+OW2_inplot <- st_transform (OW2, 4326)
+
+OW2_inplot <- st_filter(OW2_inplot, allLampingplots)
+
+# dropped 80 trees!
+
+OW2_inplot <- st_transform(OW2_inplot, 26911)
+
+# T01
+
+# st_crs(TO1) is 26910
+
+TO1_inplot <- st_transform (TO1, 4326)
+
+TO1_inplot <- st_filter(TO1_inplot, allLampingplots)
+
+# dropped 416 trees!
+
+TO1_inplot <- st_transform(TO1_inplot, 26910)
+
+# TO2
+
+# st_crs(TO2) is 26910
+
+TO2_inplot <- st_transform (TO2, 4326)
+
+TO2_inplot <- st_filter(TO2_inplot, allLampingplots)
+
+# dropped 9 trees!
+
+TO2_inplot <- st_transform(TO2_inplot, 26910)
+
+# UN3
+
+# st_crs(UN3) is 26911
+
+UN3_inplot <- st_transform (UN3, 4326)
+
+UN3_inplot <- st_filter(UN3_inplot, allLampingplots)
+
+# dropped 26 trees!
+
+UN3_inplot <- st_transform(UN3_inplot, 26911)
+
+# write them out to visualize how these results look
+
+# st_write(BS2_inplot, "C:\\Users\\emily\\Desktop\\BS2viz.gpkg")
+
+# st_write(MC1_inplot, "C:\\Users\\emily\\Desktop\\MC1viz.gpkg")
+
+# st_write(OW2_inplot, "C:\\Users\\emily\\Desktop\\OW2viz.gpkg")
+
+# st_write(TO1_inplot, "C:\\Users\\emily\\Desktop\\TO1viz.gpkg")
+
+# st_write(TO2_inplot, "C:\\Users\\emily\\Desktop\\TO2viz.gpkg")
+
+# st_write(UN3_inplot, "C:\\Users\\emily\\Desktop\\UN3viz.gpkg")
+
+# they look good!
+
+```
+
+Convert tree lat and tree lon to the right crs
 
 ```{r}
 
@@ -184,17 +283,17 @@ Convert tree lat and tree lon to the right crs
 
 #### remove the spatial aspect of each stem map ####
 
-BS2 <- st_drop_geometry(BS2)
+BS2 <- st_drop_geometry(BS2_inplot)
 
-MC1 <- st_drop_geometry(MC1)
+MC1 <- st_drop_geometry(MC1_inplot)
 
-OW2 <- st_drop_geometry(OW2)
+OW2 <- st_drop_geometry(OW2_inplot)
 
-TO1 <- st_drop_geometry(TO1)
+TO1 <- st_drop_geometry(TO1_inplot)
 
-TO2 <- st_drop_geometry(TO2)
+TO2 <- st_drop_geometry(TO2_inplot)
 
-UN3 <- st_drop_geometry(UN3)
+UN3 <- st_drop_geometry(UN3_inplot)
 
 #### let's combine the individual stem maps into one data frame ####
 
@@ -247,6 +346,8 @@ alltrees <- alltrees %>% filter (!(latitude == 0))
 ```
 
 DBH is in cm and height is in m :)
+
+Remove heights and DBHs that are zero
 
 ```{r}
 
@@ -363,7 +464,6 @@ alltrees$growth_form[is.na(alltrees$species)] <- ''
 
 ```
 
-
 Status live/dead to L/D
 
 ```{r}
@@ -460,7 +560,7 @@ Export CSV
 
 ```{r}
 
-write.csv(alltrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240220_Lamping.csv")
+write.csv(alltrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Lamping\\20240517_Lamping.csv")
 
 ```
 

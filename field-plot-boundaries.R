@@ -86,7 +86,7 @@ for(i in 1:nrow(plotdata_circles)) {
 
 polygons <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0004\\data\\updated\\plot_bounds_v4.gpkg", crs = 4326)
 
-# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070) 
+# First project to a projected (meters) coordinate system with equal x and y distances, CONUS Albers Equal Area (EPSG: 5070)
 
 polygons = st_transform(polygons, crs = 5070)
 
@@ -334,7 +334,7 @@ SanJacintoCornersPoints <- SanJacintoCorners [-(1)]
 SanJacintoPolygon = st_polygon(
   list(
     cbind(
-      SanJacintoCorners$Long[c(1,2,3,4,5)], 
+      SanJacintoCorners$Long[c(1,2,3,4,5)],
       SanJacintoCorners$Lat[c(1,2,3,4,5)])
   )
 )
@@ -387,14 +387,6 @@ Lampingplots$plot_id_ofo[Lampingplots$Name == 'TO2'] <- '0086'
 Lampingplots$plot_id_ofo[Lampingplots$Name == 'UN3'] <- '0087'
 
 Lampingplots <- Lampingplots [-(1)]
-
-# Add 15m buffer-- first need to change to a coordinate system that's projected in meters with equal x and y distances: CONUS Albers Equal Area (EPSG: 5070). Then add the 15m buffer, then switch back to the WGS84 coordinate system
-
-Lampingplots = st_transform(Lampingplots, crs = 5070)
-
-Lampingplots <- st_buffer(Lampingplots, dist = 15)
-
-Lampingplots = st_transform(Lampingplots, crs = 4326)
 
 # Export
 
@@ -596,7 +588,7 @@ Johnston10_trees = subset(Johnston10_trees, select = c("plot_id_ofo", "geom"))
 
 Johnston14_trees = st_transform(Johnston14_trees, crs = 5070)
 Johnston14_trees_buffers <- st_buffer(Johnston14_trees, dist = 10)
-# results in a multipolygon. buffered out to 30m and still a multipolygon. kept it at 10m for now. 
+# results in a multipolygon. buffered out to 30m and still a multipolygon. kept it at 10m for now.
 # Johnston14_trees_buffers <- st_buffer(Johnston14_trees, dist = 30)
 
 Johnston15_trees = st_transform(Johnston15_trees, crs = 5070)
@@ -611,7 +603,7 @@ Johnston10_trees_buffers <- st_buffer(Johnston10_trees, dist = 10)
 # Merge the resulting circles
 
 Johnston14_trees_buffers_merged <- st_union(Johnston14_trees_buffers, by_feature = FALSE, is_coverage = FALSE)
-plot (Johnston14_trees_buffers_merged) 
+plot (Johnston14_trees_buffers_merged)
 
 Johnston15_trees_buffers_merged <- st_union(Johnston15_trees_buffers, by_feature = FALSE, is_coverage = FALSE)
 plot (Johnston15_trees_buffers_merged)
@@ -622,7 +614,7 @@ plot (Johnston11_trees_buffers_merged)
 Johnston10_trees_buffers_merged <- st_union(Johnston10_trees_buffers, by_feature = FALSE, is_coverage = FALSE)
 plot (Johnston10_trees_buffers_merged)
 
-# Buffer back in 
+# Buffer back in
 
 Johnston14_trees_buffers_merged_unbuffered <- st_buffer(Johnston14_trees_buffers_merged, dist = -10)
 
