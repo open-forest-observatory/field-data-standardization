@@ -244,12 +244,37 @@ treedata$notes[is.na(treedata$notes)] <- ""
 
 Just a note that distances were measured from subplot centers to the face of the tree. Because no DBH measurements were taken in this dataset, we can't calculate distance to the pith.
 
+Update May 20th 2024! The coordinates in the lat/lon columns are different than the geometry values for plots 0060 and 0062. Going to eliminate those lat/lon columns, extract the geometry values, and merge them back into the data frame.
+
+```{r}
+
+# remove faulty lat/lon columns
+
+treedata <- treedata [,-(13:14)]
+
+# extract correct coordinates
+
+treedata_coords <- treedata %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+# export to make sure they look okay
+
+# treedata_coordstest <- st_drop_geometry(treedata_coords  [,-(1:17)])
+
+# treedata_coordstest <- st_as_sf (treedata_coordstest, coords = c("lon", "lat"), crs = 4326)
+
+# st_write(treedata_coordstest, "C:\\Users\\emily\\Desktop\\focaldispersalkernaltestcoords.gpkg")
+
+# looks good!
+
+```
 
 Export CSV
 
 ```{r}
 
-write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL.dispersal.kernel.project\\20240216_FOCAL_dispersal_kernel_project.csv")
+write.csv(treedata_coords, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL.dispersal.kernel.project\\20240520_FOCAL_dispersal_kernel_project.csv")
 
 ```
 
@@ -257,4 +282,5 @@ write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\F
 ## ALTERATIONS MADE IN EXCEL
 
 None
+
 
