@@ -1,14 +1,15 @@
 ---
-title: "FOCAL_TNC_IRI"
+title: "20240618_FOCAL_TNC_IRI"
 author: "Emily Marie Purvis"
-date: "2023-12-19"
-updated: "2024-06-15"
+date: "2024-06-19"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Tree coords look wrong-- removing declination we previously added in to see if it solves the problem
 
 ## DATA MANIPULATED IN R
 
@@ -228,7 +229,7 @@ plotcenters_coordinates <- plotcenters_coordinates %>% rename (PlotLongitudeWGS8
 
 plotcentersUTM10N_coordinates <- plotcentersUTM10N_coordinates %>% rename (`Plot#`=plotcentersUTM10N..Plot.., PlotLongitudeUTM10N=X, PlotLatitudeUTM10N=Y) 
 
-write.csv(plotcenters, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240225_IRItoOFO_plotcenters.csv")
+#write.csv(plotcenters, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240225_IRItoOFO_plotcenters.csv")
 
 # make sure all plot names are in the same format
 
@@ -459,28 +460,28 @@ combinedtrees$`TreeLatitudeUTM10N` <- 0
 
 # Add declination to Azimuth!! I am using a declination from the middle of the survey area (Latitude:	39° 33' 37" N, Longitude:	120° 49' 43" W) from the middle of the survey dates (2023-10-22):	13° 10' E  ± 0° 22'  changing by  0° 5' W per year. 13° 10' is 13.166667°. We need to subtract this declination from the magnetic azimuths to get the true azimuths. Whew!
 
-combinedtrees$`Declination` <- '-13.166667'
+#combinedtrees$`Declination` <- '-13.166667'
 
-combinedtrees$`TrueAzimuth` <- '0'
+#combinedtrees$`TrueAzimuth` <- '0'
 
-combinedtrees$Declination <- as.numeric(combinedtrees$Declination)
+#combinedtrees$Declination <- as.numeric(combinedtrees$Declination)
 
-combinedtrees$TrueAzimuth <- as.numeric(combinedtrees$TrueAzimuth)
+#combinedtrees$TrueAzimuth <- as.numeric(combinedtrees$TrueAzimuth)
 
-for(i in 1:nrow(combinedtrees)) {
-    combinedtrees[i,]$`TrueAzimuth` = (combinedtrees[i,]$Azimuth) + (combinedtrees[i,]$Declination)
-}
+#for(i in 1:nrow(combinedtrees)) {
+#    combinedtrees[i,]$`TrueAzimuth` = (combinedtrees[i,]$Azimuth) + (combinedtrees[i,]$Declination)
+#}
 
 # Longitude UTM10N
 
 for(i in 1:nrow(combinedtrees)) {
-    combinedtrees[i,]$`TreeLongitudeUTM10N` = (combinedtrees[i,]$PlotLongitudeUTM10N) + ((sin(deg2rad(combinedtrees[i,]$TrueAzimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (m)`)))
+    combinedtrees[i,]$`TreeLongitudeUTM10N` = (combinedtrees[i,]$PlotLongitudeUTM10N) + ((sin(deg2rad(combinedtrees[i,]$Azimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (m)`)))
 }
 
 # Latitude UTM10N
 
 for(i in 1:nrow(combinedtrees)) {
-    combinedtrees[i,]$`TreeLatitudeUTM10N` = (combinedtrees[i,]$PlotLatitudeUTM10N) + ((cos(deg2rad(combinedtrees[i,]$TrueAzimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (m)`)))
+    combinedtrees[i,]$`TreeLatitudeUTM10N` = (combinedtrees[i,]$PlotLatitudeUTM10N) + ((cos(deg2rad(combinedtrees[i,]$Azimuth))) * ((combinedtrees[i,]$`All Horizontal Distances (m)`)))
 }
 
 # Convert to WGS84 Coordinates
@@ -509,7 +510,7 @@ treecoordinatesconversion <- treecoordinatesconversion %>% st_transform(4326)
 
 # save this in case it's helpful later
 
-st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\finaltreecoordinates.kml"),delete_dsn=TRUE)
+st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\finaltreecoordinatesNODECLINATION.kml"),delete_dsn=TRUE)
 
 # extract the geometry features into columns of lat and long WGS84, then merge back into the tree data frame
 
@@ -723,7 +724,7 @@ Export CSV with all data
 
 ```{r}
 
-write.csv(combinedtrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240615_IRItoOFO_ALLplots.csv")
+write.csv(combinedtrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240618_IRItoOFO_ALLplots_NODECLINATION.csv")
 
 ```
 
@@ -739,7 +740,7 @@ Export CSV with only large plot data
 
 ```{r}
 
-write.csv(largeplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240615_IRItoOFO_largeplots.csv")
+write.csv(largeplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240618_IRItoOFO_largeplots_NODECLINATION.csv")
 
 ```
 
@@ -749,7 +750,7 @@ Drop large plots to save CSV of just small plots
 
 smallplots <- combinedtrees[combinedtrees$ofo_plot_id == 0,]
 
-write.csv(smallplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240615_IRItoOFO_smallplots.csv")
+write.csv(smallplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240618_IRItoOFO_smallplots_NODECLINATION.csv")
 
 ```
 
@@ -757,5 +758,3 @@ write.csv(smallplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\
 ## ALTERATIONS MADE IN EXCEL
 
 Manually moved damage codes into new columns
-
-
