@@ -666,3 +666,7 @@ st_write(Johnston15_final, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_stan
 st_write(Johnston11_final, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0055.gpkg")
 
 st_write(Johnston10_final, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0056.gpkg")
+
+#### NEON SJER, SOAP, and TEAK plots ####
+
+# this process was done in the 20240620_NEON.Rmd script!

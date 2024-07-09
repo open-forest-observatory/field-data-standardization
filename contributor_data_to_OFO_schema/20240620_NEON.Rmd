@@ -5,6 +5,10 @@ date: "2024-06-21"
 output: html_document
 ---
 
+## DEAR READER
+
+You will need to insert your own API token in the for loops below, as mine is a secret. Check out these sites for info on using the NEON API (https://www.neonscience.org/resources/learning-hub/tutorials/neon-api-usage) and rate limits (https://data.neonscience.org/data-api/rate-limiting/)
+
 ## ALTERATIONS MADE IN R
 
 Libraries 
@@ -349,7 +353,11 @@ SJER003_poly <- SJER003 %>%
   summarise(geometry = st_combine(geometry)) %>%
   st_cast("POLYGON")
 
+SJER003_poly <- SJER003_poly %>% add_column(ofo_plot_id = 0119)
+
 # st_write(SJER003_poly, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\NEON_plot_polys_from_field_coords\\SJER003.gpkg")
+
+# st_write(SJER003_poly, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0119.gpkg")
 
 units::set_units(st_area(SJER003_poly), "m^2")
 
@@ -384,6 +392,10 @@ SOAP010_poly <- SOAP010 %>%
   st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
   summarise(geometry = st_combine(geometry)) %>%
   st_cast("POLYGON")
+
+SOAP010_poly <- SOAP010_poly %>% add_column(ofo_plot_id = 0120)
+
+# st_write(SOAP010_poly, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0120.gpkg")
 
 # st_write(SOAP010_poly, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\NEON_plot_polys_from_field_coords\\SOAP010.gpkg")
 
@@ -486,25 +498,25 @@ for(i in 1:nrow(towersubplotssampled)) {
     
     # import coords. coordinates for subplots 21_400 are points 21, 23, 41, 39.
     
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.21")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.21?apiToken=")
     
 assign(paste0(plot_id_current, "_21"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_21"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_21"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.23")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.23?apiToken=")
 
 assign(paste0(plot_id_current, "_23"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_23"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_23"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41?apiToken=")
 
 assign(paste0(plot_id_current, "_41"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_41"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_41"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.39")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.39?apiToken=")
 
 assign(paste0(plot_id_current, "_39"), httr::GET(api_string))
 
@@ -534,25 +546,25 @@ assign(paste0(plot_id_current, "_a_poly"), st_as_sf(st_cast(st_combine(get(paste
     
    # import coords. coordinates for subplots 23_400 are 23, 25, 43, 41.
     
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.23")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.23?apiToken=.")
     
 assign(paste0(plot_id_current, "_23"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_23"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_23"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.25")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.25?apiToken=.")
     
 assign(paste0(plot_id_current, "_25"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_25"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_25"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.43")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.43?apiToken=.")
     
 assign(paste0(plot_id_current, "_43"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_43"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_43"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41?apiToken=.")
     
 assign(paste0(plot_id_current, "_41"), httr::GET(api_string))
 
@@ -582,25 +594,25 @@ assign(paste0(plot_id_current, "_a_poly"), st_as_sf(st_cast(st_combine(get(paste
     
     # import coords. coordinates for subplots 41_400 are 41, 43, 61, 59.
     
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41?apiToken=.")
     
 assign(paste0(plot_id_current, "_41"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_41"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_41"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.43")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.43?apiToken=.")
     
 assign(paste0(plot_id_current, "_43"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_43"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_43"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.61")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.61?apiToken=.")
     
 assign(paste0(plot_id_current, "_61"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_61"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_61"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.59")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.59?apiToken=.")
     
 assign(paste0(plot_id_current, "_59"), httr::GET(api_string))
 
@@ -630,25 +642,25 @@ assign(paste0(plot_id_current, "_a_poly"), st_as_sf(st_cast(st_combine(get(paste
     
     # import coords. coordinates for subplots 39_400 are 39, 41, 59, 57.
     
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.39")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.39?apiToken=.")
     
 assign(paste0(plot_id_current, "_39"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_39"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_39"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41?apiToken=.")
     
 assign(paste0(plot_id_current, "_41"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_41"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_41"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.59")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.59?apiToken=.")
     
 assign(paste0(plot_id_current, "_59"), httr::GET(api_string))
 
 assign(paste0(plot_id_current, "_59"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_59"), httr::GET(api_string))), as="text")))
 
-api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.57")
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.57?apiToken=.")
     
 assign(paste0(plot_id_current, "_57"), httr::GET(api_string))
 
@@ -675,21 +687,318 @@ assign(paste0(plot_id_current, "_a_poly"), st_as_sf(st_cast(st_combine(get(paste
   }
 }
 
-# OH NO...API RATE LIMIT EXCEEDED halfway thru on SOAP 054
+# subplot b calcs
 
+for(i in 1:nrow(towersubplotssampled)) {
+  
+  plot_id_current = towersubplotssampled[i,]$NEONplotID
+  
+  if((towersubplotssampled[i,]$randomsubplotb) == "21_400") {
+    
+    # import coords. coordinates for subplots 21_400 are points 21, 23, 41, 39.
+    
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.21?apiToken=.")
+    
+assign(paste0(plot_id_current, "_21"), httr::GET(api_string))
 
+assign(paste0(plot_id_current, "_21"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_21"), httr::GET(api_string))), as="text")))
 
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.23?apiToken=.")
 
+assign(paste0(plot_id_current, "_23"), httr::GET(api_string))
 
+assign(paste0(plot_id_current, "_23"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_23"), httr::GET(api_string))), as="text")))
 
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41?apiToken=.")
 
+assign(paste0(plot_id_current, "_41"), httr::GET(api_string))
 
+assign(paste0(plot_id_current, "_41"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_41"), httr::GET(api_string))), as="text")))
 
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.39?apiToken=.")
 
+assign(paste0(plot_id_current, "_39"), httr::GET(api_string))
 
+assign(paste0(plot_id_current, "_39"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_39"), httr::GET(api_string))), as="text")))
+
+# make coords into a polygon
+
+assign(paste0(plot_id_current, "_b"), data.frame(
+  lon = c(
+    (get(paste0(plot_id_current, "_21"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_23"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_41"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_39"))$data$locationDecimalLongitude)),
+  lat = c(
+    (get(paste0(plot_id_current, "_21"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_23"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_41"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_39"))$data$locationDecimalLatitude))
+))
+
+assign(paste0(plot_id_current, "_b_st_as_sf"), st_as_sf(as.data.frame(get(paste0(plot_id_current, "_b"))), coords = c("lon","lat"), crs = 4326))
+
+assign(paste0(plot_id_current, "_b_poly"), st_as_sf(st_cast(st_combine(get(paste0(plot_id_current, "_b_st_as_sf"))), "POLYGON")))
+  }
+  
+  else if ((towersubplotssampled[i,]$randomsubplotb) == "23_400") {
+    
+   # import coords. coordinates for subplots 23_400 are 23, 25, 43, 41.
+    
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.23?apiToken=.")
+    
+assign(paste0(plot_id_current, "_23"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_23"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_23"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.25?apiToken=.")
+    
+assign(paste0(plot_id_current, "_25"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_25"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_25"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.43?apiToken=.")
+    
+assign(paste0(plot_id_current, "_43"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_43"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_43"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41?apiToken=.")
+    
+assign(paste0(plot_id_current, "_41"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_41"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_41"), httr::GET(api_string))), as="text")))
+
+# make coords into a polygon
+
+assign(paste0(plot_id_current, "_b"), data.frame(
+  lon = c(
+    (get(paste0(plot_id_current, "_23"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_25"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_43"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_41"))$data$locationDecimalLongitude)),
+  lat = c(
+    (get(paste0(plot_id_current, "_23"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_25"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_43"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_41"))$data$locationDecimalLatitude))
+))
+
+assign(paste0(plot_id_current, "_b_st_as_sf"), st_as_sf(as.data.frame(get(paste0(plot_id_current, "_b"))), coords = c("lon","lat"), crs = 4326))
+
+assign(paste0(plot_id_current, "_b_poly"), st_as_sf(st_cast(st_combine(get(paste0(plot_id_current, "_b_st_as_sf"))), "POLYGON")))
+  }
+  
+  else if((towersubplotssampled[i,]$randomsubplotb) == "41_400") {
+    
+    # import coords. coordinates for subplots 41_400 are 41, 43, 61, 59.
+    
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41?apiToken=.")
+    
+assign(paste0(plot_id_current, "_41"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_41"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_41"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.43?apiToken=.")
+    
+assign(paste0(plot_id_current, "_43"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_43"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_43"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.61?apiToken=.")
+    
+assign(paste0(plot_id_current, "_61"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_61"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_61"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.59?apiToken=.")
+    
+assign(paste0(plot_id_current, "_59"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_59"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_59"), httr::GET(api_string))), as="text")))
+
+# make coords into a polygon
+
+assign(paste0(plot_id_current, "_b"), data.frame(
+  lon = c(
+    (get(paste0(plot_id_current, "_41"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_43"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_61"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_59"))$data$locationDecimalLongitude)),
+  lat = c(
+    (get(paste0(plot_id_current, "_41"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_43"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_61"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_59"))$data$locationDecimalLatitude))
+))
+
+assign(paste0(plot_id_current, "_b_st_as_sf"), st_as_sf(as.data.frame(get(paste0(plot_id_current, "_b"))), coords = c("lon","lat"), crs = 4326))
+
+assign(paste0(plot_id_current, "_b_poly"), st_as_sf(st_cast(st_combine(get(paste0(plot_id_current, "_b_st_as_sf"))), "POLYGON")))
+  }
+  
+  else if ((towersubplotssampled[i,]$randomsubplotb) == "39_400") {
+    
+    # import coords. coordinates for subplots 39_400 are 39, 41, 59, 57.
+    
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.39?apiToken=.")
+    
+assign(paste0(plot_id_current, "_39"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_39"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_39"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.41?apiToken=.")
+    
+assign(paste0(plot_id_current, "_41"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_41"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_41"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.59?apiToken=.")
+    
+assign(paste0(plot_id_current, "_59"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_59"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_59"), httr::GET(api_string))), as="text")))
+
+api_string <- paste0("https://data.neonscience.org/api/v0/locations/", plot_id_current, ".basePlot.vst.57?apiToken=.")
+    
+assign(paste0(plot_id_current, "_57"), httr::GET(api_string))
+
+assign(paste0(plot_id_current, "_57"), jsonlite::fromJSON(content((assign(paste0(plot_id_current, "_57"), httr::GET(api_string))), as="text")))
+
+# make coords into a polygon
+
+assign(paste0(plot_id_current, "_b"), data.frame(
+  lon = c(
+    (get(paste0(plot_id_current, "_39"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_41"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_59"))$data$locationDecimalLongitude),
+    (get(paste0(plot_id_current, "_57"))$data$locationDecimalLongitude)),
+  lat = c(
+    (get(paste0(plot_id_current, "_39"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_41"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_59"))$data$locationDecimalLatitude),
+    (get(paste0(plot_id_current, "_57"))$data$locationDecimalLatitude))
+))
+
+assign(paste0(plot_id_current, "_b_st_as_sf"), st_as_sf(as.data.frame(get(paste0(plot_id_current, "_b"))), coords = c("lon","lat"), crs = 4326))
+
+assign(paste0(plot_id_current, "_b_poly"), st_as_sf(st_cast(st_combine(get(paste0(plot_id_current, "_b_st_as_sf"))), "POLYGON")))
+  }
+}
+
+# combine both subplots
+
+SJER063_poly <- st_union (SJER063_a_poly, SJER063_b_poly)
+
+units::set_units(st_area(SJER063_poly), "m^2")
+
+st_centroid(SJER063_poly)
+
+# st_write(SJER063_poly, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\NEON_plot_polys_from_field_coords\\SJER063.gpkg")
+
+# towersubplotssampled <- towersubplotssampled %>%
+#   add_column(poly = "")
+
+# towersubplotssampled <- towersubplotssampled %>%
+#   add_column(area_meters = "")
+
+# towersubplotssampled <- towersubplotssampled %>%
+#   add_column(centroid = "")
+
+# towersubplotssampled <- towersubplotssampled %>%
+#   add_column(ofo_plot_id = "")
+
+# towersubplotssampled$index <- 1:nrow(towersubplotssampled)
+
+for(i in 1:nrow(towersubplotssampled)) {
+  
+  plot_id_current = towersubplotssampled[i,]$NEONplotID
+  
+  # create spatial polygon and save list of coordinates to existing data.frame
+
+assign(paste0(plot_id_current, "_poly"), st_union((get(paste0(plot_id_current, "_a_poly"))), (get(paste0(plot_id_current, "_b_poly")))))
+
+towersubplotssampled[i,]$poly <-(get(paste0(plot_id_current, "_poly")))
+
+  # calculate area of plot in square meters and save to existing data.frame
+
+towersubplotssampled[i,]$area_meters <- units::set_units(st_area(get(paste0(plot_id_current, "_poly"))), "m^2")
+
+  # calculate centroid of plot and save list of coordinates to existing data.frame
+
+towersubplotssampled[i,]$centroid <-st_centroid(get(paste0(plot_id_current, "_poly")))
+
+# add ofo plot IDs to spatial polygons and save them
+
+assign(paste0(plot_id_current, "_poly"), ((get(paste0(plot_id_current, "_poly"))) %>% add_column(ofo_plot_id = ((towersubplotssampled[i,]$index) + 120))))
+
+# save to primary data folder
+
+#st_write(get(paste0(plot_id_current, "_poly")), paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\NEON_plot_polys_from_field_coords\\", plot_id_current, ".gpkg"), overwrite = TRUE)
+
+# and field plot boundary folder
+
+st_write(get(paste0(plot_id_current, "_poly")), paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\0", (get(paste0(plot_id_current, "_poly"))$ofo_plot_id), ".gpkg"), overwrite = TRUE)
+
+# add ofo plot IDs to existing data.frame of tower subplots sampled
+
+towersubplotssampled[i,]$ofo_plot_id <- ((towersubplotssampled[i,]$index) + 120)
+
+}
+
+# export the towersubplotssampled data.frame to copy/paste into field-plots google sheet
+
+towersubplotscsv <- towersubplotssampled
+
+towersubplotscsv$centroid <- as.character(towersubplotscsv$centroid)
+
+towersubplotscsv$poly <- as.character(towersubplotscsv$poly)
+
+# write.csv(towersubplotscsv, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\towersubplotinfo.csv")
+
+# OH NO two of the plots are completely outside the OFO flight footprints now that I have the correct coordinates and dimensions :( must remove TEAK052 and TEAK049, re-do OFO plot ID numbers, and then re-run the final for loop to generate correct plot boundaries with the right ofo plot id names. 
+
+towersubplotssampled <- towersubplotssampled %>% filter (NEONplotID == 'SOAP_054' | NEONplotID == 'SOAP_047' | NEONplotID == 'SOAP_031' | NEONplotID == 'SOAP_049' | NEONplotID == 'SOAP_056' | NEONplotID == 'SOAP_053' | NEONplotID == 'SOAP_045' | NEONplotID == 'SJER_059' | NEONplotID == 'SJER_058' | NEONplotID == 'SJER_047' | NEONplotID == 'SJER_054' | NEONplotID == 'SJER_060' | NEONplotID == 'SJER_049' | NEONplotID == 'SJER_045' | NEONplotID == 'SJER_003' | NEONplotID == 'SJER_057' | NEONplotID == 'SJER_046' | NEONplotID == 'SJER_055' | NEONplotID == 'SJER_048' | NEONplotID == 'SJER_061' | NEONplotID == 'SJER_050' | NEONplotID == 'SJER_053' | NEONplotID == 'SJER_063' | NEONplotID == 'SJER_051' | NEONplotID == 'TEAK_062' | NEONplotID == 'TEAK_058' | NEONplotID == 'TEAK_043' | NEONplotID == 'TEAK_056' | NEONplotID == 'TEAK_044' | NEONplotID == 'TEAK_057' | NEONplotID == 'TEAK_047' | NEONplotID == 'TEAK_053' | NEONplotID == 'TEAK_051' | NEONplotID == 'TEAK_046' | NEONplotID == 'SOAP_057' | NEONplotID == 'SOAP_059' | NEONplotID == 'SOAP_051' | NEONplotID == 'SOAP_048' | NEONplotID == 'SOAP_058' | NEONplotID == 'SOAP_043' | NEONplotID == 'SOAP_050' | NEONplotID == 'SOAP_044' | NEONplotID == 'SOAP_052' | NEONplotID == 'SOAP_046' | NEONplotID == 'SOAP_060' | NEONplotID == 'SOAP_055' | NEONplotID == 'SOAP_061' | NEONplotID == 'SOAP_010')
+
+towersubplotssampled <- towersubplotssampled[,-c(29:33)]
+
+# re-ran final for loop code chunk! phew.
 
 ```
 
+Calculate centroids of subplots
+
+```{r}
+
+#towersubplotssampled <- towersubplotssampled %>%
+#  add_column(centroid_a = "")
+
+#towersubplotssampled <- towersubplotssampled %>%
+#  add_column(centroid_b = "")
+
+for(i in 1:nrow(towersubplotssampled)) {
+  
+  plot_id_current = towersubplotssampled[i,]$NEONplotID
+
+towersubplotssampled[i,]$centroid_a <-st_centroid(get(paste0(plot_id_current, "_a_poly")))
+
+towersubplotssampled[i,]$centroid_b <-st_centroid(get(paste0(plot_id_current, "_b_poly")))
+
+}
+
+towersubplotscsv <- towersubplotssampled
+
+towersubplotscsv$centroid <- as.character(towersubplotscsv$centroid)
+
+towersubplotscsv$poly <- as.character(towersubplotscsv$poly)
+
+towersubplotscsv$centroid_a <- as.character(towersubplotscsv$centroid_a)
+
+towersubplotscsv$centroid_b <- as.character(towersubplotscsv$centroid_b)
+
+write.csv(towersubplotscsv, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\towersubplotinfo.csv")
+
+```
 
 
 Put the tree coordinates back in the data frame
@@ -903,17 +1212,248 @@ OFO plot ID numbers
 
 ```{r}
 
-unique_treesinplots_final <- unique_treesinplots_final %>%
-  add_column(ofo_plot_id = "")
+# must remove trees from TEAK049 and TEAK052
 
-unique_treesinplots_final$ofo_plot_id[unique_treesinplots_final$NEONplotID == 'SJER_003'] <- '0119'
+unique_treesinplots_final <- unique_treesinplots_final %>% filter (NEONplotID == 'SOAP_054' | NEONplotID == 'SOAP_047' | NEONplotID == 'SOAP_031' | NEONplotID == 'SOAP_049' | NEONplotID == 'SOAP_056' | NEONplotID == 'SOAP_053' | NEONplotID == 'SOAP_045' | NEONplotID == 'SJER_059' | NEONplotID == 'SJER_058' | NEONplotID == 'SJER_047' | NEONplotID == 'SJER_054' | NEONplotID == 'SJER_060' | NEONplotID == 'SJER_049' | NEONplotID == 'SJER_045' | NEONplotID == 'SJER_003' | NEONplotID == 'SJER_057' | NEONplotID == 'SJER_046' | NEONplotID == 'SJER_055' | NEONplotID == 'SJER_048' | NEONplotID == 'SJER_061' | NEONplotID == 'SJER_050' | NEONplotID == 'SJER_053' | NEONplotID == 'SJER_063' | NEONplotID == 'SJER_051' | NEONplotID == 'TEAK_062' | NEONplotID == 'TEAK_058' | NEONplotID == 'TEAK_043' | NEONplotID == 'TEAK_056' | NEONplotID == 'TEAK_044' | NEONplotID == 'TEAK_057' | NEONplotID == 'TEAK_047' | NEONplotID == 'TEAK_053' | NEONplotID == 'TEAK_051' | NEONplotID == 'TEAK_046' | NEONplotID == 'SOAP_057' | NEONplotID == 'SOAP_059' | NEONplotID == 'SOAP_051' | NEONplotID == 'SOAP_048' | NEONplotID == 'SOAP_058' | NEONplotID == 'SOAP_043' | NEONplotID == 'SOAP_050' | NEONplotID == 'SOAP_044' | NEONplotID == 'SOAP_052' | NEONplotID == 'SOAP_046' | NEONplotID == 'SOAP_060' | NEONplotID == 'SOAP_055' | NEONplotID == 'SOAP_061' | NEONplotID == 'SOAP_010')
+
+treesfinal <- unique_treesinplots_final
+
+treesfinal <- treesfinal[,-c(52:53)]
+
+treesfinal <- treesfinal |> left_join(towersubplotssampled)
+
+treesfinal <- treesfinal[,-c(82:83)]
+
+treesfinal <- st_drop_geometry(treesfinal)
+
+treesfinal <- treesfinal[,-c(74:80)]
+
+treesfinal <- treesfinal[,-c(65:72)]
+
+treesfinal <- treesfinal[,-c(51:62)]
+
+treesfinal$ofo_plot_id[treesfinal$NEONplotID == 'SJER_003'] <- '0119'
+
+treesfinal$ofo_plot_id[treesfinal$NEONplotID == 'SOAP_010'] <- '0120'
 
 ```
 
+Add subplot ID
 
+```{r}
+
+#treesfinal <- treesfinal %>%
+#  add_column(ofo_subplot_id = "")
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_045' & treesfinal$subplotID == '23_400'] <- '0341'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_045' & treesfinal$subplotID == '39_400'] <- '0342'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_046' & treesfinal$subplotID == '39_400'] <- '0343'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_046' & treesfinal$subplotID == '41_400'] <- '0344'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_047' & treesfinal$subplotID == '21_400'] <- '0345'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_047' & treesfinal$subplotID == '39_400'] <- '0346'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_048' & treesfinal$subplotID == '39_400'] <- '0347'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_048' & treesfinal$subplotID == '41_400'] <- '0348'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_049' & treesfinal$subplotID == '21_400'] <- '0349'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_049' & treesfinal$subplotID == '23_400'] <- '0350'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_050' & treesfinal$subplotID == '21_400'] <- '0351'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_050' & treesfinal$subplotID == '39_400'] <- '0352'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_051' & treesfinal$subplotID == '39_400'] <- '0353'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_051' & treesfinal$subplotID == '41_400'] <- '0354'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_053' & treesfinal$subplotID == '21_400'] <- '0355'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_053' & treesfinal$subplotID == 'unknown_400'] <- '0355'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_053' & treesfinal$subplotID == '23_400'] <- '0356'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_054' & treesfinal$subplotID == '21_400'] <- '0357'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_054' & treesfinal$subplotID == '39_400'] <- '0358'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_055' & treesfinal$subplotID == '21_400'] <- '0359'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_055' & treesfinal$subplotID == '39_400'] <- '0360'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_057' & treesfinal$subplotID == '23_400'] <- '0361'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_057' & treesfinal$subplotID == '39_400'] <- '0362'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_058' & treesfinal$subplotID == '39_400'] <- '0363'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_058' & treesfinal$subplotID == '41_400'] <- '0364'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_059' & treesfinal$subplotID == '21_400'] <- '0365'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_059' & treesfinal$subplotID == '23_400'] <- '0366'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_060' & treesfinal$subplotID == '23_400'] <- '0367'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_060' & treesfinal$subplotID == '39_400'] <- '0368'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_061' & treesfinal$subplotID == '39_400'] <- '0369'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_061' & treesfinal$subplotID == '41_400'] <- '0370'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_063' & treesfinal$subplotID == '23_400'] <- '0371'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_063' & treesfinal$subplotID == '41_400'] <- '0372'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_031' & treesfinal$subplotID == '21_400'] <- '0373'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_031' & treesfinal$subplotID == '39_400'] <- '0374'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_043' & treesfinal$subplotID == '23_400'] <- '0375'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_043' & treesfinal$subplotID == '39_400'] <- '0376'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_043' & treesfinal$subplotID == '39_100_unknown'] <- '0376'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_044' & treesfinal$subplotID == '21_400'] <- '0377'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_044' & treesfinal$subplotID == '41_400'] <- '0378'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_045' & treesfinal$subplotID == '21_400'] <- '0379'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_045' & treesfinal$subplotID == '23_400'] <- '0380'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_046' & treesfinal$subplotID == '23_400'] <- '0381'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_046' & treesfinal$subplotID == '41_400'] <- '0382'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_047' & treesfinal$subplotID == '23_400'] <- '0383'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_047' & treesfinal$subplotID == '41_400'] <- '0384'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_048' & treesfinal$subplotID == '21_400'] <- '0385'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_048' & treesfinal$subplotID == '39_400'] <- '0386'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_049' & treesfinal$subplotID == '23_400'] <- '0387'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_049' & treesfinal$subplotID == '39_400'] <- '0388'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_050' & treesfinal$subplotID == '23_400'] <- '0389'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_050' & treesfinal$subplotID == '41_400'] <- '0390'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_051' & treesfinal$subplotID == '21_400'] <- '0391'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_051' & treesfinal$subplotID == '39_400'] <- '0392'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_052' & treesfinal$subplotID == '23_400'] <- '0393'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_052' & treesfinal$subplotID == '39_400'] <- '0394'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_053' & treesfinal$subplotID == '23_400'] <- '0395'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_053' & treesfinal$subplotID == '39_400'] <- '0396'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_054' & treesfinal$subplotID == '23_400'] <- '0397'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_054' & treesfinal$subplotID == '23_25_unknown'] <- '0397'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_054' & treesfinal$subplotID == '39_400'] <- '0398'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_054' & treesfinal$subplotID == '39_25_unknown'] <- '0398'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_055' & treesfinal$subplotID == '23_400'] <- '0399'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_055' & treesfinal$subplotID == '39_400'] <- '0399'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_055' & treesfinal$subplotID == '41_400'] <- '0400'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_056' & treesfinal$subplotID == '39_400'] <- '0401'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_056' & treesfinal$subplotID == '41_400'] <- '0402'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_057' & treesfinal$subplotID == '23_400'] <- '0403'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_057' & treesfinal$subplotID == '21_400'] <- '0403'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_057' & treesfinal$subplotID == '39_400'] <- '0404'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_058' & treesfinal$subplotID == '39_400'] <- '0405'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_058' & treesfinal$subplotID == '41_400'] <- '0406'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_059' & treesfinal$subplotID == '39_400'] <- '0407'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_059' & treesfinal$subplotID == '41_400'] <- '0408'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_060' & treesfinal$subplotID == '23_400'] <- '0409'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_060' & treesfinal$subplotID == '39_400'] <- '0410'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_061' & treesfinal$subplotID == '39_400'] <- '0411'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SOAP_061' & treesfinal$subplotID == '41_400'] <- '0412'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_043' & treesfinal$subplotID == '21_400'] <- '0413'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_043' & treesfinal$subplotID == '23_400'] <- '0414'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_044' & treesfinal$subplotID == '21_400'] <- '0415'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_044' & treesfinal$subplotID == '39_400'] <- '0416'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_046' & treesfinal$subplotID == '39_400'] <- '0417'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_046' & treesfinal$subplotID == '41_400'] <- '0418'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_047' & treesfinal$subplotID == '21_400'] <- '0419'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_047' & treesfinal$subplotID == '41_400'] <- '0420'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_051' & treesfinal$subplotID == '21_400'] <- '0421'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_051' & treesfinal$subplotID == '41_400'] <- '0422'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_053' & treesfinal$subplotID == '21_400'] <- '0423'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_053' & treesfinal$subplotID == '41_400'] <- '0424'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_056' & treesfinal$subplotID == '21_400'] <- '0425'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_056' & treesfinal$subplotID == '39_400'] <- '0426'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_057' & treesfinal$subplotID == '21_400'] <- '0427'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_057' & treesfinal$subplotID == '23_400'] <- '0428'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_058' & treesfinal$subplotID == '21_400'] <- '0429'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_058' & treesfinal$subplotID == '41_400'] <- '0430'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_062' & treesfinal$subplotID == '21_400'] <- '0431'
+
+treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'TEAK_062' & treesfinal$subplotID == '41_400'] <- '0432'
+
+treesfinal <- treesfinal[,-c(15:16)]
+
+treesfinal <- treesfinal[,-c(26:30)]
+
+```
 
 Export
 
+```{r}
+
+write.csv (treesfinal, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\trees.csv")
+
+```
 
 ## ALTERATIONS MADE IN EXCEL
 
@@ -922,6 +1462,12 @@ Manually separated damage_1 codes into separate columns
 ## junk code workshopping
 
 ```{r}
+
+treesfinal_sf <- st_as_sf (treesfinal, coords = c("lon", "lat"), crs = 4326)
+
+subplot_investigation <- st_intersection(SOAP_055_poly, treesfinal_sf)
+
+st_write(subplot_investigation, "C:\\Users\\emily\\Desktop\\SOAP055trees.gpkg")
 
 # have tried so many things over so long that I've forgotten what I've tried and erased
 
@@ -1054,7 +1600,17 @@ SJER063_b_poly <- SJER063_b %>%
   summarise(geometry = st_combine(geometry)) %>%
   st_cast("POLYGON")
 
+## testing API token nonsense
 
+SJER063_59 <- GET("https://data.neonscience.org/api/v0/locations/SJER_063.basePlot.vst.59")
+
+SJER063_59 <- jsonlite::fromJSON(content(SJER063_59, as="text"))
+
+SJER063_59 <- GET("https://data.neonscience.org/api/v0/locations/SJER_063.basePlot.vst.59?apiToken=.")
+
+SJER063_59 <- jsonlite::fromJSON(content(SJER063_59, as="text"))
+
+# token works!
 
 ```
 
