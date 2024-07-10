@@ -138,26 +138,29 @@ mappingandtagging <- removeDups(data=vst_mappingandtagging,
 vst_apparentindividual <- removeDups(data=vst_apparentindividual,
                           variables=variables_10098)
 
-# no duplicates found! this doesn't mean there aren't duplicated trees across different dates, just ensures there aren't human error duplicates
+# no duplicates found doesn't mean there aren't duplicated trees across different dates, just ensures there aren't human error duplicates
 
 # run the "getLocTOS" function to get locations of mapped woody individuals
 
-mappingandtagging = getLocTOS(data = mappingandtagging, dataProd = "vst_mappingandtagging")
+mappingandtagging_locations <- getLocTOS(data = vst_mappingandtagging, dataProd = "vst_mappingandtagging")
 
 # join that data.frame with another that contains more data
 
-join <- joinTableNEON(mappingandtagging,
+join <- joinTableNEON(mappingandtagging_locations,
                    vst_apparentindividual,
                      name1="vst_mappingandtagging",
                      name2="vst_apparentindividual")
 
-# filter this massive dataset to 1. trees, that are 2. mapped, 3. have a stemDiameter ≥ 10 cm (smaller trees were not exhaustively sampled), and 4. have a height
+# filter this massive dataset to 1. trees, that are 2. mapped, 3. have a stemDiameter ≥ 10 cm (smaller trees were not exhaustively sampled)
+
+# 11130 rows to start
 
 join = join |>
   filter(growthForm %in% c("multi-bole tree", "sapling", "single bole tree"), # exclude the "small tree" category because those are trees under 10cm DBH
          !is.na(adjDecimalLatitude),
-         (stemDiameter >= 10 & !is.na(stemDiameter)),
-         !is.na(stemDiameter))
+         (stemDiameter >= 10 & !is.na(stemDiameter)))
+
+# 1144 rows now
 
 # rename some columns, remove some extraneous columns to make this easier to examine
 
@@ -193,7 +196,6 @@ join_spatial = st_as_sf(join, coords = c("adjDecimalLongitude", "adjDecimalLatit
 
 ```
 
-
 Remove data from plots outside OFO flight footprints
 
 ```{r}
@@ -205,7 +207,9 @@ overlap_plots <- as.data.frame(unique(OFONEONintersection$NEONplotID)) # wow 50 
 # remove trees from plots that are not these plots
 
 treesinplots <- join_spatial %>% filter (NEONplotID == 'SOAP_054' | NEONplotID == 'SOAP_047' | NEONplotID == 'SOAP_031' | NEONplotID == 'SOAP_049' | NEONplotID == 'SOAP_056' | NEONplotID == 'SOAP_053' | NEONplotID == 'SOAP_045'
-| NEONplotID == 'SJER_059' | NEONplotID == 'SJER_058' | NEONplotID == 'SJER_047' | NEONplotID == 'SJER_054' | NEONplotID == 'SJER_060' | NEONplotID == 'SJER_049' | NEONplotID == 'SJER_045' | NEONplotID == 'SJER_003' | NEONplotID == 'SJER_057' | NEONplotID == 'SJER_046' | NEONplotID == 'SJER_055' | NEONplotID == 'SJER_048' | NEONplotID == 'SJER_061' | NEONplotID == 'SJER_050' | NEONplotID == 'SJER_053' | NEONplotID == 'SJER_063' | NEONplotID == 'SJER_051' | NEONplotID == 'TEAK_049' | NEONplotID == 'TEAK_062' | NEONplotID == 'TEAK_058' | NEONplotID == 'TEAK_043' | NEONplotID == 'TEAK_056' | NEONplotID == 'TEAK_044' | NEONplotID == 'TEAK_057' | NEONplotID == 'TEAK_047' | NEONplotID == 'TEAK_053' | NEONplotID == 'TEAK_051' | NEONplotID == 'TEAK_046' | NEONplotID == 'TEAK_052' | NEONplotID == 'SOAP_057' | NEONplotID == 'SOAP_059' | NEONplotID == 'SOAP_051' | NEONplotID == 'SOAP_048' | NEONplotID == 'SOAP_058' | NEONplotID == 'SOAP_043' | NEONplotID == 'SOAP_050' | NEONplotID == 'SOAP_044' | NEONplotID == 'SOAP_052' | NEONplotID == 'SOAP_046' | NEONplotID == 'SOAP_060' | NEONplotID == 'SOAP_055' | NEONplotID == 'SOAP_061' | NEONplotID == 'SOAP_010')
+| NEONplotID == 'SJER_059' | NEONplotID == 'SJER_058' | NEONplotID == 'SJER_047' | NEONplotID == 'SJER_054' | NEONplotID == 'SJER_060' | NEONplotID == 'SJER_049' | NEONplotID == 'SJER_045' | NEONplotID == 'SJER_003' | NEONplotID == 'SJER_057' | NEONplotID == 'SJER_046' | NEONplotID == 'SJER_055' | NEONplotID == 'SJER_048' | NEONplotID == 'SJER_061' | NEONplotID == 'SJER_050' | NEONplotID == 'SJER_053' | NEONplotID == 'SJER_063' | NEONplotID == 'SJER_051' | NEONplotID == 'TEAK_062' | NEONplotID == 'TEAK_058' | NEONplotID == 'TEAK_043' | NEONplotID == 'TEAK_056' | NEONplotID == 'TEAK_044' | NEONplotID == 'TEAK_057' | NEONplotID == 'TEAK_047' | NEONplotID == 'TEAK_053' | NEONplotID == 'TEAK_051' | NEONplotID == 'TEAK_046' | NEONplotID == 'SOAP_057' | NEONplotID == 'SOAP_059' | NEONplotID == 'SOAP_051' | NEONplotID == 'SOAP_048' | NEONplotID == 'SOAP_058' | NEONplotID == 'SOAP_043' | NEONplotID == 'SOAP_050' | NEONplotID == 'SOAP_044' | NEONplotID == 'SOAP_052' | NEONplotID == 'SOAP_046' | NEONplotID == 'SOAP_060' | NEONplotID == 'SOAP_055' | NEONplotID == 'SOAP_061' | NEONplotID == 'SOAP_010')
+
+# down to 547 rows
 
 # export to examine
 
@@ -217,25 +221,25 @@ Remove duplicated trees that were measured multiple times in multiple years
 
 ```{r}
 
-# 2036 trees in "treesinplots"
+# 547 trees in "treesinplots"
 
-unique_trees <- dplyr::distinct(treesinplots, adjNorthing) # but only 1402 unique northings
+unique_trees <- dplyr::distinct(treesinplots, adjNorthing) # but only 329 unique northings
 
-unique_trees <- dplyr::distinct(treesinplots, adjEasting) # AND 1402 unique eastings
+unique_trees <- dplyr::distinct(treesinplots, adjEasting) # AND 329 unique eastings
 
-unique_trees <- dplyr::distinct(treesinplots, geometry) # And 1402 sets of coordinates. strong pattern here.
+unique_trees <- dplyr::distinct(treesinplots, geometry) # And 329 sets of coordinates. strong pattern here.
 
-unique_trees <- dplyr::distinct(treesinplots) # but this returns 1953 unique rows 
+unique_trees <- dplyr::distinct(treesinplots) # but this returns 547 unique rows 
 
-# HMMMMMMM. So there are 1402 unique sets of tree coordinates. But there are 1953 unique rows in the original treesinplots sf object. So we can easily eliminate completely identical entries in treesinplots and go from 2036 rows to 1953 rows very easily. 
+# HMMMMMMM. So there are 329 unique sets of tree coordinates. But there are 547 unique rows in the original treesinplots sf object. 
 
 # I did use the NEON "removeDups" function earlier. A reasonable question would be "why are there still so many duplicates???" and the answer is that each row in the original data.frames has a "uniqueID" which is a super long string of characters and numbers. So technically there are no duplicates in the original data.frames. But then I removed a bunch of columns that we didn't need, including these "uniqueID" columns. Removing the "uniqueID" columns resulted in a whole lot of identical rows. 
 
-# Going from 1953 rows 1402 rows is trickier. I could do it manually, but it would be really time consuming. My plan is to sort the data frame in by date in descending order (so that the most recent rows are on top). Then I'll use dplyr::distinct on the geometry column. When there are duplicated rows, dplyr::distinct keeps the first row. So theoretically we'll keep the most recent set of values for each tree.
+# My plan is to sort the data frame in by date in descending order (so that the most recent rows are on top). Then I'll use dplyr::distinct on the geometry column. When there are duplicated rows, dplyr::distinct keeps the first row. So theoretically we'll keep the most recent set of values for each tree.
 
 # But of course it's more complicated than that. Turns out there are a lot of repeat measurements for single bole trees, from the same sampling date, but confusingly have different heights, dbhs, etc. So in situations where there are multiple unique most recent measurements I'll just choose which one to keep randomly (e.g. whichever one is arbitrarily first in the data.frame). 
 
-# get the 1953 unique rows
+# get the unique rows
 
 unique_treesinplots <- dplyr::distinct(treesinplots)
 
@@ -243,7 +247,7 @@ unique_treesinplots <- dplyr::distinct(treesinplots)
 
 unique_treesinplots_bydate <- unique_treesinplots %>% mutate(NEONdate=ymd(NEONdate)) %>% arrange(desc(NEONdate))
 
-# get the 1402 trees with unique sets of coordinates
+# get the 329 trees with unique sets of coordinates
 
 unique_treesinplots_final <- dplyr::distinct(unique_treesinplots_bydate, geometry, .keep_all = TRUE)
 
@@ -278,7 +282,7 @@ subplotssampled <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_rec
 subplotssampled <- subplotssampled %>% rename(NEONplotID = plotid)
 
 towersubplotssampled <- subplotssampled %>% filter (NEONplotID == 'SOAP_054' | NEONplotID == 'SOAP_047' | NEONplotID == 'SOAP_031' | NEONplotID == 'SOAP_049' | NEONplotID == 'SOAP_056' | NEONplotID == 'SOAP_053' | NEONplotID == 'SOAP_045'
-| NEONplotID == 'SJER_059' | NEONplotID == 'SJER_058' | NEONplotID == 'SJER_047' | NEONplotID == 'SJER_054' | NEONplotID == 'SJER_060' | NEONplotID == 'SJER_049' | NEONplotID == 'SJER_045' | NEONplotID == 'SJER_003' | NEONplotID == 'SJER_057' | NEONplotID == 'SJER_046' | NEONplotID == 'SJER_055' | NEONplotID == 'SJER_048' | NEONplotID == 'SJER_061' | NEONplotID == 'SJER_050' | NEONplotID == 'SJER_053' | NEONplotID == 'SJER_063' | NEONplotID == 'SJER_051' | NEONplotID == 'TEAK_049' | NEONplotID == 'TEAK_062' | NEONplotID == 'TEAK_058' | NEONplotID == 'TEAK_043' | NEONplotID == 'TEAK_056' | NEONplotID == 'TEAK_044' | NEONplotID == 'TEAK_057' | NEONplotID == 'TEAK_047' | NEONplotID == 'TEAK_053' | NEONplotID == 'TEAK_051' | NEONplotID == 'TEAK_046' | NEONplotID == 'TEAK_052' | NEONplotID == 'SOAP_057' | NEONplotID == 'SOAP_059' | NEONplotID == 'SOAP_051' | NEONplotID == 'SOAP_048' | NEONplotID == 'SOAP_058' | NEONplotID == 'SOAP_043' | NEONplotID == 'SOAP_050' | NEONplotID == 'SOAP_044' | NEONplotID == 'SOAP_052' | NEONplotID == 'SOAP_046' | NEONplotID == 'SOAP_060' | NEONplotID == 'SOAP_055' | NEONplotID == 'SOAP_061' | NEONplotID == 'SOAP_010')
+| NEONplotID == 'SJER_059' | NEONplotID == 'SJER_058' | NEONplotID == 'SJER_047' | NEONplotID == 'SJER_054' | NEONplotID == 'SJER_060' | NEONplotID == 'SJER_049' | NEONplotID == 'SJER_045' | NEONplotID == 'SJER_003' | NEONplotID == 'SJER_057' | NEONplotID == 'SJER_046' | NEONplotID == 'SJER_055' | NEONplotID == 'SJER_048' | NEONplotID == 'SJER_061' | NEONplotID == 'SJER_050' | NEONplotID == 'SJER_053' | NEONplotID == 'SJER_063' | NEONplotID == 'SJER_051' | NEONplotID == 'TEAK_062' | NEONplotID == 'TEAK_058' | NEONplotID == 'TEAK_043' | NEONplotID == 'TEAK_056' | NEONplotID == 'TEAK_044' | NEONplotID == 'TEAK_057' | NEONplotID == 'TEAK_047' | NEONplotID == 'TEAK_053' | NEONplotID == 'TEAK_046' | NEONplotID == 'TEAK_052' | NEONplotID == 'SOAP_057' | NEONplotID == 'SOAP_059' | NEONplotID == 'SOAP_051' | NEONplotID == 'SOAP_048' | NEONplotID == 'SOAP_058' | NEONplotID == 'SOAP_043' | NEONplotID == 'SOAP_050' | NEONplotID == 'SOAP_044' | NEONplotID == 'SOAP_052' | NEONplotID == 'SOAP_046' | NEONplotID == 'SOAP_060' | NEONplotID == 'SOAP_055' | NEONplotID == 'SOAP_061' | NEONplotID == 'SOAP_010')
 
 # make each plot polygon into four separate polygons (NE, NW, SE, SW)
 
@@ -934,7 +938,7 @@ assign(paste0(plot_id_current, "_poly"), ((get(paste0(plot_id_current, "_poly"))
 
 # save to primary data folder
 
-#st_write(get(paste0(plot_id_current, "_poly")), paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\NEON_plot_polys_from_field_coords\\", plot_id_current, ".gpkg"), overwrite = TRUE)
+st_write(get(paste0(plot_id_current, "_poly")), paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\NEON_plot_polys_from_field_coords\\", plot_id_current, ".gpkg"), overwrite = TRUE)
 
 # and field plot boundary folder
 
@@ -1089,12 +1093,15 @@ unique_treesinplots_final$sppcode[unique_treesinplots_final$taxonID == 'RHIL'] <
 ```
 
 
-Canopy position
+Canopy position and overhead visibility
 
 ```{r}
 
 unique_treesinplots_final <- unique_treesinplots_final %>%
   add_column(canpos_code = "")
+
+unique_treesinplots_final <- unique_treesinplots_final %>%
+  add_column(ohvis = "")
 
 unique_treesinplots_final$canpos_code[unique_treesinplots_final$canopyPosition == 'Full shade'] <- '5' 
 
@@ -1107,6 +1114,18 @@ unique_treesinplots_final$canpos_code[unique_treesinplots_final$canopyPosition =
 unique_treesinplots_final$canpos_code[unique_treesinplots_final$canopyPosition == 'Partially shaded'] <- '3' 
 
 unique_treesinplots_final$canpos_code[is.na(unique_treesinplots_final$canopyPosition)] <- '' 
+
+unique_treesinplots_final$ohvis[unique_treesinplots_final$canpos_code == '5'] <- 'FALSE' 
+
+unique_treesinplots_final$ohvis[unique_treesinplots_final$canpos_code == '4'] <- 'FALSE' 
+
+unique_treesinplots_final$ohvis[unique_treesinplots_final$canpos_code == '3'] <- 'TRUE' 
+
+unique_treesinplots_final$ohvis[unique_treesinplots_final$canpos_code == '2'] <- 'TRUE' 
+
+unique_treesinplots_final$ohvis[unique_treesinplots_final$canpos_code == '1'] <- 'TRUE' 
+
+unique_treesinplots_final$ohvis[unique_treesinplots_final$canpos_code == ''] <- '' 
 
 ```
 
@@ -1212,10 +1231,6 @@ OFO plot ID numbers
 
 ```{r}
 
-# must remove trees from TEAK049 and TEAK052
-
-unique_treesinplots_final <- unique_treesinplots_final %>% filter (NEONplotID == 'SOAP_054' | NEONplotID == 'SOAP_047' | NEONplotID == 'SOAP_031' | NEONplotID == 'SOAP_049' | NEONplotID == 'SOAP_056' | NEONplotID == 'SOAP_053' | NEONplotID == 'SOAP_045' | NEONplotID == 'SJER_059' | NEONplotID == 'SJER_058' | NEONplotID == 'SJER_047' | NEONplotID == 'SJER_054' | NEONplotID == 'SJER_060' | NEONplotID == 'SJER_049' | NEONplotID == 'SJER_045' | NEONplotID == 'SJER_003' | NEONplotID == 'SJER_057' | NEONplotID == 'SJER_046' | NEONplotID == 'SJER_055' | NEONplotID == 'SJER_048' | NEONplotID == 'SJER_061' | NEONplotID == 'SJER_050' | NEONplotID == 'SJER_053' | NEONplotID == 'SJER_063' | NEONplotID == 'SJER_051' | NEONplotID == 'TEAK_062' | NEONplotID == 'TEAK_058' | NEONplotID == 'TEAK_043' | NEONplotID == 'TEAK_056' | NEONplotID == 'TEAK_044' | NEONplotID == 'TEAK_057' | NEONplotID == 'TEAK_047' | NEONplotID == 'TEAK_053' | NEONplotID == 'TEAK_051' | NEONplotID == 'TEAK_046' | NEONplotID == 'SOAP_057' | NEONplotID == 'SOAP_059' | NEONplotID == 'SOAP_051' | NEONplotID == 'SOAP_048' | NEONplotID == 'SOAP_058' | NEONplotID == 'SOAP_043' | NEONplotID == 'SOAP_050' | NEONplotID == 'SOAP_044' | NEONplotID == 'SOAP_052' | NEONplotID == 'SOAP_046' | NEONplotID == 'SOAP_060' | NEONplotID == 'SOAP_055' | NEONplotID == 'SOAP_061' | NEONplotID == 'SOAP_010')
-
 treesfinal <- unique_treesinplots_final
 
 treesfinal <- treesfinal[,-c(52:53)]
@@ -1242,8 +1257,8 @@ Add subplot ID
 
 ```{r}
 
-#treesfinal <- treesfinal %>%
-#  add_column(ofo_subplot_id = "")
+treesfinal <- treesfinal %>%
+  add_column(ofo_subplot_id = "")
 
 treesfinal$ofo_subplot_id[treesfinal$NEONplotID == 'SJER_045' & treesfinal$subplotID == '23_400'] <- '0341'
 
@@ -1447,11 +1462,23 @@ treesfinal <- treesfinal[,-c(26:30)]
 
 ```
 
+Distance to pith
+
+```{r}
+
+treesfinal <- treesfinal %>%
+  add_column(distance_pith_m = "")
+
+treesfinal$distance_pith_m <- treesfinal$stemDistance_m + ((treesfinal$DBH_cm/2)*0.01)
+
+```
+
+
 Export
 
 ```{r}
 
-write.csv (treesfinal, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\trees.csv")
+write.csv (treesfinal, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0013\\data\\trees_with__and_without_heights.csv")
 
 ```
 
