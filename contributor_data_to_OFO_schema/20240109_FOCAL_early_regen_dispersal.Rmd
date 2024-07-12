@@ -31,7 +31,7 @@ setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
 
 #import data
 
-treedata <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0011\\data\\dispersal-data-entry-2023-stemmap_tree.csv", header = TRUE)
+treedata <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0011\\data\\updated_2024_data\\stemmap_tree.csv", header = TRUE)
 
 ```
 
@@ -48,7 +48,12 @@ for(i in 1:nrow(treedata)) {
     }
     else (treedata[i,]$ofo_plot_id = '0114')
   }
-else (treedata[i,]$ofo_plot_id = '0112')
+  else if (treedata$fire[i] == 'CA-SM03') {
+    treedata[i,]$ofo_plot_id = '0112'
+  }
+  else if (treedata$fire[i] == 'CA-SM99') {
+    treedata[i,]$ofo_plot_id = '0167'
+  }
 }
 
 ```
@@ -142,6 +147,9 @@ Species
 treedata$`species`[treedata$`species` == 'abco'] <- '15' 
 treedata$`species`[treedata$`species` == 'cade'] <- '81' 
 treedata$`species`[treedata$`species` == 'pipj'] <- '150' # a code we made up for "either PIPO or PIJE", not an official FIA species code number either
+treedata$`species`[treedata$`species` == 'pila'] <- '117'
+treedata$`species`[treedata$`species` == 'pipo'] <- '122'
+treedata$`species`[treedata$`species` == 'quke'] <- '818'
 
 ```
 
@@ -149,11 +157,8 @@ Growth form
 
 ```{r}
 
-treedata$`growth_form` <- ''
+treedata$`growth_form` <- 'tree' # all abco, cade, pipj, pila, pipo, and qukes are trees
 
-treedata$`growth_form`[treedata$`species` == '15'] <- 'tree'  #'ABCO'
-treedata$`growth_form`[treedata$`species` == '81'] <- 'tree' # 'CADE27'
-treedata$`growth_form`[treedata$`species` == '150'] <- 'tree' # either PIPO or PIJE, "PIPJ" in terms of this dataset
 ```
 
 Live/dead
@@ -212,6 +217,8 @@ treedata$defects <- str_replace(treedata$defects, "C", "90006") # crook/sweep
 treedata$defects <- str_replace(treedata$defects, "D", "90002") # dead top
 treedata$defects <- str_replace(treedata$defects, "L", "90006") # lean, there isn't a code for lean but it's pretty close to crook/sweep
 treedata$defects <- str_replace(treedata$defects, "S", "90006") # crook/sweep
+treedata$defects <- str_replace(treedata$defects, "M", "") # mortality...we don't need this as a damage code
+treedata$defects <- str_replace(treedata$defects, "R", "") # resprout...we don't need this as a damage code either
 
 ```
 
@@ -234,7 +241,7 @@ Export CSV
 
 ```{r}
 
-write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_early_regen_dispersal\\20240516_FOCAL_early_regen_dispersal.csv")
+write.csv(treedata, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_early_regen_dispersal\\20240712_FOCAL_early_regen_dispersal.csv")
 
 ```
 
