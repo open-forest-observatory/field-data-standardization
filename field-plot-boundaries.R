@@ -400,7 +400,7 @@ for(i in 1:nrow(Lampingplots)) {
 
 #import data
 
-treedata <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_early_regen_dispersal\\20240110_FOCAL_early_regen_dispersal.csv", header = TRUE)
+treedata <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_early_regen_dispersal\\20240712_FOCAL_early_regen_dispersal.csv", header = TRUE)
 
 # we don't want all of these columns, just plot ID and spatial attributes
 
@@ -412,6 +412,8 @@ treedata <- treedata [-(2:94),]
 treedata <- treedata [-(3:21),]
 treedata <- treedata [-(4:19),]
 
+treedata <- treedata [-(1:189),]
+
 # convert to sf
 
 treedata_sf <- st_as_sf(treedata, coords = c("centerpoint_longitude", "centerpoint_latitude"), crs = 4326)
@@ -421,7 +423,7 @@ treedata_sf <- st_as_sf(treedata, coords = c("centerpoint_longitude", "centerpoi
 # CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
 
 treedata_sf = st_transform(treedata_sf, crs = 5070)
-treedata_circles <- st_buffer(treedata_sf, dist = c(50,30, 30), nQuadSegs = 10) # First plot (#112 is 50m radius), other 30m
+treedata_circles <- st_buffer(treedata_sf, dist = c(50,30, 30, 30), nQuadSegs = 10) # First plot (#112 is 50m radius), other 30m
 
 # Then back to WGS84
 
