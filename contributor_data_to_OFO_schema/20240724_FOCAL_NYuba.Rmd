@@ -1,0 +1,63 @@
+---
+title: "FOCAL N Yuba"
+author: "Emily Marie Purvis"
+date: "2024-07-24"
+output: html_document
+---
+
+## DATA MANIPULATED IN R
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+library(stringr)
+library(pracma)
+```
+
+Load data
+
+```{r}
+
+treelocs <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0015\\data\\tree-locs-rectified-macroplot.gpkg")
+
+plotlocs <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0015\\data\\macroplot-footprint.gpkg")
+
+tabulardata <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0015\\data\\ground-survey-tabular.csv")
+
+```
+
+Plot calculations
+
+```{r}
+
+# plot area
+
+units::set_units(st_area(plotlocs[4,]$geometry), "m^2")
+
+# plot center
+
+plotlocs <- st_transform(plotlocs, crs=4326)
+
+st_centroid(plotlocs[4,]$geometry)
+
+```
+
+Damage codes
+
+```{r}
+
+# broken top 90001
+
+# dead top 90002
+
+# fork 90004
+
+```
+
+
+
+## DATA MANIPULATED IN EXCEL
+
