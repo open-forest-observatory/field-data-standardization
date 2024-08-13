@@ -25,6 +25,8 @@ treelocs <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-da
 
 plotlocs <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0015\\data\\macroplot-footprint.gpkg")
 
+subplotlocs <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0015\\data\\plot-footprint-rectified-macroplot.gpkg")
+
 tabulardata <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0015\\data\\ground-survey-tabular.csv")
 
 ```
@@ -35,13 +37,178 @@ Plot calculations
 
 # plot area
 
-units::set_units(st_area(plotlocs[4,]$geometry), "m^2")
+plotlocs <- plotlocs %>%
+  add_column(area_m2 = "")
+
+plotlocs$area_m2 <- units::set_units(st_area(plotlocs$geometry), "m^2")
 
 # plot center
 
 plotlocs <- st_transform(plotlocs, crs=4326)
 
-st_centroid(plotlocs[4,]$geometry)
+plotlocs <- plotlocs %>%
+  add_column(centroid = "")
+
+plotlocs$centroid <- st_centroid(plotlocs$geometry)
+
+plots <- st_drop_geometry(plotlocs)
+
+write.csv(plots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_NYuba\\20240725_FOCAL_NYuba_plots.csv")
+
+```
+
+Subplot calculations
+
+```{r}
+
+# need subplot center lat/lons
+
+subplotlocs <- st_transform(subplotlocs, crs=4326)
+
+subplotlocs <- subplotlocs %>%
+  add_column(centroid = "")
+
+subplotlocs$centroid <- st_centroid(subplotlocs$geom)
+
+subplots <- st_drop_geometry(subplotlocs)
+
+write.csv(subplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_NYuba\\20240725_FOCAL_NYuba_subplots.csv")
+
+```
+
+Tree calculations
+
+OFO plot ID and subplot ID
+
+```{r}
+
+treelocs <- treelocs %>%
+  add_column(ofo_plot_id = "")
+
+treelocs$ofo_plot_id[treelocs$macroplot_id == 'B'] <- '0168'
+
+treelocs$ofo_plot_id[treelocs$macroplot_id == 'C'] <- '0169'
+
+treelocs$ofo_plot_id[treelocs$macroplot_id == 'E'] <- '0170'
+
+treelocs$ofo_plot_id[treelocs$macroplot_id == 'F'] <- '0171'
+
+treelocs <- treelocs %>%
+  add_column(ofo_subplot_id = "")
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B21'] <- '0433'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B22'] <- '0434'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B23'] <- '0435'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B31'] <- '0436'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B32'] <- '0437'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B33'] <- '0438'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B41'] <- '0439'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B42'] <- '0440'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'B43'] <- '0441'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'C31'] <- '0442'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'C32'] <- '0443'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'C41'] <- '0444'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'C42'] <- '0445'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'E11'] <- '0446'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'E12'] <- '0447'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'E21'] <- '0448'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'E22'] <- '0449'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'E31'] <- '0450'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'E32'] <- '0451'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F01'] <- '0452'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F02'] <- '0453'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F03'] <- '0454'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F11'] <- '0455'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F12'] <- '0456'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F13'] <- '0457'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F21'] <- '0458'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F22'] <- '0459'
+
+treelocs$ofo_subplot_id[treelocs$plot_num == 'F23'] <- '0460'
+
+```
+
+Tree lat/lon
+
+```{r}
+
+treelocs <- st_transform(treelocs, crs=4326)
+
+treelocs <- treelocs %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+```
+
+DBH is in cm and height is in m
+
+Species
+
+```{r}
+
+treelocs <- treelocs %>%
+  add_column(spp_numeric = "")
+
+treelocs$spp_numeric[treelocs$species == 'ABCO'] <- '015'
+
+treelocs$spp_numeric[treelocs$species == 'CADE27'] <- '081'
+
+treelocs$spp_numeric[treelocs$species == 'PILA'] <- '117'
+
+treelocs$spp_numeric[treelocs$species == 'PIPO'] <- '122'
+
+treelocs$spp_numeric[treelocs$species == 'PSME'] <- '202'
+
+treelocs$spp_numeric[treelocs$species == 'QUKE'] <- '818'
+
+treelocs$spp_numeric[treelocs$species == 'UNKNCONIFER'] <- '002'
+
+```
+
+Growth form
+
+```{r}
+
+# they're all trees
+
+treelocs <- treelocs %>%
+  add_column(growth_form = "tree")
+
+```
+
+Live/dead
+
+```{r}
+
+treelocs$status[treelocs$status == 'live'] <- 'L'
+
+treelocs$status[treelocs$status == 'dead'] <- 'D'
 
 ```
 
@@ -51,13 +218,58 @@ Damage codes
 
 # broken top 90001
 
+treelocs$health[treelocs$health == 'brokentop'] <- '90001'
+
 # dead top 90002
+
+treelocs$health[treelocs$health == 'deadtop'] <- '90002'
 
 # fork 90004
 
+treelocs$health[treelocs$health == 'forks'] <- '90004'
+
+treelocs$health[treelocs$health == 'brokentop,forks'] <- '90001 90004'
+
+treelocs$health[treelocs$health == 'forks,brokentop'] <- '90004 90001'
+
+treelocs$health[treelocs$health == 'forks,deadtop'] <- '90004 90002'
+
+treelocs$health[treelocs$health == 'forks,deadtop,brokentop'] <- '90004 90002 90001'
+
+treelocs$health[is.na(treelocs$health)] <- ''
+
 ```
 
+Distance to pith
 
+```{r}
+
+treelocs <- treelocs %>%
+  add_column(distance_pith_m = "")
+
+treelocs$distance_pith_m <- treelocs$dist + ((treelocs$dbh/2)*0.01)
+
+```
+
+Notes
+
+```{r}
+
+treelocs$notes[is.na(treelocs$notes)] <- ''
+
+```
+
+Export
+
+```{r}
+
+treesfinal <- st_drop_geometry(treelocs)
+
+write.csv(treesfinal, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\FOCAL_NYuba\\20240725_FOCAL_NYuba.csv")
+
+```
 
 ## DATA MANIPULATED IN EXCEL
+
+Moved damage codes into separate columns
 

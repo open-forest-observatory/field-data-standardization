@@ -672,3 +672,27 @@ st_write(Johnston10_final, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_stan
 #### NEON SJER, SOAP, and TEAK plots ####
 
 # this process was done in the 20240620_NEON.Rmd script!
+
+#### FOCAL N Yuba ####
+
+plotlocs <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0015\\data\\macroplot-footprint.gpkg")
+
+plotlocs <- plotlocs %>%
+  add_column(ofo_plot_id = "")
+
+plotlocs$ofo_plot_id[plotlocs$macroplot_id == 'B'] <- '0168'
+
+plotlocs$ofo_plot_id[plotlocs$macroplot_id == 'C'] <- '0169'
+
+plotlocs$ofo_plot_id[plotlocs$macroplot_id == 'E'] <- '0170'
+
+plotlocs$ofo_plot_id[plotlocs$macroplot_id == 'F'] <- '0171'
+
+plotlocs <- plotlocs[ -1 ]
+
+for(i in 1:nrow(plotlocs)) {
+  polygon_current <- plotlocs[i, ]
+  plot_id_current = polygon_current$ofo_plot_id
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}
+
