@@ -696,3 +696,132 @@ for(i in 1:nrow(plotlocs)) {
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
 
+#### Eshom ####
+
+# load data. right now we just have plot center points.
+
+plots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\Eshom_GIS_for_DY\\Eshom_GIS_for_DY\\EshomRegenPlots.shp")
+
+flight_footprints <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\eshom-flight-footprints.gpkg")
+
+# pare down large plot dataset to just those plots included in our flight footprints
+
+plotsinfootprint <- st_intersection(plots, flight_footprints)
+
+# pare down dataset further to complete stem maps with standing trees
+
+plotsinfootprint <- plotsinfootprint %>% filter (PlotID == 'MHC_2' | PlotID == 'MHW_03' | PlotID == '005_10' | PlotID == '005_22' | PlotID == 'MHW_18' | PlotID == 'PPN_20' | PlotID == 'PPN_22' | PlotID == 'PPN_23' | PlotID == 'PPN_24' | PlotID == 'PPN_25' | PlotID == 'MHW_13' | PlotID == 'MHW_15' | PlotID == 'MHW_17' | PlotID == 'PPN_09' | PlotID == 'PPN_12' | PlotID == 'PPN_13' | PlotID == '101_24' | PlotID == '101_28' | PlotID == '002_11' | PlotID == '100_03' | PlotID == '100_06' | PlotID == '100_07' | PlotID == '100_09' | PlotID == '100_11' | PlotID == '100_12' | PlotID == '100_13' | PlotID == '100_14' | PlotID == '100_16' | PlotID == '100_21' | PlotID == '100_23' | PlotID == '100_24' | PlotID == '100_28' | PlotID == '100_01' | PlotID == '100_02' | PlotID == '100_05' | PlotID == '100_17' | PlotID == '100_25' | PlotID == '100_26' | PlotID == '100_27')
+
+# remove duplicate plots
+
+plotsinfootprint <- plotsinfootprint [,-c(14:84)]
+
+plotsinfootprint <- dplyr::distinct (plotsinfootprint, .keep_all = TRUE)
+
+# add OFO plot IDs
+
+plotsinfootprint <- plotsinfootprint %>%
+  add_column(OFO_plot_id = "")
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'MHC_2'] <- '0203'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'MHW_03'] <- '0204'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '005_10'] <- '0205'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '005_22'] <- '0206'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'MHW_18'] <- '0207'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'PPN_20'] <- '0208'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'PPN_22'] <- '0209'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'PPN_23'] <- '0210'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'PPN_24'] <- '0211'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'PPN_25'] <- '0212'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'MHW_13'] <- '0213'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'MHW_15'] <- '0214'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'MHW_17'] <- '0215'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'PPN_09'] <- '0216'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'PPN_12'] <- '0217'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == 'PPN_13'] <- '0218'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '101_24'] <- '0219'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '101_28'] <- '0220'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '002_11'] <- '0221'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_03'] <- '0222'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_06'] <- '0223'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_07'] <- '0224'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_09'] <- '0225'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_11'] <- '0226'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_12'] <- '0227'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_13'] <- '0228'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_14'] <- '0229'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_16'] <- '0230'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_21'] <- '0231'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_23'] <- '0232'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_24'] <- '0233'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_28'] <- '0234'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_01'] <- '0235'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_02'] <- '0236'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_05'] <- '0237'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_17'] <- '0238'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_25'] <- '0239'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_26'] <- '0240'
+
+plotsinfootprint$OFO_plot_id[plotsinfootprint$PlotID == '100_27'] <- '0241'
+
+# remove extraneous columns
+
+plotsinfootprint <- plotsinfootprint [,-c(1:13)]
+
+# draw circles around plots (circles have a radius of 37.2 feet, or 11.33856 meters)
+
+# First project to a projected (meters) coordinate system with equal x and y distances
+
+# CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+
+plotsinfootprint <- st_transform(plotsinfootprint, crs = 5070)
+plotsinfootprint <- st_buffer(plotsinfootprint, dist = 11.33856, nQuadSegs = 10)
+
+# Then back to WGS84
+
+plot_circles <- st_transform(plotsinfootprint, crs = 4326)
+
+# export plot polygons
+
+for(i in 1:nrow(plot_circles)) {
+  polygon_current <- plot_circles[i, ]
+  plot_id_current = polygon_current$OFO_plot_id
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}
