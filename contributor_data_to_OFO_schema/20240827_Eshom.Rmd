@@ -1,0 +1,581 @@
+---
+title: "20240827_Eshom"
+author: "Emily Marie Purvis"
+date: "2024-08-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DATA MANIPULATED IN EXCEL
+
+Some data was manipulated in excel before being imported into R. In the trees csv we were sent, witness trees have two distances/azimuths. The first set of measurements is for the witness monument, which is a nail installed near the tree's root collar. The second distance measurement is from plot center to the pith of the tree. I removed the first set of measurements (not relevant for us) from the distance/azimuth columns. Additionally, I moved the distances to a new column: distance to pith. The rest of the trees' distance measurements are to the face of the tree so these are actually different measurements. 
+
+## DATA MANIPULATED IN R
+
+Load libraries
+
+```{r, echo=FALSE}
+
+library(tidyverse)
+library(sf)
+library(stringr)
+library(pracma)
+```
+
+Load data
+
+```{r}
+
+trees <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\Eshom\\Eshom_overstory_for_DY_EMPedits.csv")
+
+plots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\Eshom_GIS_for_DY\\Eshom_GIS_for_DY\\EshomRegenPlots.shp")
+
+WHRtype <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\Eshom_GIS_for_DY\\Eshom_GIS_for_DY\\WHRtypeshp.shp")
+
+flight_footprints <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\eshom-flight-footprints.gpkg")
+
+```
+
+Find overlap between plots and flight footprints
+
+```{r}
+
+st_crs(plots) # 4326
+st_crs(flight_footprints) #4326
+
+plotsinfootprint <- st_intersection(plots, flight_footprints)
+
+# st_write(plotsinfootprint, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\plots-in-flight-footprints.gpkg")
+
+```
+
+Prep plot data for spreadsheet export
+
+```{r}
+
+# Figure out veg types for each plot
+
+WHRtype <- WHRtype[,-c(1:15)]
+
+WHRtype <- WHRtype[,-c(2:8)]
+
+WHRtype <- WHRtype[,-c(3:17)]
+
+WHRtype <- st_transform (WHRtype, crs = 4326)
+
+plotswWHR <- st_intersection(plotsinfootprint, WHRtype)
+
+# dang the WHR file is too big and has too many overlapping segments for this to work. looks like all the plots are in CA mixed conifer or (most commonly) ponderosa pine FRID forest types. 
+
+# export
+
+# plotsinfootprint <- st_drop_geometry(plotsinfootprint)
+
+# st_write(plotsinfootprint, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\plotsinfootprint.csv")
+
+```
+
+Add plot ID to tree data
+
+```{r}
+
+# create new column for plot IDs, which are a combination of unit number and plot number
+
+trees <- trees %>%
+   add_column(PlotID = "")
+
+# add new unit numbers. some unit numbers are given alphanumeric codes in the plot IDs, other unit numbers are padded with extra digits in the plot IDs
+
+trees <- trees %>%
+   add_column(Alt_Unit = "")
+
+trees$Alt_Unit[trees$unit == '2'] <- '002' 
+
+trees$Alt_Unit[trees$unit == '4'] <- '004' 
+
+trees$Alt_Unit[trees$unit == '5'] <- '005' 
+
+trees$Alt_Unit[trees$unit == '6'] <- '006'
+
+trees$Alt_Unit[trees$unit == '10'] <- '010'
+
+trees$Alt_Unit[trees$unit == '13'] <- '013'
+
+trees$Alt_Unit[trees$unit == '100'] <- '100'
+
+trees$Alt_Unit[trees$unit == '101'] <- '101'
+
+trees$Alt_Unit[trees$unit == '200'] <- 'PPN'
+
+trees$Alt_Unit[trees$unit == '300'] <- 'MHW'
+
+trees$Alt_Unit[trees$unit == '400'] <- 'MHC'
+
+# add new plot numbers. often plot numbers are padded with extra zeros.
+
+trees <- trees %>%
+   add_column(Alt_Plot = "")
+
+trees$Alt_Plot <- trees$plot
+
+trees$Alt_Plot[trees$Alt_Plot == '1'] <- '01' 
+
+trees$Alt_Plot[trees$Alt_Plot == '2'] <- '02' 
+
+trees$Alt_Plot[trees$Alt_Plot == '3'] <- '03' 
+
+trees$Alt_Plot[trees$Alt_Plot == '4'] <- '04' 
+
+trees$Alt_Plot[trees$Alt_Plot == '5'] <- '05' 
+
+trees$Alt_Plot[trees$Alt_Plot == '6'] <- '06' 
+
+trees$Alt_Plot[trees$Alt_Plot == '7'] <- '07' 
+
+trees$Alt_Plot[trees$Alt_Plot == '8'] <- '08' 
+
+trees$Alt_Plot[trees$Alt_Plot == '9'] <- '09' 
+
+# smash the alt_unit and alt_plot together with an underscore in between for the plot ID number
+
+trees$PlotID <- paste0(trees$Alt_Unit, "_", trees$Alt_Plot)
+
+# fix some random one-offs in the plot ID schema
+
+trees$PlotID[trees$PlotID == '006_23'] <- '6_23'
+
+trees$PlotID[trees$PlotID == '005_19'] <- '05_19'
+
+trees$PlotID[trees$PlotID == 'MHW_02'] <- 'MHW_2'
+
+trees$PlotID[trees$PlotID == 'MHC_02'] <- 'MHC_2'
+
+trees$PlotID[trees$PlotID == 'MHC_06'] <- 'MHC_6'
+
+trees$PlotID[trees$PlotID == 'MHC_08'] <- 'MHC_8'
+
+trees$PlotID[trees$PlotID == 'MHC_09'] <- 'MHC_9'
+
+```
+
+Remove trees that are not in the 61 plots that fall within our flight footprints
+
+```{r}
+
+plotIDs <- as.data.frame(unique(plotsinfootprint$PlotID))
+
+#write.csv(plotIDs, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\plotIDs_in_flight_footprint.csv")
+
+trees <- trees %>% filter (PlotID == 'MHC_01' | PlotID == 'MHC_2' |  PlotID == 'MHW_01' | PlotID == 'MHW_2' | PlotID == 'MHW_03' | PlotID == 'MHW_04' | PlotID == '005_10' | PlotID == '005_22' | PlotID == '013_01' | PlotID == '013_23' | PlotID == '013_24' | PlotID == 'MHW_18' | PlotID == 'PPN_20' | PlotID == 'PPN_21' | PlotID == 'PPN_22' | PlotID == 'PPN_23' | PlotID == 'PPN_24' | PlotID == 'PPN_25' | PlotID == 'MHC_18' | PlotID == 'MHW_13' | PlotID == 'MHW_15' | PlotID == 'MHW_16' | PlotID == 'MHW_17' | PlotID == 'PPN_09' | PlotID == 'PPN_10' | PlotID == 'PPN_12' | PlotID == 'PPN_13' | PlotID == '101_24' | PlotID == '101_28' | PlotID == '101_29' | PlotID == '002_11' | PlotID == '002_12' | PlotID == '101_11' | PlotID == '100_03' | PlotID == '100_06' | PlotID == '100_07' | PlotID == '100_09' | PlotID == '100_10' | PlotID == '100_11' | PlotID == '100_12' | PlotID == '100_13' | PlotID == '100_14' | PlotID == '100_15' | PlotID == '100_16' | PlotID == '100_18' | PlotID == '100_19' | PlotID == '100_20' | PlotID == '100_21' | PlotID == '100_23' | PlotID == '100_24' | PlotID == '100_28' | PlotID == '100_29' | PlotID == '100_01' | PlotID == '100_02' | PlotID == '100_04' | PlotID == '100_05' | PlotID == '100_08' | PlotID == '100_17' | PlotID == '100_25' | PlotID == '100_26' | PlotID == '100_27')
+
+```
+
+
+Remove trees with status F=fallen, M=missing, X=cut, removed, masticated
+
+```{r}
+
+trees <- subset(trees, status == 'L' | status == 'D')
+
+```
+
+Witness trees have distance to pith, all other stem mapped trees have distance to face. Need to calculate both measurements where they are missing.
+
+```{r}
+
+# calculate missing distances
+
+trees$dbh_in <- as.numeric(trees$dbh_in)
+trees$distance_face_ft <- as.numeric(trees$distance_face_ft)
+trees$distance_pith_ft <- as.numeric(trees$distance_pith_ft)
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees[i,]$distance_pith_ft)) {
+    trees[i,]$distance_pith_ft = (trees[i,]$distance_face_ft) + ((trees[i,]$dbh_in/2)/12)
+  }
+}
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees[i,]$distance_face_ft)) {
+    trees[i,]$distance_face_ft = (trees[i,]$distance_pith_ft) - ((trees[i,]$dbh_in/2)/12)
+  }
+}
+
+# now the only trees that have NA distances in either column have NA distances in both columns; that is, distance wasn't measured for those trees
+
+```
+
+Create new columns for dbh, heights, and distances in cm/m
+
+```{r}
+
+# dbh
+
+trees <- trees %>%
+   add_column(dbh_cm = "")
+
+trees$dbh_cm <- trees$dbh_in * 2.54
+
+# height
+
+trees <- trees %>%
+   add_column(height_m = "")
+
+trees$height_ft <- as.numeric(trees$height_ft)
+
+trees$height_m <- trees$height_ft * 0.3048
+
+# height to base of living crown
+
+trees <- trees %>%
+   add_column(height_to_crown_m = "")
+
+trees$htcb <- as.numeric(trees$htcb)
+
+trees$height_to_crown_m <- trees$htcb * 0.3048
+
+trees$height_to_crown_m[is.na(trees$height_to_crown_m)] <- ''
+
+# distance to pith
+
+trees <- trees %>%
+   add_column(distance_pith_m = "")
+
+trees$distance_pith_m <- trees$distance_pith_ft * 0.3048
+
+# distance to face
+
+trees <- trees %>%
+   add_column(distance_face_m = "")
+
+trees$distance_face_m <- trees$distance_face_ft * 0.3048
+
+```
+
+Add growth form (only surveyed trees)
+
+```{r}
+
+trees <- trees %>%
+   add_column(growth_form = "tree")
+
+```
+
+Tree species codes
+
+```{r}
+
+trees <- trees %>%
+   add_column(spp_code = "")
+
+trees$spp_code[trees$species == 'CADE'] <- '81'
+
+trees$spp_code[trees$species == 'PIPO'] <- '122'
+
+trees$spp_code[trees$species == 'ABCO'] <- '15'
+
+trees$spp_code[trees$species == 'BO'] <- '818'
+
+trees$spp_code[trees$species == 'IC'] <- '81'
+
+trees$spp_code[trees$species == 'QUE-'] <- '800'
+
+trees$spp_code[trees$species == 'SAL-'] <- '920'
+
+trees$spp_code[trees$species == 'PP'] <- '122'
+
+trees$spp_code[trees$species == 'WF'] <- '15'
+
+trees$spp_code[trees$species == 'QUKE'] <- '818'
+
+trees$spp_code[trees$species == 'QUCH'] <- '805'
+
+trees$spp_code[trees$species == 'PIJE'] <- '116'
+
+trees$spp_code[trees$species == 'PILA'] <- '117'
+
+```
+
+Find tree lat/lon
+
+```{r}
+
+# pare down plot data.frame to prep to join with tree data.frame
+
+plotsinfootprint <- plotsinfootprint[,-c(1:4)]
+
+plotsinfootprint <- plotsinfootprint[,-2]
+
+plotsinfootprint <- plotsinfootprint[,-c(4:79)]
+
+plotsinfootprint <- dplyr::distinct(plotsinfootprint, .keep_all = TRUE)
+
+# rename lat/lon columns
+
+plotsinfootprint <- plotsinfootprint %>% rename(PlotLatWGS84 = Latitude) %>% rename(PlotLonWGS84 = Longitude) 
+
+# convert plot centers to UTM 11N
+
+plotsinfootprint <- st_transform(plotsinfootprint, crs = 32611)
+
+plotsinfootprint <- plotsinfootprint %>%
+  dplyr::mutate(PlotLonUTM11N = sf::st_coordinates(.)[,1],
+                PlotLatUTM11N = sf::st_coordinates(.)[,2])
+
+plotsinfootprint <- st_drop_geometry(plotsinfootprint)
+
+# remove duplicate rows in the plot data.frame
+
+plots <- dplyr::distinct(plotsinfootprint, PlotID, .keep_all = TRUE)
+
+# join plot data.frame to tree data.frame
+
+treeswplots <- left_join(trees, plots)
+
+# Longitude UTM11N
+
+treeswplots <- treeswplots %>%
+   add_column(TreeLongitudeUTM11N = "")
+
+treeswplots$azimuth <- as.numeric(treeswplots$azimuth)
+
+for(i in 1:nrow(treeswplots)) {
+  
+    treeswplots[i,]$TreeLongitudeUTM11N =
+      
+      (treeswplots[i,]$PlotLonUTM11N) + 
+      
+      (sin(deg2rad(treeswplots[i,]$azimuth)) *
+         
+      (treeswplots[i,]$distance_pith_m))
+}
+
+# Latitude UTM11N
+
+treeswplots <- treeswplots %>%
+   add_column(TreeLatitudeUTM11N = "")
+
+for(i in 1:nrow(treeswplots)) {
+  
+    treeswplots[i,]$TreeLatitudeUTM11N =
+      
+      (treeswplots[i,]$PlotLatUTM11N) + 
+      
+      (cos(deg2rad(treeswplots[i,]$azimuth)) *
+         
+      (treeswplots[i,]$distance_pith_m))
+}
+
+```
+
+Plots with trees that are missing distance and/or azimuth and therefore have no coordinates:
+
+- 013_23
+- PPN_21
+- 002_12
+- 013_01
+- 013_24
+- 100_15
+- 101_11
+- 101_29
+- 100_10
+- 100_18
+- 100_19
+- 100_29
+- MHC_01
+
+Bummer, going to remove those trees and plots from our datasets before exporting
+
+```{r}
+
+# trees- remove plots with missing stem map data
+
+trees <- treeswplots %>% filter (PlotID == 'MHC_2' |  PlotID == 'MHW_01' | PlotID == 'MHW_2' | PlotID == 'MHW_03' | PlotID == 'MHW_04' | PlotID == '005_10' | PlotID == '005_22' | PlotID == 'MHW_18' | PlotID == 'PPN_20' | PlotID == 'PPN_22' | PlotID == 'PPN_23' | PlotID == 'PPN_24' | PlotID == 'PPN_25' | PlotID == 'MHC_18' | PlotID == 'MHW_13' | PlotID == 'MHW_15' | PlotID == 'MHW_16' | PlotID == 'MHW_17' | PlotID == 'PPN_09' | PlotID == 'PPN_10' | PlotID == 'PPN_12' | PlotID == 'PPN_13' | PlotID == '101_24' | PlotID == '101_28' | PlotID == '002_11' | PlotID == '100_03' | PlotID == '100_06' | PlotID == '100_07' | PlotID == '100_09' | PlotID == '100_11' | PlotID == '100_12' | PlotID == '100_13' | PlotID == '100_14' | PlotID == '100_16' | PlotID == '100_20' | PlotID == '100_21' | PlotID == '100_23' | PlotID == '100_24' | PlotID == '100_28' | PlotID == '100_01' | PlotID == '100_02' | PlotID == '100_04' | PlotID == '100_05' | PlotID == '100_08' | PlotID == '100_17' | PlotID == '100_25' | PlotID == '100_26' | PlotID == '100_27')
+
+# plots
+
+plots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\Eshom_GIS_for_DY\\Eshom_GIS_for_DY\\EshomRegenPlots.shp")
+
+plotsinfootprint <- st_intersection(plots, flight_footprints)
+
+plotsinfootprint <- dplyr::distinct (plotsinfootprint, .keep_all = TRUE)
+
+plotsinfootprint <- plotsinfootprint %>% filter (PlotID == 'MHC_2' |  PlotID == 'MHW_01' | PlotID == 'MHW_2' | PlotID == 'MHW_03' | PlotID == 'MHW_04' | PlotID == '005_10' | PlotID == '005_22' | PlotID == 'MHW_18' | PlotID == 'PPN_20' | PlotID == 'PPN_22' | PlotID == 'PPN_23' | PlotID == 'PPN_24' | PlotID == 'PPN_25' | PlotID == 'MHC_18' | PlotID == 'MHW_13' | PlotID == 'MHW_15' | PlotID == 'MHW_16' | PlotID == 'MHW_17' | PlotID == 'PPN_09' | PlotID == 'PPN_10' | PlotID == 'PPN_12' | PlotID == 'PPN_13' | PlotID == '101_24' | PlotID == '101_28' | PlotID == '002_11' | PlotID == '100_03' | PlotID == '100_06' | PlotID == '100_07' | PlotID == '100_09' | PlotID == '100_11' | PlotID == '100_12' | PlotID == '100_13' | PlotID == '100_14' | PlotID == '100_16' | PlotID == '100_20' | PlotID == '100_21' | PlotID == '100_23' | PlotID == '100_24' | PlotID == '100_28' | PlotID == '100_01' | PlotID == '100_02' | PlotID == '100_04' | PlotID == '100_05' | PlotID == '100_08' | PlotID == '100_17' | PlotID == '100_25' | PlotID == '100_26' | PlotID == '100_27')
+
+plotsinfootprint <- st_drop_geometry(plotsinfootprint)
+
+# write.csv(plotsinfootprint, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\plotsinfootprint_completestemmaps.csv")
+
+```
+
+Convert tree coordinates to spatial data frame, convert to WGS84, export tree coordinates
+
+```{r}
+
+# give trees ID numbers
+
+trees = trees %>% mutate(tree_id = 1:nrow(trees))
+
+# make a spatial data frame
+
+treecoordinatesconversion <- data.frame(trees$tree_id, trees$TreeLongitudeUTM11N, trees$TreeLatitudeUTM11N) 
+
+treecoordinatesconversion <- treecoordinatesconversion %>% rename (tree_id=trees.tree_id, TreeLongitudeUTM11N=trees.TreeLongitudeUTM11N, TreeLatitudeUTM11N=trees.TreeLatitudeUTM11N)
+
+treecoordinatesconversion <- st_as_sf(treecoordinatesconversion, coords = c("TreeLongitudeUTM11N", "TreeLatitudeUTM11N"), crs = 32611, remove=F)
+
+# change the CRS
+
+treecoordinatesconversion <- treecoordinatesconversion %>% st_transform(4326)
+
+# save this in case it's helpful later
+
+# st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\finaltreecoordinates.kml"),delete_dsn=TRUE)
+
+# extract the geometry features into columns of lat and long WGS84, then merge back into the tree data frame
+
+treecoordinatesconversionWGS84 <- data.frame(treecoordinatesconversion$tree_id, st_coordinates(treecoordinatesconversion[,1], st_coordinates(treecoordinatesconversion[,2]))) 
+
+treecoordinatesconversionWGS84 <- treecoordinatesconversionWGS84 %>% rename (tree_id=treecoordinatesconversion.tree_id, TreeLongitudeWGS84=X, TreeLatitudeWGS84=Y)
+
+trees <- full_join (trees, treecoordinatesconversionWGS84, by="tree_id")
+
+```
+
+Add OFO plot ID numbers
+
+```{r}
+
+trees <- trees %>%
+   add_column(OFO_plot_id = "")
+
+trees$OFO_plot_id[trees$PlotID == 'MHC_2'] <- '0203'
+
+trees$OFO_plot_id[trees$PlotID == 'MHW_03'] <- '0204'
+
+trees$OFO_plot_id[trees$PlotID == '005_10'] <- '0205'
+
+trees$OFO_plot_id[trees$PlotID == '005_22'] <- '0206'
+
+trees$OFO_plot_id[trees$PlotID == 'MHW_18'] <- '0207'
+
+trees$OFO_plot_id[trees$PlotID == 'PPN_20'] <- '0208'
+
+trees$OFO_plot_id[trees$PlotID == 'PPN_22'] <- '0209'
+
+trees$OFO_plot_id[trees$PlotID == 'PPN_23'] <- '0210'
+
+trees$OFO_plot_id[trees$PlotID == 'PPN_24'] <- '0211'
+
+trees$OFO_plot_id[trees$PlotID == 'PPN_25'] <- '0212'
+
+trees$OFO_plot_id[trees$PlotID == 'MHW_13'] <- '0213'
+
+trees$OFO_plot_id[trees$PlotID == 'MHW_15'] <- '0214'
+
+trees$OFO_plot_id[trees$PlotID == 'MHW_17'] <- '0215'
+
+trees$OFO_plot_id[trees$PlotID == 'PPN_09'] <- '0216'
+
+trees$OFO_plot_id[trees$PlotID == 'PPN_12'] <- '0217'
+
+trees$OFO_plot_id[trees$PlotID == 'PPN_13'] <- '0218'
+
+trees$OFO_plot_id[trees$PlotID == '101_24'] <- '0219'
+
+trees$OFO_plot_id[trees$PlotID == '101_28'] <- '0220'
+
+trees$OFO_plot_id[trees$PlotID == '002_11'] <- '0221'
+
+trees$OFO_plot_id[trees$PlotID == '100_03'] <- '0222'
+
+trees$OFO_plot_id[trees$PlotID == '100_06'] <- '0223'
+
+trees$OFO_plot_id[trees$PlotID == '100_07'] <- '0224'
+
+trees$OFO_plot_id[trees$PlotID == '100_09'] <- '0225'
+
+trees$OFO_plot_id[trees$PlotID == '100_11'] <- '0226'
+
+trees$OFO_plot_id[trees$PlotID == '100_12'] <- '0227'
+
+trees$OFO_plot_id[trees$PlotID == '100_13'] <- '0228'
+
+trees$OFO_plot_id[trees$PlotID == '100_14'] <- '0229'
+
+trees$OFO_plot_id[trees$PlotID == '100_16'] <- '0230'
+
+trees$OFO_plot_id[trees$PlotID == '100_21'] <- '0231'
+
+trees$OFO_plot_id[trees$PlotID == '100_23'] <- '0232'
+
+trees$OFO_plot_id[trees$PlotID == '100_24'] <- '0233'
+
+trees$OFO_plot_id[trees$PlotID == '100_28'] <- '0234'
+
+trees$OFO_plot_id[trees$PlotID == '100_01'] <- '0235'
+
+trees$OFO_plot_id[trees$PlotID == '100_02'] <- '0236'
+
+trees$OFO_plot_id[trees$PlotID == '100_05'] <- '0237'
+
+trees$OFO_plot_id[trees$PlotID == '100_17'] <- '0238'
+
+trees$OFO_plot_id[trees$PlotID == '100_25'] <- '0239'
+
+trees$OFO_plot_id[trees$PlotID == '100_26'] <- '0240'
+
+trees$OFO_plot_id[trees$PlotID == '100_27'] <- '0241'
+
+```
+
+Remove a plot surveyed in 2020 that was not extensively stem-mapped (400_18)
+
+```{r}
+
+treesfinal <- trees[-c(1:2),]
+
+```
+
+Some plots included in the dataset don't have any representative trees so I'm going to remove them:
+- MHW_01 (only had two trees that fell in 2022)
+- MHW_2 (only had one tree that fell in 2022)
+- MHW_04 (one fallen tree)
+- MHW_16 (single tree that was gone in 2022, possibly in burn pile)
+- PPN_10 (likely masticated in 2022)
+- 100_20 (all trees fell and burned in 2022)
+- 100_04 (all trees fell and burned in 2022)
+- 100_08 (all trees fell and burned in 2022)
+- MHC_18 (simply no records of trees in this plot)
+
+Need to remove these plots from the dataset and then re-do OFO plot ID numbers
+
+```{r}
+
+plots <- st_read("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\Eshom_GIS_for_DY\\Eshom_GIS_for_DY\\EshomRegenPlots.shp")
+
+plotsinfootprint <- st_intersection(plots, flight_footprints)
+
+plotsinfootprint <- plotsinfootprint %>% filter (PlotID == 'MHC_2' | PlotID == 'MHW_03' | PlotID == '005_10' | PlotID == '005_22' | PlotID == 'MHW_18' | PlotID == 'PPN_20' | PlotID == 'PPN_22' | PlotID == 'PPN_23' | PlotID == 'PPN_24' | PlotID == 'PPN_25' | PlotID == 'MHW_13' | PlotID == 'MHW_15' | PlotID == 'MHW_17' | PlotID == 'PPN_09' | PlotID == 'PPN_12' | PlotID == 'PPN_13' | PlotID == '101_24' | PlotID == '101_28' | PlotID == '002_11' | PlotID == '100_03' | PlotID == '100_06' | PlotID == '100_07' | PlotID == '100_09' | PlotID == '100_11' | PlotID == '100_12' | PlotID == '100_13' | PlotID == '100_14' | PlotID == '100_16' | PlotID == '100_21' | PlotID == '100_23' | PlotID == '100_24' | PlotID == '100_28' | PlotID == '100_01' | PlotID == '100_02' | PlotID == '100_05' | PlotID == '100_17' | PlotID == '100_25' | PlotID == '100_26' | PlotID == '100_27')
+
+plotsinfootprint <- plotsinfootprint [,-c(14:84)]
+
+plotsinfootprint <- dplyr::distinct (plotsinfootprint, .keep_all = TRUE)
+
+plotsinfootprint <- st_drop_geometry(plotsinfootprint)
+
+# write.csv(plotsinfootprint, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\plotsinfootprint_completestemmaps.csv")
+
+```
+
+Export
+
+```{r}
+
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0018\\data\\finaltreedataOFO.csv")
+
+```
+
