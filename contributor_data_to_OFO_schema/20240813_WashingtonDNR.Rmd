@@ -279,7 +279,114 @@ trees$spp_code[trees$Spp == 'THPL'] <- '242'
 
 trees$spp_code[trees$Spp == 'TSHE'] <- '263' 
 
+trees$spp_code[trees$Spp == 'OT'] <- '0'
+
 ```
 
+Convert DBH to cm and horizontal distance to feet
 
-## DATA MANIPULATED IN EXCEL
+```{r}
+
+trees <- trees %>%
+   add_column(HD_m = "")
+
+trees$HD_m <- trees$HD * 0.3048
+
+trees <- trees %>%
+   add_column(DBH_cm = "")
+
+trees$DBH_cm <- trees$DBH * 2.54
+
+```
+
+Calculate distance to pith
+
+```{r}
+
+trees <- trees %>%
+   add_column(distance_pith_m = "")
+
+trees$distance_pith_m <- trees$HD_m + ((trees$DBH_cm/2)*0.01)
+
+```
+
+Add OFO plot IDs to the trees data.frame
+
+```{r}
+
+trees <- trees %>%
+   add_column(combined_tree_id = "")
+
+trees$combined_tree_id <- paste0(trees$Plot, "_", trees$ID)
+
+allplots <- allplots %>%
+   add_column(combined_tree_id = "")
+
+allplots$combined_tree_id <- paste0(allplots$Plot, "_", allplots$ID)
+
+allplots_forjoin <- allplots [, -c(1:5)]
+
+allplots_forjoin <- allplots_forjoin [, -c(2:3)]
+
+trees_join <- left_join(trees, allplots_forjoin)
+
+# whoops that didn't work, some trees have the same ID number when the same organism has multiple stems (like Salix), will have to add ofo plot IDs to tree data.frame another way
+
+trees <- trees %>%
+   add_column(ofo_plot_id = "")
+
+for(i in 1:nrow(trees)) {
+  if(trees[i,]$Plot == "3") {
+    trees[i,]$ofo_plot_id = "0186"
+  }
+  else if (trees[i,]$Plot == "4") {
+    trees[i,]$ofo_plot_id = "0187"
+  }
+  else if (trees[i,]$Plot == "5") {
+    trees[i,]$ofo_plot_id = "0188"
+  }
+  else if (trees[i,]$Plot == "16") {
+    trees[i,]$ofo_plot_id = "0190"
+  }
+  else if (trees[i,]$Plot == "23") {
+    trees[i,]$ofo_plot_id = "0191"
+  }
+  else if (trees[i,]$Plot == "24") {
+    trees[i,]$ofo_plot_id = "0192"
+  }
+  else if (trees[i,]$Plot == "31") {
+    trees[i,]$ofo_plot_id = "0193"
+  }
+  else if (trees[i,]$Plot == "35") {
+    trees[i,]$ofo_plot_id = "0194"
+  }
+  else if (trees[i,]$Plot == "43") {
+    trees[i,]$ofo_plot_id = "0196"
+  }
+  else if (trees[i,]$Plot == "9") {
+    trees[i,]$ofo_plot_id = "0189"
+  }
+  else if (trees[i,]$Plot == "41") {
+    trees[i,]$ofo_plot_id = "0195"
+  }
+}
+
+```
+
+Growth form (only trees were measured in this study)
+
+```{r}
+
+trees <- trees %>%
+   add_column(growth_form = "tree")
+
+```
+
+Export
+
+```{r}
+
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Washington_DNR\\trees_ofo.csv")
+
+```
+

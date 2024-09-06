@@ -825,3 +825,67 @@ for(i in 1:nrow(plot_circles)) {
   plot_id_current = polygon_current$OFO_plot_id
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
+
+#### WA DNR ####
+
+# import plot polys
+
+plots <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_boundaries.gpkg")
+
+# add OFO plot IDs
+
+plots <- plots %>%
+  add_column(ofo_plot_id = "")
+
+for(i in 1:nrow(plots)) {
+  if(plots[i,]$Plot == "3") {
+    plots[i,]$ofo_plot_id = "0186"
+  }
+  else if (plots[i,]$Plot == "4") {
+    plots[i,]$ofo_plot_id = "0187"
+  }
+  else if (plots[i,]$Plot == "5") {
+    plots[i,]$ofo_plot_id = "0188"
+  }
+  else if (plots[i,]$Plot == "16") {
+    plots[i,]$ofo_plot_id = "0190"
+  }
+  else if (plots[i,]$Plot == "23") {
+    plots[i,]$ofo_plot_id = "0191"
+  }
+  else if (plots[i,]$Plot == "24") {
+    plots[i,]$ofo_plot_id = "0192"
+  }
+  else if (plots[i,]$Plot == "31") {
+    plots[i,]$ofo_plot_id = "0193"
+  }
+  else if (plots[i,]$Plot == "35") {
+    plots[i,]$ofo_plot_id = "0194"
+  }
+  else if (plots[i,]$Plot == "43") {
+    plots[i,]$ofo_plot_id = "0196"
+  }
+  else if (plots[i,]$Plot == "9") {
+    plots[i,]$ofo_plot_id = "0189"
+  }
+  else if (plots[i,]$Plot == "41") {
+    plots[i,]$ofo_plot_id = "0195"
+  }
+}
+
+# remove extraneous columns
+
+plots <- plots [,-c(1:3)]
+
+# convert to WGS84
+
+plots <- st_transform(plots, crs = 4326)
+
+# export plot polygons
+
+for(i in 1:nrow(plots)) {
+  polygon_current <- plots[i, ]
+  plot_id_current = polygon_current$ofo_plot_id
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}
+
