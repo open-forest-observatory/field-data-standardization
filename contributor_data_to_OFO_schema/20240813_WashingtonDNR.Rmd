@@ -1,0 +1,285 @@
+---
+title: "20240813_WashingtonDNR"
+author: "Emily Marie Purvis"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DATA MANIPULATED IN R
+
+Load libraries
+
+```{r, echo=FALSE}
+
+library(tidyverse)
+library(sf)
+library(stringr)
+library(pracma)
+```
+
+Load data
+
+```{r}
+
+plots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\Source_Tables\\plot_data.csv")
+
+trees <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\Source_Tables\\tree_data.csv")
+
+plot_boundaries <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_boundaries.gpkg")
+
+plot3 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_3.gpkg")
+
+plot4 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_4.gpkg")
+
+plot5 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_5.gpkg")
+
+plot16 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_16.gpkg")
+
+plot23 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_23.gpkg")
+
+plot24 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_24.gpkg")
+
+plot31 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_31.gpkg")
+
+plot35 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_35.gpkg")
+
+plot43 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plot_stems_43.gpkg")
+
+plot9 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plots_wout_DAP_data\\plot_stems_9.gpkg")
+
+plot41 <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0016\\data\\Stem_Maps\\Stem_Maps\\plots_wout_DAP_data\\plot_stems_41.gpkg")
+
+```
+
+Plot level data
+
+```{r}
+
+# calculate plot areas
+
+plot_boundaries <- plot_boundaries %>%
+   add_column(area_m2 = "")
+
+plot_boundaries$area_m2 <- units::set_units(st_area(plot_boundaries$geom), "m^2")
+
+# find plot centroids
+
+plot_boundaries <- plot_boundaries %>%
+   add_column(centroid = "")
+
+plot_boundaries <- st_transform(plot_boundaries, crs = 4326)
+
+plot_boundaries$centroid <- st_centroid(plot_boundaries$geom)
+
+# export
+
+plot_boundaries <- st_drop_geometry(plot_boundaries)
+
+st_write(plot_boundaries, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Washington_DNR\\plot_boundaries.gpkg")
+
+write.csv(plot_boundaries, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\Washington_DNR\\plot_boundaries.csv")
+
+```
+
+Tree level data
+
+OFO plot ID
+
+```{r}
+
+plot3 <- plot3 %>%
+   add_column(ofo_plot_id = "0186")
+
+plot4 <- plot4 %>%
+   add_column(ofo_plot_id = "0187")
+
+plot5 <- plot5 %>%
+   add_column(ofo_plot_id = "0188")
+
+plot16 <- plot16 %>%
+   add_column(ofo_plot_id = "0190")
+
+plot23 <- plot23 %>%
+   add_column(ofo_plot_id = "0191")
+
+plot24 <- plot24 %>%
+   add_column(ofo_plot_id = "0192")
+
+plot31 <- plot31 %>%
+   add_column(ofo_plot_id = "0193")
+
+plot35 <- plot35 %>%
+   add_column(ofo_plot_id = "0194")
+
+plot43 <- plot43 %>%
+   add_column(ofo_plot_id = "0196")
+
+plot9 <- plot9 %>%
+   add_column(ofo_plot_id = "0189")
+
+plot41 <- plot41 %>%
+   add_column(ofo_plot_id = "0195")
+
+```
+
+Combine all the plots into one data.frame
+
+```{r}
+
+# make the plots without DAP data have the same columns as the plots with DAP data
+
+plot9 <- plot9 %>%
+   add_column(Z = "")
+
+plot41 <- plot41 %>%
+   add_column(Z = "")
+
+plot41 <- plot41[,-c(5:7)]
+
+plot9 <- plot9[,-c(5:7)]
+
+# extract coordinates and put them into columns
+
+plot16 <- plot16 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot23 <- plot23 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot24 <- plot24 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot3 <- plot3 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot31 <- plot31 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot35 <- plot35 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot4 <- plot4 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot41 <- plot41 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot43 <- plot43 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot5 <- plot5 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+plot9 <- plot9 %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+# drop geometry
+
+plot16 <- st_drop_geometry(plot16)
+
+plot23 <- st_drop_geometry(plot23)
+
+plot24 <- st_drop_geometry(plot24)
+
+plot3 <- st_drop_geometry(plot3)
+
+plot31 <- st_drop_geometry(plot31)
+
+plot35 <- st_drop_geometry(plot35)
+
+plot4 <- st_drop_geometry(plot4)
+
+plot41 <- st_drop_geometry(plot41)
+
+plot43 <- st_drop_geometry(plot43)
+
+plot5 <- st_drop_geometry(plot5)
+
+plot9 <- st_drop_geometry(plot9)
+
+# merge
+
+allplots <- full_join(plot16, plot23)
+
+allplots <- full_join(allplots, plot24)
+
+allplots <- full_join(allplots, plot3)
+
+allplots <- full_join(allplots, plot31)
+
+allplots <- full_join(allplots, plot35)
+
+allplots <- full_join(allplots, plot4)
+
+plot41$Z <- as.double(plot41$Z)
+
+allplots <- full_join(allplots, plot41)
+
+allplots <- full_join(allplots, plot43)
+
+allplots <- full_join(allplots, plot5)
+
+plot9$Z <- as.double(plot9$Z)
+
+allplots <- full_join(allplots, plot9)
+
+```
+
+Species codes
+
+```{r}
+
+trees <- trees %>%
+   add_column(spp_code = "")
+
+trees$spp_code[trees$Spp == 'ABGR'] <- '17' 
+
+trees$spp_code[trees$Spp == 'ALRU2'] <- '351' 
+
+trees$spp_code[trees$Spp == 'AMAL2'] <- 'AMEALN' 
+
+trees$spp_code[trees$Spp == 'LAOC'] <- '073' 
+
+trees$spp_code[trees$Spp == 'OT'] <- '' 
+
+trees$spp_code[trees$Spp == 'PICO'] <- '108' 
+
+trees$spp_code[trees$Spp == 'PIEN'] <- '093' 
+
+trees$spp_code[trees$Spp == 'PIMO'] <- '119' 
+
+trees$spp_code[trees$Spp == 'PIPO'] <- '122' 
+
+trees$spp_code[trees$Spp == 'POBAT'] <- '741' 
+
+trees$spp_code[trees$Spp == 'POTR5'] <- '746' 
+
+trees$spp_code[trees$Spp == 'PREM'] <- '768' 
+
+trees$spp_code[trees$Spp == 'PSME'] <- '202' 
+
+trees$spp_code[trees$Spp == 'SALIX'] <- '920' 
+
+trees$spp_code[trees$Spp == 'THPL'] <- '242' 
+
+trees$spp_code[trees$Spp == 'TSHE'] <- '263' 
+
+```
+
+
+## DATA MANIPULATED IN EXCEL
