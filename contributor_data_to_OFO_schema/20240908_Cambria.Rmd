@@ -1,0 +1,575 @@
+---
+title: "Cambria"
+author: "Emily Marie Purvis"
+date: "2024-09-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DATA MANIPULATED IN R
+
+Load libraries
+
+```{r}
+
+library(tidyverse)
+library(sf)
+library(readxl)
+
+```
+
+Load data
+
+```{r}
+
+trees <- read_xlsx("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\Cambria_Stems_for_DY_UTM_Zone10.xlsx")
+
+```
+
+PLOT LEVEL DATA
+
+Find plot lat/lons
+
+```{r}
+
+plots <- trees
+
+# we only want one row per plot
+
+plots <- plots[-c(2:29),]
+
+plots <- plots[-c(3:50),]
+
+plots <- plots[-c(4:70),]
+
+plots <- plots[-c(5:37),]
+
+plots <- plots[-c(6:85),]
+
+plots <- plots[-c(7:39),]
+
+plots <- plots[-c(8:105),]
+
+plots <- plots[-c(9:44),]
+
+plots <- plots[-c(10:126),]
+
+plots <- plots[-c(11:90),]
+
+plots <- plots[-c(12:56),]
+
+plots <- plots[-c(13:149),]
+
+plots <- plots[-c(14:143),]
+
+plots <- plots[-c(15:46),]
+
+plots <- plots[,-c(2:12)]
+
+plots <- plots[,-c(4:5)]
+
+plots <- rename (plots, plot_lon_UTM = Long_UTM)
+
+plots <- rename (plots, plot_lat_UTM = Lat_UTM)
+
+# make a spatial data frame
+
+plotcoordinatesconversion <- data.frame(plots$Plot, plots$plot_lon_UTM, plots$plot_lat_UTM) 
+
+plotcoordinatesconversion <- plotcoordinatesconversion %>% rename (Plot=plots.Plot, PlotLongitudeUTM10N=plots.plot_lon_UTM, PlotLatitudeUTM10N=plots.plot_lat_UTM)
+
+plotcoordinatesconversion <- st_as_sf(plotcoordinatesconversion, coords = c("PlotLongitudeUTM10N", "PlotLatitudeUTM10N"), crs = 32610, remove=F)
+
+# change the CRS
+
+plotcoordinatesconversion <- plotcoordinatesconversion %>% st_transform(4326)
+
+# extract the geometry features into columns of lat and long WGS84, then merge back into the plot data frame
+
+plotcoordinatesconversionWGS84 <- data.frame(plotcoordinatesconversion$Plot, st_coordinates(plotcoordinatesconversion[,1], st_coordinates(plotcoordinatesconversion[,2]))) 
+
+plotcoordinatesconversionWGS84 <- plotcoordinatesconversionWGS84 %>% rename (Plot=plotcoordinatesconversion.Plot, PlotLongitudeWGS84=X, PlotLatitudeWGS84=Y)
+
+plots <- full_join (plots, plotcoordinatesconversionWGS84, by="Plot")
+
+# export
+
+write.csv (plots, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\plot_center_coords.csv")
+
+```
+
+
+TREE LEVEL DATA
+
+Remove plot RM23; most of the trees are missing stem map data
+
+```{r}
+
+trees <- subset(trees, Plot == "RM10" | Plot == "RM11" | Plot == "RM12" | Plot == "RM13" | Plot == "RM14" | Plot == "RM15" | Plot == "RM16" | Plot == "RM17" | Plot == "RM18" | Plot == "RM19" | Plot == "RM20" | Plot == "RM21" | Plot == "RM22" | Plot == "RM9") 
+
+```
+
+
+Add OFO hyperplot IDs
+
+```{r}
+
+trees <- trees %>%
+   add_column(ofo_hyperplot_id = "")
+
+for(i in 1:nrow(trees)) {
+  if(trees[i,]$Plot == "RM10") {
+    trees[i,]$ofo_hyperplot_id = "0001"
+  }
+  else if (trees[i,]$Plot == "RM11") {
+    trees[i,]$ofo_hyperplot_id = "0002"
+  }
+  else if (trees[i,]$Plot == "RM12") {
+    trees[i,]$ofo_hyperplot_id = "0003"
+  }
+  else if (trees[i,]$Plot == "RM13") {
+    trees[i,]$ofo_hyperplot_id = "0004"
+  }
+  else if (trees[i,]$Plot == "RM14") {
+    trees[i,]$ofo_hyperplot_id = "0005"
+  }
+  else if (trees[i,]$Plot == "RM15") {
+    trees[i,]$ofo_hyperplot_id = "0006"
+  }
+  else if (trees[i,]$Plot == "RM16") {
+    trees[i,]$ofo_hyperplot_id = "0007"
+  }
+  else if (trees[i,]$Plot == "RM17") {
+    trees[i,]$ofo_hyperplot_id = "0008"
+  }
+  else if (trees[i,]$Plot == "RM18") {
+    trees[i,]$ofo_hyperplot_id = "0009"
+  }
+  else if (trees[i,]$Plot == "RM19") {
+    trees[i,]$ofo_hyperplot_id = "0010"
+  }
+  else if (trees[i,]$Plot == "RM20") {
+    trees[i,]$ofo_hyperplot_id = "0011"
+  }
+  else if (trees[i,]$Plot == "RM21") {
+    trees[i,]$ofo_hyperplot_id = "0012"
+  }
+  else if (trees[i,]$Plot == "RM22") {
+    trees[i,]$ofo_hyperplot_id = "0013"
+  }
+  else if (trees[i,]$Plot == "RM9") {
+    trees[i,]$ofo_hyperplot_id = "0014"
+  }
+}
+
+```
+
+
+Add OFO plot IDs
+
+```{r}
+
+# each plot is actually two plots, a large and a small plot. for the primary plot ID number, all the large trees are in the large plot, and all the small trees are in the small plot. large trees that also fall within the small plot are given a secondary plot ID number corresponding to the small plot as well.
+
+#### primary OFO plot ID: large trees in the large plot, small trees in the small plot
+
+# assign trees to "large" and "small" categories
+
+trees <- trees %>%
+   add_column(tree_size = "")
+
+trees$DBH <- as.numeric(trees$DBH)
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees[i,]$DBH)) {
+    trees[i,]$tree_size = "unknown"
+  }
+  else if (trees[i,]$DBH >= 12.5) {
+    trees[i,]$tree_size = "large"
+  }
+  else if (trees[i,]$DBH < 12.5) {
+    trees[i,]$tree_size = "small"
+  }
+}
+
+# assign distances to "large" and "small" plots. note that large trees within the small plot are also within the large plot.
+
+trees <- trees %>%
+   add_column(plot_size = "")
+
+trees$Distance <- as.numeric(trees$Distance)
+
+# there are three trees with NA distances; two in RM 17 and one in RM 20. removing those from the dataset. they also don't have stem map data so we don't know where they are.
+
+trees <- subset(trees, !is.na(Distance))
+
+for(i in 1:nrow(trees)) {
+  if(trees[i,]$Distance <= 8) {
+    trees[i,]$plot_size = "small"
+  }
+  else if (trees[i,]$Distance > 8) {
+    trees[i,]$plot_size = "large"
+  }
+}
+
+# so all large trees have a primary plot ID in the large plot, and all small trees have a primary plot ID in the small plot. for trees of unknown size, I'm going to assign primary plot ID of small if they're in the small plot, and large if they're in the large plot. 
+
+trees <- trees %>%
+   add_column(ofo_plot_id_primary = "")
+
+# primary plot ID for trees that have tree sizes
+
+for(i in 1:nrow(trees)) {
+  if(trees[i,]$Plot == "RM10" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0242"
+  }
+  else if (trees[i,]$Plot == "RM11" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0243"
+  }
+  else if (trees[i,]$Plot == "RM12" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0244"
+  }
+  else if (trees[i,]$Plot == "RM13" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0245"
+  }
+  else if (trees[i,]$Plot == "RM14" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0246"
+  }
+  else if (trees[i,]$Plot == "RM15" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0247"
+  }
+  else if (trees[i,]$Plot == "RM16" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0248"
+  }
+  else if (trees[i,]$Plot == "RM17" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0249"
+  }
+  else if (trees[i,]$Plot == "RM18" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0250"
+  }
+  else if (trees[i,]$Plot == "RM19" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0251"
+  }
+  else if (trees[i,]$Plot == "RM20" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0252"
+  }
+  else if (trees[i,]$Plot == "RM21" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0253"
+  }
+  else if (trees[i,]$Plot == "RM22" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0254"
+  }
+  else if (trees[i,]$Plot == "RM9" & trees[i,]$tree_size == "small") {
+    trees[i,]$ofo_plot_id_primary = "0255"
+  }
+  else if(trees[i,]$Plot == "RM10" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0256"
+  }
+  else if (trees[i,]$Plot == "RM11" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0257"
+  }
+  else if (trees[i,]$Plot == "RM12" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0258"
+  }
+  else if (trees[i,]$Plot == "RM13" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0259"
+  }
+  else if (trees[i,]$Plot == "RM14" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0260"
+  }
+  else if (trees[i,]$Plot == "RM15" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0261"
+  }
+  else if (trees[i,]$Plot == "RM16" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0262"
+  }
+  else if (trees[i,]$Plot == "RM17" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0263"
+  }
+  else if (trees[i,]$Plot == "RM18" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0264"
+  }
+  else if (trees[i,]$Plot == "RM19" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0265"
+  }
+  else if (trees[i,]$Plot == "RM20" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0266"
+  }
+  else if (trees[i,]$Plot == "RM21" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0267"
+  }
+  else if (trees[i,]$Plot == "RM22" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0268"
+  }
+  else if (trees[i,]$Plot == "RM9" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_primary = "0269"
+  }
+}
+
+# primary plot ID for trees that don't have tree sizes, just plot size
+
+for(i in 1:nrow(trees)) {
+  if(trees[i,]$Plot == "RM10" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0242"
+  }
+  else if (trees[i,]$Plot == "RM11" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0243"
+  }
+  else if (trees[i,]$Plot == "RM12" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0244"
+  }
+  else if (trees[i,]$Plot == "RM13" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0245"
+  }
+  else if (trees[i,]$Plot == "RM14" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0246"
+  }
+  else if (trees[i,]$Plot == "RM15" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0247"
+  }
+  else if (trees[i,]$Plot == "RM16" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0248"
+  }
+  else if (trees[i,]$Plot == "RM17" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0249"
+  }
+  else if (trees[i,]$Plot == "RM18" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0250"
+  }
+  else if (trees[i,]$Plot == "RM19" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0251"
+  }
+  else if (trees[i,]$Plot == "RM20" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0252"
+  }
+  else if (trees[i,]$Plot == "RM21" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0253"
+  }
+  else if (trees[i,]$Plot == "RM22" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0254"
+  }
+  else if (trees[i,]$Plot == "RM9" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0255"
+  }
+  else if(trees[i,]$Plot == "RM10" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0256"
+  }
+  else if (trees[i,]$Plot == "RM11" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0257"
+  }
+  else if (trees[i,]$Plot == "RM12" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0258"
+  }
+  else if (trees[i,]$Plot == "RM13" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0259"
+  }
+  else if (trees[i,]$Plot == "RM14" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0260"
+  }
+  else if (trees[i,]$Plot == "RM15" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0261"
+  }
+  else if (trees[i,]$Plot == "RM16" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0262"
+  }
+  else if (trees[i,]$Plot == "RM17" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0263"
+  }
+  else if (trees[i,]$Plot == "RM18" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0264"
+  }
+  else if (trees[i,]$Plot == "RM19" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0265"
+  }
+  else if (trees[i,]$Plot == "RM20" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0266"
+  }
+  else if (trees[i,]$Plot == "RM21" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0267"
+  }
+  else if (trees[i,]$Plot == "RM22" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0268"
+  }
+  else if (trees[i,]$Plot == "RM9" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
+    trees[i,]$ofo_plot_id_primary = "0269"
+  }
+}
+
+##### secondary OFO plot ID: for large trees that also fall within the small plot
+
+trees <- trees %>%
+   add_column(ofo_plot_id_secondary = "")
+
+
+for(i in 1:nrow(trees)) {
+  if(trees[i,]$Plot == "RM10" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0242"
+  }
+  else if (trees[i,]$Plot == "RM11" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0243"
+  }
+  else if (trees[i,]$Plot == "RM12" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0244"
+  }
+  else if (trees[i,]$Plot == "RM13" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0245"
+  }
+  else if (trees[i,]$Plot == "RM14" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0246"
+  }
+  else if (trees[i,]$Plot == "RM15" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0247"
+  }
+  else if (trees[i,]$Plot == "RM16" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0248"
+  }
+  else if (trees[i,]$Plot == "RM17" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0249"
+  }
+  else if (trees[i,]$Plot == "RM18" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0250"
+  }
+  else if (trees[i,]$Plot == "RM19" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0251"
+  }
+  else if (trees[i,]$Plot == "RM20" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0252"
+  }
+  else if (trees[i,]$Plot == "RM21" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0253"
+  }
+  else if (trees[i,]$Plot == "RM22" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0254"
+  }
+  else if (trees[i,]$Plot == "RM9" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "large") {
+    trees[i,]$ofo_plot_id_secondary = "0255"
+  }
+}
+
+```
+
+Add species codes
+
+```{r}
+
+trees <- trees %>%
+   add_column(spp_code = "")
+
+for(i in 1:nrow(trees)) {
+  if(trees[i,]$Species == "QUAG") {
+    trees[i,]$spp_code = "801"
+  }
+  else if (trees[i,]$Species == "PIRA") {
+    trees[i,]$spp_code = "124"
+  }
+    else if (trees[i,]$Species == "UMCA") {
+    trees[i,]$spp_code = "981"
+  }
+}
+
+```
+
+Remove NAs from DBH column
+
+```{r}
+
+trees$DBH[is.na(trees$DBH)] <- ''
+
+```
+
+Distance is in meters, DBH is in centimeters
+
+Growth form (only trees were measured here)
+
+```{r}
+
+trees <- trees %>%
+   add_column(growth_form = "tree")
+
+```
+
+Rename the lat/lon columns because the names are confusing, and the snag decay class column to make it more clear
+
+```{r}
+
+trees <- rename (trees, tree_lon_UTM = New_Long_UTM)
+
+trees <- rename (trees, tree_lat_UTM = New_Lat_UTM)
+
+trees <- rename (trees, plot_lon_UTM = Long_UTM)
+
+trees <- rename (trees, plot_lat_UTM = Lat_UTM)
+
+trees <- rename (trees, snag_decay_class = Snag)
+
+trees$snag_decay_class[is.na(trees$snag_decay_class)] <- ""
+
+```
+
+Convert lat/lon from UTM to WGS84
+
+```{r}
+
+# remove trees without a lat or lon
+
+trees$tree_lat_UTM[trees$tree_lat_UTM == 'NA'] <- NA
+
+trees <- trees %>% drop_na(`tree_lat_UTM`) # went from 1004 trees to 981 trees in the dataset
+
+# give trees ID numbers
+
+trees = trees %>% mutate(tree_id = 1:nrow(trees))
+
+# make a spatial data frame
+
+treecoordinatesconversion <- data.frame(trees$tree_id, trees$tree_lon_UTM, trees$tree_lat_UTM) 
+
+treecoordinatesconversion <- treecoordinatesconversion %>% rename (tree_id=trees.tree_id, TreeLongitudeUTM10N=trees.tree_lon_UTM, TreeLatitudeUTM10N=trees.tree_lat_UTM)
+
+treecoordinatesconversion <- st_as_sf(treecoordinatesconversion, coords = c("TreeLongitudeUTM10N", "TreeLatitudeUTM10N"), crs = 32610, remove=F)
+
+# change the CRS
+
+treecoordinatesconversion <- treecoordinatesconversion %>% st_transform(4326)
+
+# extract the geometry features into columns of lat and long WGS84, then merge back into the tree data frame
+
+treecoordinatesconversionWGS84 <- data.frame(treecoordinatesconversion$tree_id, st_coordinates(treecoordinatesconversion[,1], st_coordinates(treecoordinatesconversion[,2]))) 
+
+treecoordinatesconversionWGS84 <- treecoordinatesconversionWGS84 %>% rename (tree_id=treecoordinatesconversion.tree_id, TreeLongitudeWGS84=X, TreeLatitudeWGS84=Y)
+
+trees <- full_join (trees, treecoordinatesconversionWGS84, by="tree_id")
+
+```
+
+Live crown class
+
+```{r}
+
+trees <- trees %>%
+   add_column(live_crown_class = "")
+
+trees$live_crown_class[is.na(trees$LCC)] <- ""
+
+trees$live_crown_class[trees$LCC == 1] <- "90-100"
+
+trees$live_crown_class[trees$LCC == 2] <- "50-89"
+
+trees$live_crown_class[trees$LCC == 3] <- "1-49"
+
+trees$live_crown_class[trees$LCC == 4] <- "0"
+
+```
+
+
+Export
+
+```{r}
+
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\cambria_trees_ofo.csv")
+
+```
+
