@@ -482,6 +482,31 @@ trees$DBH[is.na(trees$DBH)] <- ''
 
 Distance is in meters, DBH is in centimeters
 
+Distance to pith. We can only calculate this for trees that have DBH values
+
+```{r}
+
+trees <- trees %>%
+   add_column(distance_to_pith = "")
+
+trees$distance_to_pith <- as.numeric(trees$distance_to_pith)
+trees$DBH <- as.numeric(trees$DBH)
+trees$Distance <- as.numeric(trees$Distance)
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees[i,]$DBH)) {
+    trees[i,]$distance_to_pith = NA
+  }
+  else if (!is.na(trees[i,]$DBH)) {
+    trees[i,]$distance_to_pith = trees[i,]$Distance + ((trees[i,]$DBH/2)*0.01)
+  }
+}
+
+trees$distance_to_pith[is.na(trees$distance_to_pith)] <- ''
+
+```
+
+
 Growth form (only trees were measured here)
 
 ```{r}

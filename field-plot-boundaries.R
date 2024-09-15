@@ -889,3 +889,186 @@ for(i in 1:nrow(plots)) {
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
 
+
+#### Cambria ####
+
+# import plot center coordinates
+
+plots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\plot_center_coords.csv")
+
+# each of these is a hyperplot with a large plot with a 17.8 m radius and a small plot with an 8 m radius
+
+## small plots first
+
+# make new data.frame
+
+smallplots <- plots
+
+smallplots <- smallplots[,-1]
+
+smallplots <- smallplots[,-c(2:3)]
+
+# add ofo plot IDs
+
+smallplots <- smallplots %>%
+  add_column(ofo_plot_id = "")
+
+for(i in 1:nrow(smallplots)) {
+  if(smallplots[i,]$Plot == "RM10") {
+    smallplots[i,]$ofo_plot_id = "0242"
+  }
+  else if (smallplots[i,]$Plot == "RM11") {
+    smallplots[i,]$ofo_plot_id = "0243"
+  }
+  else if (smallplots[i,]$Plot == "RM12") {
+    smallplots[i,]$ofo_plot_id = "0244"
+  }
+  else if (smallplots[i,]$Plot == "RM13") {
+    smallplots[i,]$ofo_plot_id = "0245"
+  }
+  else if (smallplots[i,]$Plot == "RM14") {
+    smallplots[i,]$ofo_plot_id = "0246"
+  }
+  else if (smallplots[i,]$Plot == "RM15") {
+    smallplots[i,]$ofo_plot_id = "0247"
+  }
+  else if (smallplots[i,]$Plot == "RM16") {
+    smallplots[i,]$ofo_plot_id = "0248"
+  }
+  else if (smallplots[i,]$Plot == "RM17") {
+    smallplots[i,]$ofo_plot_id = "0249"
+  }
+  else if (smallplots[i,]$Plot == "RM18") {
+    smallplots[i,]$ofo_plot_id = "0250"
+  }
+  else if (smallplots[i,]$Plot == "RM19") {
+    smallplots[i,]$ofo_plot_id = "0251"
+  }
+  else if (smallplots[i,]$Plot == "RM20") {
+    smallplots[i,]$ofo_plot_id = "0252"
+  }
+  else if (smallplots[i,]$Plot == "RM21") {
+    smallplots[i,]$ofo_plot_id = "0253"
+  }
+  else if (smallplots[i,]$Plot == "RM22") {
+    smallplots[i,]$ofo_plot_id = "0254"
+  }
+  else if (smallplots[i,]$Plot == "RM9") {
+    smallplots[i,]$ofo_plot_id = "0255"
+  }
+}
+
+# create spatial data frame and draw circles around plots (circles have a radius of 8 meters)
+
+smallplots <- st_as_sf(smallplots, coords = c("PlotLongitudeWGS84", "PlotLatitudeWGS84"), crs = 4236)
+
+# First project to a projected (meters) coordinate system with equal x and y distances
+
+# CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+
+smallplots <- st_transform(smallplots, crs = 5070)
+smallplots <- st_buffer(smallplots, dist = 8, nQuadSegs = 10)
+
+# Then back to WGS84
+
+smallplots <- st_transform(smallplots, crs = 4326)
+
+smallplots <- smallplots[,-1]
+
+# export plot polygons
+
+for(i in 1:nrow(smallplots)) {
+  polygon_current <- smallplots[i, ]
+  plot_id_current = polygon_current$ofo_plot_id
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}
+
+## now large plots
+
+# make new data.frame
+
+largeplots <- plots
+
+largeplots <- largeplots[,-1]
+
+largeplots <- largeplots[,-c(2:3)]
+
+# add ofo plot IDs
+
+largeplots <- largeplots %>%
+  add_column(ofo_plot_id = "")
+
+for(i in 1:nrow(largeplots)) {
+  if(largeplots[i,]$Plot == "RM10") {
+    largeplots[i,]$ofo_plot_id = "0256"
+  }
+  else if (largeplots[i,]$Plot == "RM11") {
+    largeplots[i,]$ofo_plot_id = "0257"
+  }
+  else if (largeplots[i,]$Plot == "RM12") {
+    largeplots[i,]$ofo_plot_id = "0258"
+  }
+  else if (largeplots[i,]$Plot == "RM13") {
+    largeplots[i,]$ofo_plot_id = "0259"
+  }
+  else if (largeplots[i,]$Plot == "RM14") {
+    largeplots[i,]$ofo_plot_id = "0260"
+  }
+  else if (largeplots[i,]$Plot == "RM15") {
+    largeplots[i,]$ofo_plot_id = "0261"
+  }
+  else if (largeplots[i,]$Plot == "RM16") {
+    largeplots[i,]$ofo_plot_id = "0262"
+  }
+  else if (largeplots[i,]$Plot == "RM17") {
+    largeplots[i,]$ofo_plot_id = "0263"
+  }
+  else if (largeplots[i,]$Plot == "RM18") {
+    largeplots[i,]$ofo_plot_id = "0264"
+  }
+  else if (largeplots[i,]$Plot == "RM19") {
+    largeplots[i,]$ofo_plot_id = "0265"
+  }
+  else if (largeplots[i,]$Plot == "RM20") {
+    largeplots[i,]$ofo_plot_id = "0266"
+  }
+  else if (largeplots[i,]$Plot == "RM21") {
+    largeplots[i,]$ofo_plot_id = "0267"
+  }
+  else if (largeplots[i,]$Plot == "RM22") {
+    largeplots[i,]$ofo_plot_id = "0268"
+  }
+  else if (largeplots[i,]$Plot == "RM9") {
+    largeplots[i,]$ofo_plot_id = "0269"
+  }
+}
+
+# create spatial data frame and draw circles around plots (circles have a radius of 17.8 meters)
+
+largeplots <- st_as_sf(largeplots, coords = c("PlotLongitudeWGS84", "PlotLatitudeWGS84"), crs = 4236)
+
+# First project to a projected (meters) coordinate system with equal x and y distances
+
+# CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+
+largeplots <- st_transform(largeplots, crs = 5070)
+largeplots <- st_buffer(largeplots, dist = 17.8, nQuadSegs = 10)
+
+# Then back to WGS84
+
+largeplots <- st_transform(largeplots, crs = 4326)
+
+largeplots <- largeplots[,-1]
+
+# export plot polygons
+
+for(i in 1:nrow(largeplots)) {
+  polygon_current <- largeplots[i, ]
+  plot_id_current = polygon_current$ofo_plot_id
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}
+
+
+
+
+
