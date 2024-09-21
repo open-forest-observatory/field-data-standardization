@@ -1,0 +1,60 @@
+---
+title: "O'Harrell Canyon and Indiana Summit"
+author: "Emily Marie Purvis"
+date: "2024-09-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DATA MANIPULATED IN R
+
+Load libraries
+
+```{r, echo=FALSE}
+
+library(readxl)
+library(tidyverse)
+library(sf)
+
+```
+
+Import data
+
+```{r}
+
+plots <- read_excel("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0017\\data\\East Side\\metadata_9-3_DB.xlsx")
+
+trees <- read_excel("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0017\\data\\East Side\\Treedata_9-3_Em_DB.xlsx")
+
+```
+
+Find plot centers in WGS84
+
+```{r}
+
+# right now the plot center coordinates are in UTM11N, EPSG:32611
+
+plots <- st_as_sf(plots, coords = c("Eutm", "Nutm"), crs = 32611)
+
+plots <- st_transform(plots, crs = 4326)
+
+plotcoordinates <- data.frame(plots$Plot, st_coordinates(plots[,1], st_coordinates(plots[,2])))
+
+plotcoordinates <- plotcoordinates %>% rename (Plot=plots.Plot, PlotLongitudeWGS84=X, PlotLatitudeWGS84=Y)
+
+plots <- full_join (plots, plotcoordinates, by="Plot")
+
+plots <- st_drop_geometry(plots)
+
+# export
+
+write.csv(plots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\plotdata.csv")
+
+```
+
+
+
+## DATA MANIPULATED IN EXCEL

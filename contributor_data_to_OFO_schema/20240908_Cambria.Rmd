@@ -25,7 +25,12 @@ Load data
 
 ```{r}
 
-trees <- read_xlsx("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\Cambria_Stems_for_DY_UTM_Zone10.xlsx")
+# trees <- read_xlsx("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\Cambria_Stems_for_DY_UTM_Zone10.xlsx")
+
+# new data sheet with more DBH data
+
+trees <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\Cambria_Stems_EMP.csv")
+
 
 ```
 
@@ -174,6 +179,26 @@ Add OFO plot IDs
 
 # each plot is actually two plots, a large and a small plot. for the primary plot ID number, all the large trees are in the large plot, and all the small trees are in the small plot. large trees that also fall within the small plot are given a secondary plot ID number corresponding to the small plot as well.
 
+# first combine all the DBH values into one column
+
+trees <- trees %>%
+   add_column(DBH_all = "")
+
+for(i in 1:nrow(trees)) {
+  if(!is.na(trees[i,]$DBH)) {
+    trees[i,]$DBH_all = trees[i,]$DBH
+  }
+  if(is.na(trees[i,]$DBH)) {
+    trees[i,]$DBH_all = trees[i,]$Max_DBH
+  }
+}
+
+# Conor says that "For the other dead trees that still have no dbh values, this is because they never grew large enough to have a dbh recorded. This is why you will see tagged trees that are dead and have no dbh. They were small trees (germinants or seedlings) which died or were never recorded living."
+
+# Going to get rid of all these tiny dead trees with no DBH values
+
+trees <- subset(trees, !is.na(DBH_all)) 
+
 #### primary OFO plot ID: large trees in the large plot, small trees in the small plot
 
 # assign trees to "large" and "small" categories
@@ -181,16 +206,13 @@ Add OFO plot IDs
 trees <- trees %>%
    add_column(tree_size = "")
 
-trees$DBH <- as.numeric(trees$DBH)
+trees$DBH_all <- as.numeric(trees$DBH_all)
 
 for(i in 1:nrow(trees)) {
-  if(is.na(trees[i,]$DBH)) {
-    trees[i,]$tree_size = "unknown"
-  }
-  else if (trees[i,]$DBH >= 12.5) {
+  if (trees[i,]$DBH_all >= 12.5) {
     trees[i,]$tree_size = "large"
   }
-  else if (trees[i,]$DBH < 12.5) {
+  else if (trees[i,]$DBH_all < 12.5) {
     trees[i,]$tree_size = "small"
   }
 }
@@ -215,7 +237,7 @@ for(i in 1:nrow(trees)) {
   }
 }
 
-# so all large trees have a primary plot ID in the large plot, and all small trees have a primary plot ID in the small plot. for trees of unknown size, I'm going to assign primary plot ID of small if they're in the small plot, and large if they're in the large plot. 
+# so all large trees have a primary plot ID in the large plot, and all small trees have a primary plot ID in the small plot. 
 
 trees <- trees %>%
    add_column(ofo_plot_id_primary = "")
@@ -309,95 +331,6 @@ for(i in 1:nrow(trees)) {
   }
 }
 
-# primary plot ID for trees that don't have tree sizes, just plot size
-
-for(i in 1:nrow(trees)) {
-  if(trees[i,]$Plot == "RM10" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0242"
-  }
-  else if (trees[i,]$Plot == "RM11" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0243"
-  }
-  else if (trees[i,]$Plot == "RM12" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0244"
-  }
-  else if (trees[i,]$Plot == "RM13" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0245"
-  }
-  else if (trees[i,]$Plot == "RM14" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0246"
-  }
-  else if (trees[i,]$Plot == "RM15" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0247"
-  }
-  else if (trees[i,]$Plot == "RM16" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0248"
-  }
-  else if (trees[i,]$Plot == "RM17" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0249"
-  }
-  else if (trees[i,]$Plot == "RM18" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0250"
-  }
-  else if (trees[i,]$Plot == "RM19" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0251"
-  }
-  else if (trees[i,]$Plot == "RM20" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0252"
-  }
-  else if (trees[i,]$Plot == "RM21" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0253"
-  }
-  else if (trees[i,]$Plot == "RM22" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0254"
-  }
-  else if (trees[i,]$Plot == "RM9" & trees[i,]$plot_size == "small" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0255"
-  }
-  else if(trees[i,]$Plot == "RM10" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0256"
-  }
-  else if (trees[i,]$Plot == "RM11" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0257"
-  }
-  else if (trees[i,]$Plot == "RM12" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0258"
-  }
-  else if (trees[i,]$Plot == "RM13" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0259"
-  }
-  else if (trees[i,]$Plot == "RM14" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0260"
-  }
-  else if (trees[i,]$Plot == "RM15" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0261"
-  }
-  else if (trees[i,]$Plot == "RM16" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0262"
-  }
-  else if (trees[i,]$Plot == "RM17" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0263"
-  }
-  else if (trees[i,]$Plot == "RM18" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0264"
-  }
-  else if (trees[i,]$Plot == "RM19" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0265"
-  }
-  else if (trees[i,]$Plot == "RM20" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0266"
-  }
-  else if (trees[i,]$Plot == "RM21" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0267"
-  }
-  else if (trees[i,]$Plot == "RM22" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0268"
-  }
-  else if (trees[i,]$Plot == "RM9" & trees[i,]$plot_size == "large" & trees[i,]$tree_size == "unknown") {
-    trees[i,]$ofo_plot_id_primary = "0269"
-  }
-}
-
 ##### secondary OFO plot ID: for large trees that also fall within the small plot
 
 trees <- trees %>%
@@ -472,14 +405,6 @@ for(i in 1:nrow(trees)) {
 
 ```
 
-Remove NAs from DBH column
-
-```{r}
-
-trees$DBH[is.na(trees$DBH)] <- ''
-
-```
-
 Distance is in meters, DBH is in centimeters
 
 Distance to pith. We can only calculate this for trees that have DBH values
@@ -490,19 +415,10 @@ trees <- trees %>%
    add_column(distance_to_pith = "")
 
 trees$distance_to_pith <- as.numeric(trees$distance_to_pith)
-trees$DBH <- as.numeric(trees$DBH)
-trees$Distance <- as.numeric(trees$Distance)
 
 for(i in 1:nrow(trees)) {
-  if(is.na(trees[i,]$DBH)) {
-    trees[i,]$distance_to_pith = NA
-  }
-  else if (!is.na(trees[i,]$DBH)) {
-    trees[i,]$distance_to_pith = trees[i,]$Distance + ((trees[i,]$DBH/2)*0.01)
-  }
+    trees[i,]$distance_to_pith = trees[i,]$Distance + ((trees[i,]$DBH_all/2)*0.01)
 }
-
-trees$distance_to_pith[is.na(trees$distance_to_pith)] <- ''
 
 ```
 
@@ -542,7 +458,7 @@ Convert lat/lon from UTM to WGS84
 
 trees$tree_lat_UTM[trees$tree_lat_UTM == 'NA'] <- NA
 
-trees <- trees %>% drop_na(`tree_lat_UTM`) # went from 1004 trees to 981 trees in the dataset
+trees <- trees %>% drop_na(`tree_lat_UTM`) # didn't have to eliminate any trees in this round
 
 # give trees ID numbers
 
@@ -594,7 +510,7 @@ Export
 
 ```{r}
 
-write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\cambria_trees_ofo.csv")
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0019\\data\\cambria_trees_ofo_updated_with_dbhs.csv")
 
 ```
 
