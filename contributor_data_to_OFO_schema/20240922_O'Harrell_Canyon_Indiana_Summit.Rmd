@@ -18,6 +18,8 @@ Load libraries
 library(readxl)
 library(tidyverse)
 library(sf)
+library(terra) # needed for elevatr
+library(elevatr)
 
 ```
 
@@ -55,6 +57,336 @@ write.csv(plots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Ha
 
 ```
 
+Add OFO plot IDs
 
+```{r}
 
-## DATA MANIPULATED IN EXCEL
+trees <- trees %>%
+  add_column(ofo_plot_id = "")
+
+for(i in 1:nrow(trees)) {
+  if(trees[i,]$Plot == "IS1") {
+    trees[i,]$ofo_plot_id = "0197"
+  }
+  else if (trees[i,]$Plot == "IS2") {
+    trees[i,]$ofo_plot_id = "0198"
+  }
+  else if (trees[i,]$Plot == "IS3") {
+    trees[i,]$ofo_plot_id = "0199"
+  }
+  else if (trees[i,]$Plot == "OH1") {
+    trees[i,]$ofo_plot_id = "0200"
+  }
+  else if (trees[i,]$Plot == "OH2") {
+    trees[i,]$ofo_plot_id = "0201"
+  }
+  else if (trees[i,]$Plot == "OH3") {
+    trees[i,]$ofo_plot_id = "0202"
+  }
+}
+
+```
+
+Remove NAs from notes/comments column
+
+```{r}
+
+trees$Comments[is.na(trees$Comments)] <- ''
+
+```
+
+Rename columns to be more descriptive
+
+```{r}
+trees <- trees %>% rename (DBH_cm=DBH, Crown_height_meters=CrHt, Scorch_height_meters=SrchHt, tree_height_above_plot_center_m=Z, distance_x_m=X, distance_y_m=Y)
+```
+
+Snag decay class
+
+```{r}
+
+# rename column
+
+trees <- trees %>% rename (snag_decay_class=Dec)
+
+# trees with a snag decay class value are dead, trees without a snag decay class value are alive. use this info to populate a live/dead colulmn
+
+trees <- trees %>%
+  add_column(live_dead = "")
+
+for(i in 1:nrow(trees)) {
+  if(is.na(trees[i,]$snag_decay_class)) {
+    trees[i,]$live_dead = "L"
+  }
+  else if (!is.na(trees[i,]$snag_decay_class)){
+    trees[i,]$live_dead = "D"
+  }
+}
+
+# remove NAs from snag decay class column
+
+trees$snag_decay_class[is.na(trees$snag_decay_class)] <- ''
+
+```
+
+Create species code column
+
+```{r}
+
+trees <- trees %>%
+  add_column(spp_codes = "")
+
+trees$spp_codes[trees$Spec == 'ABCO'] <- '15'
+
+trees$spp_codes[trees$Spec == 'BEOC'] <- 'BETOCC'
+
+trees$spp_codes[trees$Spec == 'CELE'] <- '475'
+
+trees$spp_codes[trees$Spec == 'JUGR'] <- '64'
+
+trees$spp_codes[trees$Spec == 'JUN'] <- '57'
+
+trees$spp_codes[trees$Spec == 'PICO'] <- '108'
+
+trees$spp_codes[trees$Spec == 'PIFL'] <- '113'
+
+trees$spp_codes[trees$Spec == 'PIJE'] <- '116'
+
+```
+
+Growth form
+
+```{r}
+
+# only trees were surveyed in this project
+
+trees <- trees %>%
+  add_column(growth_form = "tree")
+
+```
+
+Tree lat/lon
+
+```{r}
+
+# we have the plot centers in UTMs, and the tree distances in x/y meter coordinates. join the plot center UTMs to the tree data frame, and then add the respective x/y coordinates to the UTMs to find the tree UTMs. 
+
+# import plot UTMs
+
+plots <- read_excel("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\1_received-data\\0017\\data\\East Side\\metadata_9-3_DB.xlsx")
+
+# make a smaller plot data.frame ready to join with the tree data.frame
+
+plots <- plots[,-1]
+
+plots <- plots[,-2]
+
+plots <- plots[,-c(4:7)]
+
+plots <- plots %>% rename(Plot_UTM_N = Nutm, Plot_UTM_E = Eutm)
+
+# merge plot coords into tree data.frame
+
+trees <- dplyr::left_join(trees, plots, by = "Plot")
+
+# add tree x and y distances to the plot UTMs to get tree coordinates
+
+# surprise, this is harder than it might have been! I'm inclined to think the X distance is meters north (+) or south (-) from the plot center, and the Y distance is meters east (+) or west (-) from the plot center, but the data collectors don't remember. so I'll run with this assumption to calculate the tree coordinates, then export them to examine against satellite imagery. 
+
+trees <- trees %>% add_column(Tree_UTM_N = "", Tree_UTM_E = "")
+
+trees$Tree_UTM_N <- as.numeric(trees$Tree_UTM_N)
+trees$Tree_UTM_E <- as.numeric(trees$Tree_UTM_E)
+
+for(i in 1:nrow(trees)) {
+  trees[i,]$Tree_UTM_N = trees[i,]$Plot_UTM_N + trees[i,]$distance_x_m
+  trees[i,]$Tree_UTM_E = trees[i,]$Plot_UTM_E + trees[i,]$distance_y_m
+}
+
+trees <- st_as_sf(trees, coords = c("Tree_UTM_E", "Tree_UTM_N"), crs = 32611)
+
+trees_coordinate_export <- trees[,-c(3:19)]
+
+st_write(trees_coordinate_export, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\trees_test1.gpkg")
+
+# damn that looks bad, I'll try again
+
+trees <- trees %>% add_column(Tree_UTM_N_2 = "", Tree_UTM_E_2 = "")
+
+trees$Tree_UTM_N_2 <- as.numeric(trees$Tree_UTM_N_2)
+trees$Tree_UTM_E_2 <- as.numeric(trees$Tree_UTM_E_2)
+
+for(i in 1:nrow(trees)) {
+  trees[i,]$Tree_UTM_N_2 = trees[i,]$Plot_UTM_N - trees[i,]$distance_x_m
+  trees[i,]$Tree_UTM_E_2 = trees[i,]$Plot_UTM_E - trees[i,]$distance_y_m
+}
+
+trees <- st_drop_geometry(trees)
+
+trees <- st_as_sf(trees, coords = c("Tree_UTM_E_2", "Tree_UTM_N_2"), crs = 32611)
+
+trees_coordinate_export <- trees[,-c(3:19)]
+
+st_write(trees_coordinate_export, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\trees_test2.gpkg")
+
+# still looks bad. 3rd try.
+
+trees <- trees %>% add_column(Tree_UTM_N_3 = "", Tree_UTM_E_3 = "")
+
+trees$Tree_UTM_N_3 <- as.numeric(trees$Tree_UTM_N_3)
+trees$Tree_UTM_E_3 <- as.numeric(trees$Tree_UTM_E_3)
+
+for(i in 1:nrow(trees)) {
+  trees[i,]$Tree_UTM_N_3 = trees[i,]$Plot_UTM_N + trees[i,]$distance_y_m
+  trees[i,]$Tree_UTM_E_3 = trees[i,]$Plot_UTM_E + trees[i,]$distance_x_m
+}
+
+trees <- st_drop_geometry(trees)
+
+trees <- st_as_sf(trees, coords = c("Tree_UTM_E_3", "Tree_UTM_N_3"), crs = 32611)
+
+trees_coordinate_export <- trees[,-c(3:19)]
+
+st_write(trees_coordinate_export, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\trees_test3.gpkg")
+
+# number three looks good I think! but I really doubt myself so I'm going to calculate a fourth possible solution. and possibly the other four possible solutions too idk. 
+
+trees <- trees %>% add_column(Tree_UTM_N_4 = "", Tree_UTM_E_4 = "")
+
+trees$Tree_UTM_N_4 <- as.numeric(trees$Tree_UTM_N_4)
+trees$Tree_UTM_E_4 <- as.numeric(trees$Tree_UTM_E_4)
+
+for(i in 1:nrow(trees)) {
+  trees[i,]$Tree_UTM_N_4 = trees[i,]$Plot_UTM_N - trees[i,]$distance_y_m
+  trees[i,]$Tree_UTM_E_4 = trees[i,]$Plot_UTM_E - trees[i,]$distance_x_m
+}
+
+trees <- st_drop_geometry(trees)
+
+trees <- st_as_sf(trees, coords = c("Tree_UTM_E_4", "Tree_UTM_N_4"), crs = 32611)
+
+trees_coordinate_export <- trees[,-c(3:19)]
+
+st_write(trees_coordinate_export, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\trees_test4.gpkg")
+
+# 5
+
+trees <- trees %>% add_column(Tree_UTM_N_5 = "", Tree_UTM_E_5 = "")
+
+trees$Tree_UTM_N_5 <- as.numeric(trees$Tree_UTM_N_5)
+trees$Tree_UTM_E_5 <- as.numeric(trees$Tree_UTM_E_5)
+
+for(i in 1:nrow(trees)) {
+  trees[i,]$Tree_UTM_N_5 = trees[i,]$Plot_UTM_N + trees[i,]$distance_y_m
+  trees[i,]$Tree_UTM_E_5 = trees[i,]$Plot_UTM_E - trees[i,]$distance_x_m
+}
+
+trees <- st_drop_geometry(trees)
+
+trees <- st_as_sf(trees, coords = c("Tree_UTM_E_5", "Tree_UTM_N_5"), crs = 32611)
+
+trees_coordinate_export <- trees[,-c(3:19)]
+
+st_write(trees_coordinate_export, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\trees_test5.gpkg")
+
+# 6
+
+trees <- trees %>% add_column(Tree_UTM_N_6 = "", Tree_UTM_E_6 = "")
+
+trees$Tree_UTM_N_6 <- as.numeric(trees$Tree_UTM_N_6)
+trees$Tree_UTM_E_6 <- as.numeric(trees$Tree_UTM_E_6)
+
+for(i in 1:nrow(trees)) {
+  trees[i,]$Tree_UTM_N_6 = trees[i,]$Plot_UTM_N - trees[i,]$distance_y_m
+  trees[i,]$Tree_UTM_E_6 = trees[i,]$Plot_UTM_E + trees[i,]$distance_x_m
+}
+
+trees <- st_drop_geometry(trees)
+
+trees <- st_as_sf(trees, coords = c("Tree_UTM_E_6", "Tree_UTM_N_6"), crs = 32611)
+
+trees_coordinate_export <- trees[,-c(3:19)]
+
+st_write(trees_coordinate_export, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\trees_test6.gpkg")
+
+# 7
+
+trees <- trees %>% add_column(Tree_UTM_N_7 = "", Tree_UTM_E_7 = "")
+
+trees$Tree_UTM_N_7 <- as.numeric(trees$Tree_UTM_N_7)
+trees$Tree_UTM_E_7 <- as.numeric(trees$Tree_UTM_E_7)
+
+for(i in 1:nrow(trees)) {
+  trees[i,]$Tree_UTM_N_7 = trees[i,]$Plot_UTM_N - trees[i,]$distance_x_m
+  trees[i,]$Tree_UTM_E_7 = trees[i,]$Plot_UTM_E + trees[i,]$distance_y_m
+}
+
+trees <- st_drop_geometry(trees)
+
+trees <- st_as_sf(trees, coords = c("Tree_UTM_E_7", "Tree_UTM_N_7"), crs = 32611)
+
+trees_coordinate_export <- trees[,-c(3:19)]
+
+st_write(trees_coordinate_export, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\trees_test7.gpkg")
+
+# 8
+
+trees <- trees %>% add_column(Tree_UTM_N_8 = "", Tree_UTM_E_8 = "")
+
+trees$Tree_UTM_N_8 <- as.numeric(trees$Tree_UTM_N_8)
+trees$Tree_UTM_E_8 <- as.numeric(trees$Tree_UTM_E_8)
+
+for(i in 1:nrow(trees)) {
+  trees[i,]$Tree_UTM_N_8 = trees[i,]$Plot_UTM_N + trees[i,]$distance_x_m
+  trees[i,]$Tree_UTM_E_8 = trees[i,]$Plot_UTM_E - trees[i,]$distance_y_m
+}
+
+trees <- st_drop_geometry(trees)
+
+trees <- st_as_sf(trees, coords = c("Tree_UTM_E_8", "Tree_UTM_N_8"), crs = 32611)
+
+trees_coordinate_export <- trees[,-c(3:19)]
+
+st_write(trees_coordinate_export, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\trees_test8.gpkg")
+
+```
+
+Tree heights
+
+```{r}
+
+# we have the plot center coordinates, the tree coordinates, and the height of each tree above plot center. will use the elevatr package to: 1. get the plot center elevations and 2. get the elevations of each tree. the difference between the plot center elevation and the tree elevation, plus the height of the tree above plot center, is the height of the tree. 
+
+## first get plot center elevations
+
+# import plot center coordinates
+
+plots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\plotdata.csv")
+
+# make into a spatial data.frame
+
+plots <- st_as_sf(plots, coords = c("PlotLongitudeWGS84", "PlotLatitudeWGS84"), crs = 4236)
+
+# use elevatr to find plot elevations
+
+plot_elevations <- elevatr::get_elev_point(locations = plots, prj = st_crs(plots), src = "epqs") # "epqs" is the USGS Elevation Point Query Service
+
+# make a smaller data.frame of plot numbers + elevations
+
+plot_elevations_to_join <- plot_elevations[,-c(1:2)]
+
+plot_elevations_to_join <- st_drop_geometry(plot_elevations_to_join)
+
+plot_elevations_to_join <- plot_elevations_to_join[,-c(2:6)]
+
+plot_elevations_to_join <- plot_elevations_to_join[,-3]
+
+plot_elevations_to_join <- plot_elevations_to_join %>% rename(plot_elevation_meters = elevation)
+
+## now get tree elevations
+
+## now add/subtract to get the tree heights
+
+```
+
+Tree scorch heights and height to live crown are the actual heights, not the heights above plot center!

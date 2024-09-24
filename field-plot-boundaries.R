@@ -1068,7 +1068,62 @@ for(i in 1:nrow(largeplots)) {
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
 }
 
+#### O'Harrell Canyon and Indiana Summit
 
+# load data
 
+plots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\plotdata.csv")
 
+# add OFO ID numbers
+
+plots <- plots %>%
+  add_column(ofo_plot_id = "")
+
+for(i in 1:nrow(plots)) {
+  if(plots[i,]$Plot == "IS1") {
+    plots[i,]$ofo_plot_id = "0197"
+  }
+  else if (plots[i,]$Plot == "IS2") {
+    plots[i,]$ofo_plot_id = "0198"
+  }
+  else if (plots[i,]$Plot == "IS3") {
+    plots[i,]$ofo_plot_id = "0199"
+  }
+  else if (plots[i,]$Plot == "OH1") {
+    plots[i,]$ofo_plot_id = "0200"
+  }
+  else if (plots[i,]$Plot == "OH2") {
+    plots[i,]$ofo_plot_id = "0201"
+  }
+  else if (plots[i,]$Plot == "OH3") {
+    plots[i,]$ofo_plot_id = "0202"
+  }
+}
+
+# remove extraneous columns
+
+plots <- plots[,-c(1:8)]
+
+# create spatial data frame and draw circles around plots (circles have an area of 1ha (10000 square meters) or a radius of 56.4189584 meters)
+
+plots <- st_as_sf(plots, coords = c("PlotLongitudeWGS84", "PlotLatitudeWGS84"), crs = 4236)
+
+# First project to a projected (meters) coordinate system with equal x and y distances
+
+# CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+
+plots <- st_transform(plots, crs = 5070)
+plots <- st_buffer(plots, dist = 56.4189584, nQuadSegs = 10)
+
+# Then back to WGS84
+
+plots <- st_transform(plots, crs = 4326)
+
+# export plot polygons
+
+for(i in 1:nrow(plots)) {
+  polygon_current <- plots[i, ]
+  plot_id_current = polygon_current$ofo_plot_id
+  st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}
 
