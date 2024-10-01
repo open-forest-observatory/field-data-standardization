@@ -98,6 +98,10 @@ Rename columns to be more descriptive
 
 ```{r}
 trees <- trees %>% rename (DBH_cm=DBH, Crown_height_meters=CrHt, Scorch_height_meters=SrchHt, tree_height_above_plot_center_m=Z, distance_x_m=X, distance_y_m=Y)
+
+# turns out the Z column is NOT height above plot center, renaming again
+
+trees <- trees %>% rename (tree_dbh_height_above_plot_center=tree_height_above_plot_center_m)
 ```
 
 Snag decay class and live/dead
@@ -448,110 +452,25 @@ trees <- full_join (trees, treecoordinates, by="ID")
 
 trees <- st_drop_geometry(trees)
 
+trees <- trees[,-c(21:23)]
+
 ```
 
-
-Tree heights
+Tree scorch heights and height to live crown are the actual heights, not the heights above plot center! Remove NAs
 
 ```{r}
 
-#### we have the plot center coordinates, the tree coordinates, and the height of each tree above plot center. will use the elevatr package to: 1. get the plot center elevations and 2. get the elevations of each tree. the difference between the plot center elevation and the tree elevation, plus the height of the tree above plot center, is the height of the tree. 
+trees$Crown_height_meters[is.na(trees$Crown_height_meters)] <- ''
 
-## first get plot center elevations
-
-# import plot center coordinates
-
-plots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\plotdata.csv")
-
-# make into a spatial data.frame
-
-plots <- st_as_sf(plots, coords = c("PlotLongitudeWGS84", "PlotLatitudeWGS84"), crs = 4236)
-
-# use elevatr to find plot elevations
-
-plot_elevations <- elevatr::get_elev_point(locations = plots, prj = st_crs(plots), src = "epqs") # "epqs" is the USGS Elevation Point Query Service
-
-# make a smaller data.frame of plot numbers + elevations
-
-plot_elevations_to_join <- plot_elevations[,-c(1:2)]
-
-plot_elevations_to_join <- st_drop_geometry(plot_elevations_to_join)
-
-plot_elevations_to_join <- plot_elevations_to_join[,-c(2:6)]
-
-plot_elevations_to_join <- plot_elevations_to_join[,-3]
-
-plot_elevations_to_join <- plot_elevations_to_join %>% rename(plot_elevation_meters = elevation)
-
-# merge plot elevations to tree data.frame
-
-trees <- left_join (trees, plot_elevations_to_join, by = "Plot")
-
-## now get tree elevations
-
-# make into a spatial data.frame
-
-trees <- st_as_sf(trees, coords = c("TreeLongitudeWGS84", "TreeLatitudeWGS84"), crs = 4236)
-
-# use elevatr to find plot elevations
-
-tree_elevations <- elevatr::get_elev_point(locations = trees, prj = st_crs(trees), src = "epqs") # "epqs" is the USGS Elevation Point Query Service
-
-tree_elevations <- tree_elevations %>% rename (tree_elevation_meters = elevation)
-
-trees <- full_join (tree_elevations, treecoordinates, by="ID")
-
-## now add/subtract to get the tree heights. true tree height = plot center elevation + tree height above plot center elevation - tree elevation.
-
-trees$height_m <- trees$plot_elevation_meters + trees$tree_height_above_plot_center_m - trees$tree_elevation_meters
-
-#### there are a LOT of trees with negative heights, especially in plots OH1 and OH2. What if I get point elevation data from Amazon Web Service Terrain Tiles?
-
-## plot elevations
-
-# import plot center coordinates
-
-plots <- read.csv("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\plotdata.csv")
-
-# make into a spatial data.frame
-
-plots <- st_as_sf(plots, coords = c("PlotLongitudeWGS84", "PlotLatitudeWGS84"), crs = 4236)
-
-# use elevatr to find plot elevations
-
-plot_elevations_aws <- elevatr::get_elev_point(locations = plots, prj = st_crs(plots), src = "aws", z = 14) # z is zoom, 14 is the maximum zoom
-
-# make a smaller data.frame of plot numbers + elevations
-
-plot_elevations_to_join <- plot_elevations_aws[,-c(1:2)]
-
-plot_elevations_to_join <- st_drop_geometry(plot_elevations_to_join)
-
-plot_elevations_to_join <- plot_elevations_to_join[,-c(2:6)]
-
-plot_elevations_to_join <- plot_elevations_to_join[,-3]
-
-plot_elevations_to_join <- plot_elevations_to_join %>% rename(plot_elevation_meters_aws = elevation)
-
-# merge plot elevations to tree data.frame
-
-trees <- left_join (trees, plot_elevations_to_join, by = "Plot")
-
-## now get tree elevations
-
-# use elevatr to find plot elevations
-
-tree_elevations_aws <- elevatr::get_elev_point(locations = trees, prj = st_crs(trees), src = "aws", z = 14, overwrite = TRUE)
-
-trees <- tree_elevations_aws %>% rename (tree_elevation_meters_aws = elevation)
-
-## now add/subtract to get the tree heights. true tree height = plot center elevation + tree height above plot center elevation - tree elevation.
-
-trees$height_m_aws <- trees$plot_elevation_meters_aws + trees$tree_height_above_plot_center_m - trees$tree_elevation_meters_aws
-
-#### the elevations and final heights are sooooooooooooooooooo different between datasets. using the aws dataset on the highest zoom level resulted in fewer negative heights, and less dramatically large negative heights. going to try using the OpenTopography API (gl1 elevation product) to generate a raster DEM and then extracting point elevations from that.
-
+trees$Scorch_height_meters[is.na(trees$Scorch_height_meters)] <- ''
 
 ```
 
-Tree scorch heights and height to live crown are the actual heights, not the heights above plot center!
+Export
+
+```{r}
+
+write.csv(trees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\O'Harrell_Canyon_Indiana_Summit\\OHarrellCanyonIndianaSummitTreesOFO.csv")
+
+```
+
