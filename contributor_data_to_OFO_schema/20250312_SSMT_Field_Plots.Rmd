@@ -1,0 +1,169 @@
+---
+title: "OHDS_Field_Test"
+author: "Orenge"
+date: "2025-03-11"
+output: html_document
+---
+
+```{r}
+
+# Load necessary libraries
+library(tidyverse)
+library(dplyr)
+
+# Load data
+SSMT <- read_csv("C:\\Users\\Oren\\Nardi_workspace\\Tech\\OFO\\StemMaps\\Data\\SSMT\\SSMT_Check\\Final_Export\\SSMT_All_StemPoints\\Final_StemPoints\\Final_SSMT_StemPlots.csv")
+
+# HT21 Field: Original measurement values recorded in (cm) converted to (m) 
+# PHT Field: Original measurement values recorded in (cm); no conversion 
+# PDBH Field: Original measurement values recorded in (mm); no conversion
+# DBH21 Field: Original measurement values recorded in (mm); no conversion 
+
+# Add the max_dbh_of_primary_trees column with empty or missing values
+SSMT <- SSMT %>%
+  mutate(
+    max_dbh_of_primary_trees = ""  # or "" if you prefer empty strings
+  )
+
+# Convert DBH21 from mm to cm
+SSMT <- SSMT %>%
+  mutate(DBH21_cm = DBH21 / 10)  # Converting from mm to cm
+
+# Calculate min_dbh per site
+SSMT_DBH21 <- SSMT %>%
+  group_by(SITE) %>%
+  summarise(
+    min_dbh = min(DBH21_cm)
+  )
+
+# Calculate min_ht per site
+SSMT_HT21 <- SSMT %>%
+  group_by(SITE) %>%
+  summarise(
+    min_ht = min(HT21)
+  )
+
+# Rename columns
+SSMT_min_max <- SSMT_HT21 %>%
+  rename(contributer_plot_id = SITE)
+
+# Join min_dbh with the original data (SSMT)
+SSMT <- SSMT %>%
+  left_join(SSMT_DBH21, by = c("SITE" = "SITE")) %>%
+  left_join(SSMT_min_max, by = c("SITE" = "contributer_plot_id"))
+
+# Add new fields
+SSMT <- SSMT %>%
+  mutate(
+    project_id = "0020",
+    plot_id = case_when(
+      SITE == "Buckhorn" ~ "0277",
+      SITE == "Doorstop" ~ "0278",
+      SITE == "EvansCreek" ~ "0279",
+      SITE == "Floras" ~ "0280",
+      SITE == "Jammer" ~ "0281",
+      SITE == "Nortons" ~ "0282",
+      SITE == "SliceButte" ~ "0283",
+      SITE == "Soda" ~ "0284",
+      SITE == "Stone" ~ "0285",
+      TRUE ~ "0"
+    ),
+    hyperplot_id = "",
+    survey_date_approx = TRUE,
+    survey_date = "2021",
+    plot_shape = "irregular",
+    plot_area = case_when(
+      plot_id == "0277" ~ "14856.214341",
+      plot_id == "0278" ~ "15532.0020034",
+      plot_id == "0279" ~ "13150.547117",
+      plot_id == "0280" ~ "13132.36281",
+      plot_id == "0281" ~ "14734.245714",
+      plot_id == "0282" ~ "12307.1097347",
+      plot_id == "0283" ~ "11799.7807243",
+      plot_id == "0284" ~ "15874.1164316",
+      plot_id == "0285" ~ "13073.0421983",
+      TRUE ~ "0"
+    ),
+    subplots = TRUE,
+    subplot_shape = FALSE,
+    subplot_area = "",
+    includes_snags = FALSE,
+    includes_damage = TRUE,
+    damage_codes_inspected = "",
+    forest_type = case_when(
+      plot_id %in% c("0277", "0278", "0279", "0280", "0281", "0282", "0283", "0284", "0285") ~ "201 - Douglas-fir",
+      TRUE ~ "0"
+    ),
+    canopy_cover = "",
+    min_dbh_live = "",
+    min_dbh_ohvis = "",
+    min_ht_ohvis = "",
+    plot_lon = case_when(
+      plot_id == "0277" ~ "-122.98908189",
+      plot_id == "0278" ~ "-122.00738381",
+      plot_id == "0279" ~ "-123.05217222",
+      plot_id == "0280" ~ "-124.35515556",
+      plot_id == "0281" ~ "-123.70424164",
+      plot_id == "0282" ~ "-123.68850043",
+      plot_id == "0283" ~ "-122.8682236",
+      plot_id == "0284" ~ "-122.24268296",
+      plot_id == "0285" ~ "-122.93815862",
+      TRUE ~ "0"
+    ),
+    plot_lat = case_when(
+      plot_id == "0277" ~ "46.54707577",
+      plot_id == "0278" ~ "46.94822638",
+      plot_id == "0279" ~ "42.62918823",
+      plot_id == "0280" ~ "42.9059617",
+      plot_id == "0281" ~ "46.61718415",
+      plot_id == "0282" ~ "44.66331258",
+      plot_id == "0283" ~ "44.10924544",
+      plot_id == "0284" ~ "44.43354829",
+      plot_id == "0285" ~ "42.34906831",
+      TRUE ~ "0"
+    ),
+    num_ohvis_trees_excluded = "",
+    contributer_plot_id = SITE  # Adding contributer_plot_id column based on SITE
+  )
+
+# Pivot the data to get one row per plot with multiple columns for each field
+SSMT_one_record_per_plot <- SSMT %>%
+  group_by(plot_id) %>%
+  summarise(
+    project_id = first(project_id),
+    hyperplot_id = first(hyperplot_id),
+    survey_date_approx = first(survey_date_approx),
+    survey_date = first(survey_date),
+    plot_shape = first(plot_shape),
+    plot_area = first(plot_area),
+    subplots = first(subplots),
+    subplot_shape = first(subplot_shape),
+    subplot_area = first(subplot_area),
+    includes_snags = first(includes_snags),
+    includes_damage = first(includes_damage),
+    damage_codes_inspected = first(damage_codes_inspected),
+    forest_type = first(forest_type),
+    canopy_cover = first(canopy_cover),
+    min_dbh = min(min_dbh),
+    min_dbh_live = first(min_dbh_live),
+    max_dbh_of_primary_trees = first(max_dbh_of_primary_trees),
+    min_ht = min(min_ht),
+    min_dbh_ohvis = first(min_dbh_ohvis),
+    min_ht_ohvis = first(min_ht_ohvis),
+    plot_lon = first(plot_lon),
+    plot_lat = first(plot_lat),
+    num_ohvis_trees_excluded = first(num_ohvis_trees_excluded),
+    contributer_plot_id = first(contributer_plot_id)  # Ensure contributer_plot_id is included as the last column
+  ) %>%
+  select(
+    plot_id, project_id, hyperplot_id, survey_date_approx, survey_date, plot_shape, 
+    plot_area, subplots, subplot_shape, subplot_area, includes_snags, includes_damage, 
+    damage_codes_inspected, forest_type, canopy_cover, min_dbh, min_dbh_live, 
+    max_dbh_of_primary_trees, min_ht, min_dbh_ohvis, min_ht_ohvis, plot_lon, plot_lat, 
+    num_ohvis_trees_excluded, contributer_plot_id  # Ensure contributer_plot_id is the last column
+  )
+
+# Save the modified data to a new CSV file
+write_csv(SSMT_one_record_per_plot, "C:\\Users\\Oren\\Nardi_workspace\\Tech\\OFO\\StemMaps\\Data\\SSMT\\SSMT_Check\\Final_Export\\SSMT_All_StemPoints\\Final_StemPoints\\SSMT_Field_Plots.csv")
+
+```
