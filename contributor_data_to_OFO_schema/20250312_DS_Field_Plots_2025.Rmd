@@ -1,0 +1,156 @@
+---
+title: "DS_Field_Plots"
+author: "Orenge"
+date: "2025-03-12"
+output: html_document
+---
+
+```{r}
+
+# Load necessary libraries
+library(tidyverse)
+library(dplyr)
+
+# Load data
+DS <- read_csv("C:\\Users\\Oren\\Nardi_workspace\\Tech\\OFO\\StemMaps\\Data\\DS\\Checked_DS\\DS_Final_Export\\Final_StemPoints\\DS_StemPlots.csv")
+
+#DBH_13   = diameter at beast height (1.37 m) in centimeters.
+#HT_13    = total height for year in meters sampled on treatment trees.
+
+# Add the max_dbh_of_primary_trees column with empty or missing values
+DS <- DS %>%
+  mutate(
+    max_dbh_of_primary_trees = ""  # or "" if you prefer empty strings
+  )
+
+# Calculate min_dbh per site
+DS_DBH13 <- DS %>%
+  group_by(PLOT) %>%
+  summarise(
+    min_dbh = min(DBH_13)
+  )
+
+# Calculate min_ht per site
+DS_HT13 <- DS %>%
+  group_by(PLOT) %>%
+  summarise(
+      min_ht = min(HT_13, na.rm = TRUE)  # Ignore NA values
+  ) %>%
+  mutate(
+    min_ht = ifelse(is.infinite(min_ht), "", min_ht)  # Ensure no Inf values
+  )
+
+# Rename columns
+DS_min_max <- DS_HT13 %>%
+  rename(contributer_plot_id = PLOT)
+
+# Join min_dbh with the original data (DS)
+DS <- DS %>%
+  left_join(DS_DBH13, by = c("PLOT" = "PLOT")) %>%
+  left_join(DS_min_max, by = c("PLOT" = "contributer_plot_id"))
+
+# Add new fields
+DS <- DS %>%
+  mutate(
+    project_id = "0021",
+    plot_id = case_when(
+      PLOT == "DS_1" ~ "0286",
+      PLOT == "DS_2" ~ "0287",
+      PLOT == "DS_3" ~ "0288",
+      PLOT == "DS_4" ~ "0289",
+      PLOT == "DS_5" ~ "0290",
+      PLOT == "DS_6" ~ "0291",
+      TRUE ~ "0"
+    ),
+    hyperplot_id = "",
+    survey_date_approx = TRUE,
+    survey_date = "2013",
+    plot_shape = "irregular",
+    plot_area = case_when(
+      plot_id == "0286" ~ "6996.32627",
+      plot_id == "0287" ~ "5571.154416",
+      plot_id == "0288" ~ "6359.32351",
+      plot_id == "0289" ~ "6690.590624",
+      plot_id == "0290" ~ "7930.649384",
+      plot_id == "0291" ~ "6551.160075",
+      TRUE ~ "0"
+    ),
+    subplots = FALSE,
+    subplot_shape = FALSE,
+    subplot_area = "",
+    includes_snags = FALSE,
+    includes_damage = TRUE,
+    damage_codes_inspected = "",
+    forest_type = case_when(
+      plot_id %in% c("0286", "0287", "0288", "0289", "0290", "0291") ~ "201 - Douglas-fir",
+      TRUE ~ "0"
+    ),
+    canopy_cover = "",
+    min_dbh_live = "",
+    min_dbh_ohvis = "",
+    min_ht_ohvis = "",
+    plot_lon = case_when(
+      plot_id == "0286" ~ "-123.094989",
+      plot_id == "0287" ~ "-123.1076208",
+      plot_id == "0288" ~ "-123.12433738",
+      plot_id == "0289" ~ "-123.18370477",
+      plot_id == "0290" ~ "-123.13663612",
+      plot_id == "0291" ~ "-123.1116346",
+      TRUE ~ "0"
+   
+    ),
+    plot_lat = case_when(
+      plot_id == "0286" ~ "46.90502265",
+      plot_id == "0287" ~ "46.93003302",
+      plot_id == "0288" ~ "46.90556957",
+      plot_id == "0289" ~ "46.8621885",
+      plot_id == "0290" ~ "46.86954561",
+      plot_id == "0291" ~ "46.86729638",
+      TRUE ~ "0"
+     
+    ),
+    num_ohvis_trees_excluded = "",
+    contributer_plot_id = PLOT  # Adding contributer_plot_id column based on PLOT
+  )
+
+# Pivot the data to get one row per plot with multiple columns for each field
+DS_one_record_per_plot <- DS %>%
+  group_by(plot_id) %>%
+  summarise(
+    project_id = first(project_id),
+    hyperplot_id = first(hyperplot_id),
+    survey_date_approx = first(survey_date_approx),
+    survey_date = first(survey_date),
+    plot_shape = first(plot_shape),
+    plot_area = first(plot_area),
+    subplots = first(subplots),
+    subplot_shape = first(subplot_shape),
+    subplot_area = first(subplot_area),
+    includes_snags = first(includes_snags),
+    includes_damage = first(includes_damage),
+    damage_codes_inspected = first(damage_codes_inspected),
+    forest_type = first(forest_type),
+    canopy_cover = first(canopy_cover),
+    min_dbh = min(min_dbh),
+    min_dbh_live = first(min_dbh_live),
+    max_dbh_of_primary_trees = first(max_dbh_of_primary_trees),
+    min_ht = min(min_ht),
+    min_dbh_ohvis = first(min_dbh_ohvis),
+    min_ht_ohvis = first(min_ht_ohvis),
+    plot_lon = first(plot_lon),
+    plot_lat = first(plot_lat),
+    num_ohvis_trees_excluded = first(num_ohvis_trees_excluded),
+    contributer_plot_id = first(contributer_plot_id)  # Ensure contributer_plot_id is included as the last column
+  ) %>%
+  select(
+    plot_id, project_id, hyperplot_id, survey_date_approx, survey_date, plot_shape, 
+    plot_area, subplots, subplot_shape, subplot_area, includes_snags, includes_damage, 
+    damage_codes_inspected, forest_type, canopy_cover, min_dbh, min_dbh_live, 
+    max_dbh_of_primary_trees, min_ht, min_dbh_ohvis, min_ht_ohvis, plot_lon, plot_lat, 
+    num_ohvis_trees_excluded, contributer_plot_id  # Ensure contributer_plot_id is the last column
+  )
+
+# Save the modified data to a new CSV file
+write_csv(DS_one_record_per_plot, "C:\\Users\\Oren\\Nardi_workspace\\Tech\\OFO\\StemMaps\\Data\\DS\\Checked_DS\\DS_Final_Export\\Final_StemPoints\\DS_Field_Plots.csv")
+
+```
