@@ -29,45 +29,68 @@ Load data
 
 # Set working directory
 
-setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+# setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
 
 # Load tree data
 
-Batch1trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\updated (9.11.23) data and output files\\Stem_Batch_1\\Plot_Data\\StemData_Batch1_emp_edits_QC_EDITS.xlsx"),sheet=1,col_names = TRUE)
+# Batch1trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_1\\updated (9.11.23) data and output files\\Stem_Batch_1\\Plot_Data\\StemData_Batch1_emp_edits_QC_EDITS.xlsx"),sheet=1,col_names = TRUE)
 
-Batch2trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\updated (9.11.23) data and output files\\Stem_Batch_2\\Plot_Data\\StemData_Batch2_QC_EDITS.xlsx"),sheet=1,col_names = TRUE)
+# Batch2trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_2\\updated (9.11.23) data and output files\\Stem_Batch_2\\Plot_Data\\StemData_Batch2_QC_EDITS.xlsx"),sheet=1,col_names = TRUE)
 
-Batch3trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\StemData_Batch3_Master_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch3trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_3\\StemData_Batch3_Master_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch4trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_4\\Stem_Batch_4\\Plot_Data\\StemData_Batch4_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch4trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_4\\Stem_Batch_4\\Plot_Data\\StemData_Batch4_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch5trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_5\\Batch_5\\Plot_Data\\Stem_Batch5_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch5trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_5\\Batch_5\\Plot_Data\\Stem_Batch5_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch6trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_6\\Batch_6\\Plot_Data\\StemData_Batch6_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch6trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_6\\Batch_6\\Plot_Data\\StemData_Batch6_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch7trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_7\\Batch_7\\Plot_Data\\Stem_Batch7_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch7trees <- read_excel(data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_7\\Batch_7\\Plot_Data\\Stem_Batch7_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch8trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_8\\Batch_8\\Plot_Data\\Stem_Batch_8_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch8trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_8\\Batch_8\\Plot_Data\\Stem_Batch_8_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch9trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Batch_9\\Batch_9_Complete_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch9trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_9\\Batch_9\\Batch_9_Complete_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch10trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\Batch_10_final\\Batch_10_Final_Data_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch10trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_10\\Batch_10_final\\Batch_10_Final_Data_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch11trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_11\\Batch_11_Final\\Batch_11_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch11trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_11\\Batch_11_Final\\Batch_11_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch12trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_12\\Batch_12_updated\\Plot_Data\\Stem_Batch12_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch12trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_12\\Batch_12_updated\\Plot_Data\\Stem_Batch12_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch13trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_13\\Batch_13_Final_Geoff\\Batch13_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch13trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_13\\Batch_13_Final_Geoff\\Batch13_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch14trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_14\\Batch14\\Plot_Data\\Stem_Batch14_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch14trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_14\\Batch14\\Plot_Data\\Stem_Batch14_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-Batch15trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_15\\Batch15\\Plot_Data\\Stem_Batch15_emp_edits.xlsx"),sheet=1,col_names = TRUE)
+# Batch15trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_15\\Batch15\\Plot_Data\\Stem_Batch15_emp_edits.xlsx"),sheet=1,col_names = TRUE)
 
-BatchL527trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_L527\\L-527\\Data\\L-527.xlsx"),sheet=1,col_names = TRUE)
+# BatchL527trees <- read_excel (data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.Stem_Batch_L527\\L-527\\Data\\L-527.xlsx"),sheet=1,col_names = TRUE)
 
-# Load plot center data
+# # Load plot center data
 
-plotcenters <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml")
+# plotcenters <- read_sf("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\allupdatedplotcentersWGS84.kml")
+
+# Rewrite all of the above paths, except for linux and with the field-data-standardization folder being at ~/Documents/repo-data-local/field-datastandardization/, and removing the data() function:
+Batch1trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_1/updated (9.11.23) data and output files/Stem_Batch_1/Plot_Data/StemData_Batch1_emp_edits_QC_EDITS.xlsx",sheet=1,col_names = TRUE)
+Batch2trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_2/updated (9.11.23) data and output files/Stem_Batch_2/Plot_Data/StemData_Batch2_QC_EDITS.xlsx",sheet=1,col_names = TRUE)
+Batch3trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_3/StemData_Batch3_Master_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch4trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_4/Stem_Batch_4/Plot_Data/StemData_Batch4_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch5trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_5/Batch_5/Plot_Data/Stem_Batch5_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch6trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_6/Batch_6/Plot_Data/StemData_Batch6_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch7trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_7/Batch_7/Plot_Data/Stem_Batch7_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch8trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_8/Batch_8/Plot_Data/Stem_Batch_8_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch9trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_9/Batch_9/Batch_9_Complete_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch10trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_10/Batch_10_final/Batch_10_Final_Data_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch11trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_11/Batch_11_Final/Batch_11_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch12trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_12/Batch_12_updated/Plot_Data/Stem_Batch12_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch13trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_13/Batch_13_Final_Geoff/Batch13_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch14trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_14/Batch14/Plot_Data/Stem_Batch14_emp_edits.xlsx",sheet=1,col_names = TRUE)
+Batch15trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_15/Batch15/Plot_Data/Stem_Batch15_emp_edits.xlsx",sheet=1,col_names = TRUE)
+BatchL527trees <- read_excel("~/Documents/repo-data-local/field-data-standardization/TNC.Stem_Batch_L527/L-527/Data/L-527.xlsx",sheet=1,col_names = TRUE)
+plotcenters <- read_sf("~/Documents/repo-data-local/field-data-standardization/TNC.IRI.Compiled.Data/allupdatedplotcentersWGS84.kml")
+
+
+
+
 
 ```
 
@@ -134,43 +157,6 @@ combinedtrees <- combinedtrees %>% drop_na(`Azimuth`) # this gets rid of rows us
 
 ```
 
-Plot ID
-
-```{r}
-
-combinedtrees$`ofo_plot_id` <- "0"
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L506'] <- '0088'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L511'] <- '0089'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L512'] <- '0090'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L515'] <- '0091'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L517'] <- '0092'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L525'] <- '0093'
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L521'] <- '0099'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L505'] <- '0096'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L504'] <- '0095'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L536'] <- '0101'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L507'] <- '0097'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L502'] <- '0094'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L529'] <- '0100'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L508'] <- '0098'
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L519'] <- '0102'
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L522'] <- '0107'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L528'] <- '0104'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L524'] <- '0103'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L520'] <- '0106'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L535'] <- '0108'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L539'] <- '0109'
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L534'] <- '0105'
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L092'] <- '0110'
-
-combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L527'] <- '0111'
-
-```
 
 
 Tree lat and long
@@ -228,7 +214,9 @@ plotcenters_coordinates <- plotcenters_coordinates %>% rename (PlotLongitudeWGS8
 
 plotcentersUTM10N_coordinates <- plotcentersUTM10N_coordinates %>% rename (`Plot#`=plotcentersUTM10N..Plot.., PlotLongitudeUTM10N=X, PlotLatitudeUTM10N=Y) 
 
-write.csv(plotcenters, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240225_IRItoOFO_plotcenters.csv")
+# write.csv(plotcenters, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240225_IRItoOFO_plotcenters.csv")
+# redo the above for the linux path
+write.csv(plotcenters, "~/Documents/repo-data-local/field-data-standardization/TNC.IRI.Compiled.Data/20240225_IRItoOFO_plotcenters.csv")
 
 # make sure all plot names are in the same format
 
@@ -509,7 +497,9 @@ treecoordinatesconversion <- treecoordinatesconversion %>% st_transform(4326)
 
 # save this in case it's helpful later
 
-st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\finaltreecoordinates.kml"),delete_dsn=TRUE)
+# st_write(treecoordinatesconversion, data("C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\finaltreecoordinates.kml"),delete_dsn=TRUE)
+# redo the above for the linux path
+st_write(treecoordinatesconversion, ("~/Documents/repo-data-local/field-data-standardization/TNC.IRI.Compiled.Data/finaltreecoordinates.kml"),delete_dsn=TRUE)
 
 # extract the geometry features into columns of lat and long WGS84, then merge back into the tree data frame
 
@@ -520,6 +510,45 @@ treecoordinatesconversionWGS84 <- treecoordinatesconversionWGS84 %>% rename (tre
 combinedtrees <- full_join (combinedtrees, treecoordinatesconversionWGS84, by="tree_id")
 
 ```
+
+OFO Plot ID (large plots only; others (small plots) assigned 0)
+
+```{r}
+
+combinedtrees$`ofo_plot_id` <- "0"
+
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L506'] <- '0088'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L511'] <- '0089'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L512'] <- '0090'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L515'] <- '0091'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L517'] <- '0092'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L525'] <- '0093'
+
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L521'] <- '0099'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L505'] <- '0096'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L504'] <- '0095'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L536'] <- '0101'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L507'] <- '0097'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L502'] <- '0094'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L529'] <- '0100'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L508'] <- '0098'
+
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L519'] <- '0102'
+
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L522'] <- '0107'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L528'] <- '0104'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L524'] <- '0103'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L520'] <- '0106'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L535'] <- '0108'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L539'] <- '0109'
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L534'] <- '0105'
+
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L092'] <- '0110'
+
+combinedtrees$`ofo_plot_id`[combinedtrees$`Plot#` == 'L527'] <- '0111'
+
+```
+
 
 Convert height from feet to meters
 
@@ -635,11 +664,11 @@ Canopy position
 
 combinedtrees$`CanopyPosition`[is.na(combinedtrees$`CanopyPosition`)] <- ''
 
-combinedtrees$`CanopyPosition`[combinedtrees$`Species` == '35'] <- '' 
+combinedtrees$`CanopyPosition`[combinedtrees$`CanopyPosition` == '35'] <- '' 
 
-combinedtrees$`CanopyPosition`[combinedtrees$`Species` == '15'] <- '' 
+combinedtrees$`CanopyPosition`[combinedtrees$`CanopyPosition` == '15'] <- '' 
 
-combinedtrees$`CanopyPosition`[combinedtrees$`Species` == '12'] <- '' 
+combinedtrees$`CanopyPosition`[combinedtrees$`CanopyPosition` == '12'] <- '' 
 
 ```
 
@@ -723,7 +752,9 @@ Export CSV with all data
 
 ```{r}
 
-write.csv(combinedtrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240618_IRItoOFO_ALLplots.csv")
+# write.csv(combinedtrees, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240618_IRItoOFO_ALLplots_v2-20250514.csv")
+# linux version
+write.csv(combinedtrees, "~/Documents/repo-data-local/field-data-standardization/TNC.IRI.Compiled.Data/20240618_IRItoOFO_ALLplots_v2-20250514.csv")
 
 ```
 
@@ -735,13 +766,6 @@ largeplots <- combinedtrees[combinedtrees$ofo_plot_id !=0,]
 
 ```
 
-Export CSV with only large plot data
-
-```{r}
-
-write.csv(largeplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240618_IRItoOFO_largeplots.csv")
-
-```
 
 Drop large plots to save CSV of just small plots
 
@@ -749,13 +773,92 @@ Drop large plots to save CSV of just small plots
 
 smallplots <- combinedtrees[combinedtrees$ofo_plot_id == 0,]
 
-write.csv(smallplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240618_IRItoOFO_smallplots.csv")
+# write.csv(smallplots, "C:\\Users\\emily\\Box\\FOCAL\\field-data-standardization\\TNC.IRI.Compiled.Data\\20240618_IRItoOFO_smallplots.csv")
+# linux version
+write.csv(smallplots, "~/Documents/repo-data-local/field-data-standardization/TNC.IRI.Compiled.Data/20240618_IRItoOFO_smallplots_v2-20250514.csv")
 
 ```
 
 
 ## ALTERATIONS MADE IN EXCEL
-
 Manually moved damage codes into new columns
+Note from DY: Now this is being done in R below.
 
 
+
+
+## Save the large plot data frame in the format (col order) needed for pasting into the ofo tree table
+
+```{r}
+
+unique(largeplots$ofo_plot_id)
+
+na_to_blank = function(x) {
+  ifelse(is.na(x), "", x)
+}
+
+
+# Split out multiple damage codes into separate columns (the are delimited by spaces)
+for(i in 1:nrow(largeplots)) {
+  row = largeplots[i,]
+  codes = str_split(row$`Live Tree Defects`, " ")[[1]]
+  code_1 = codes[1]
+  code_2 = codes[2]
+  code_3 = codes[3]
+  
+  largeplots[i, "damage_1"] = code_1 |> na_to_blank()
+  largeplots[i, "damage_2"] = code_2 |> na_to_blank()
+  largeplots[i, "damage_3"] = code_3 |> na_to_blank()
+}
+
+
+
+
+largeplots_to_paste = largeplots |>
+  mutate(CanopyPosition = na_to_blank(CanopyPosition)) |>
+  mutate(dummy = "") |>
+  select(
+    tree_id,
+    ofo_plot_id,
+    plot_id2 = dummy,
+    subplotid = dummy,
+    tree_lat = TreeLatitudeWGS84,
+    tree_lon = TreeLongitudeWGS84,
+    height = `Height (m)`,
+    height_allometric = dummy,
+    ht_above = dummy,
+    dbh = `DBH (cm)`,
+    species = `Species`,
+    growth_form = `growth_form`,
+    live_dead = `Live/Dead`,
+    canopy_position = `CanopyPosition`,
+    ohvis = ohvis,
+    crown_ratio = dummy,
+    crown_ratio_compacted = `crown_ratio_compacted`,
+    ht_crown = dummy,
+    height_needle = dummy,
+    scorch_height = dummy,
+    percent_precip = dummy,
+    percent_post = dummy,
+    live_crown_class = dummy,
+    crown_width = dummy,
+    cr_wid_2 = dummy,
+    cr_wid_3 = dummy,
+    decay_class = `Snag Decay Class`,
+    damage_1,
+    damage_2,
+    damage_3,
+    damage_4 = dummy,
+    damage_5 = dummy,
+    distance_to_pith = horiz_distance_pith,
+    distance_to_face = `All Horizontal Distances (m)`,
+    azimuth = TrueAzimuth,
+    contributor_tree_id = `Tree#`,
+    notes = `Notes`,
+  )
+  
+
+write.csv(largeplots_to_paste, "~/Documents/repo-data-local/field-data-standardization/TNC.IRI.Compiled.Data/20240618_IRItoOFO_largeplots_v2-20250514.csv")
+
+
+```
