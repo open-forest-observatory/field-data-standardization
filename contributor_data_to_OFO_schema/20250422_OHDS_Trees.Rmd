@@ -24,7 +24,7 @@ Load and merge datasets
 # Load Data
 
 treesraw <- read_csv("/Users/Victoria/Documents/OFO/OHDS_StemPlots.csv") # 6206 rows
-coordsraw <- read_excel("/Users/Victoria/Documents/OFO/StemCoordinates_DataOHDS.xlsx") # 13658 rows
+coordsraw <- read_excel("/Users/Victoria/Documents/OFO/StemCoordinates_DataOHDS.xlsx") # 13658 rows, has some additional comments
 
 
 # Reclassify plot ID's, assign unique ID
@@ -55,17 +55,19 @@ coords <- coordsraw %>% mutate(
 # Join datasets
 
 trees <- left_join(trees, coords, by = "unique_id")
-# note this does not retain the 7452 trees only found in coords dataset
+# joining the coords datasetisn't absolutely necessary, but it does contain some extra comments
 
 ```
 
-Filter out logged trees?
+Remove downed trees
 ```{r}
+
+# remove downed trees, i.e. damage = uprooted down
+trees <- subset(trees, DamA != "UR" | is.na(DamA)) # removed 1 tree, 6205 trees now
 
 # Maybe: remove trees with tree_no over 9000? emily says these were logged in her olympic.rmd... not sure where this information came from though
 
-# subset(trees, trees$Tree_no.x > 9000) # how many would be removed ? 86 trees
-trees <- subset(trees, trees$Tree_no.x < 9000)
+# trees <- subset(trees, trees$Tree_no.x < 9000) # 86 would be removed, uncomment this code if confirm this is true
 
 ```
 
@@ -87,23 +89,22 @@ trees <- trees %>% mutate(
       Species.x == "ABAM" ~ "11",
       Species.x == "ALRU2" ~ "351",
       Species.x == "PISI" ~ "98",
-      Species.x == "UNCLS" ~ "0", # unclassified softwood
-      Species.x == "RHPU" ~ "RHPU", # does not have FIA or species-codes sheet code
+      Species.x == "UNCLS" ~ "002", # unclassified softwood
+      Species.x == "RHPU" ~ "RHPU", # does not have FIA or species-codes sheet code (Cascara)
       Species.x == "THPL" ~ "242",
       Species.x == "SASP" ~ "924",
       Species.x == "PREM" ~ "768",
-      Species.x == "ACCI" ~ "ACECIR", # from species-codes sheet
+      Species.x == "ACCI" ~ "ACECIR", # from OFO species-codes sheet
       Species.x == "ACMA3" ~ "312",
-      Species.x == "TABR" ~ "231"), # check! species-codes says TABR2 = 231
-    growth_form = "", 
+      Species.x == "TABR" ~ "231"), # assuming they really meant TABR2 (pacific yew)
+    growth_form = "tree", # assume all are trees
     live_dead = case_when( 
-      TC == "10" ~ "L",
-      TC == "11" ~ "L",
-      TC == "12" ~ "L",
-      TC == "13" ~ "L",
-      TC == "21" ~ "D",
-      TC == "22" ~ "D",
-      DamA == "DI" ~ "M"),  # I think this makes sense, but not sure
+      TC == "10" ~ "L", # live tree (leave tree)
+      TC == "11" ~ "L", # ingrowth tree
+      TC == "12" ~ "L", # new tree, missed at previous measurements
+      TC == "13" ~ "L", # live tree not suitable for height/diameter curves or height growth
+      TC == "21" ~ "D", # standing dead (snag)
+      DamA == "DI" ~ "M"), # diseased/sick/dying -> marginal
     crown_position = case_when(
       CC == "7" ~ "1", 
       CC == "1" ~ "2", 
@@ -129,17 +130,20 @@ trees <- trees %>% mutate(
     crown_width_allometric = "",
     decay_class = "",
     damage_1 = case_when(
-      DamA == "FT" ~ "90004", # forked top 
-      DamA == "BT" ~ "90001", # broken top
-      DamA == "CR" | DamA == "SW" | DamA == "XL" ~ "90006", # crook or sweep... or lean?
-      DamA == "DT" ~ "90002", # dead top
-      DamA == "SB" ~ "9011", # open wound?
+      DamA == "FT" ~ "90004", # FT = forked top or stem -> 90004 = forked top
+      DamA == "BT" ~ "90001", # BT = broken top -> 90001 broken top
+      DamA == "CR" | DamA == "SW" | DamA == "XL" ~ "90006", # 90006 = crook or sweep <- 
+      # CR = crook, SW = sweep, XL = excessive lean (no FIA damage code for this specifically)
+      DamA == "DT" ~ "90002", # DT = dead top -> 90002 = dead top
+      DamA == "SB" ~ "9011", # SB = basal bark damage -> 9011 = open wound
       TRUE ~ ""),
-    damage_2 = "",
+    damage_2 = "", # original dataset includes cols for dam 2 and 3 but none were recorded
     damage_3 = "",
     damage_4 = "",
     damage_5 = "",
-    distance_to_pith = (Dist + (0.5 * 0.01 * Post_Dbh)), # dist to face + radius of tree in meters
+    distance_to_pith = "", # distance and azimuth measurements complicated by ingrowth tagging methods
+    distance_to_face = "", 
+    azimuth = "",
     notes = case_when(
       !is.na(Comments.x) & !is.na(Comments.y) ~ paste(Comments.x, Comments.y, sep = ", "),
       !is.na(Comments.x) ~ Comments.x,
@@ -151,19 +155,16 @@ trees <- trees %>% mutate(
     tree_lon = X_Long,
     height = Ht,
     dbh = Post_Dbh,
-    distance_to_face = Dist,
-    azimuth = Azimuth,
     contributor_tree_id = Tree_no.x) %>%  # note that contributor did not use unique id's
   subset(select = c(
     tree_id, plot_id, plot_id2, subplot_id, tree_lat, tree_lon, height, height_allometric,
     height_above_plot_center, dbh, species, growth_form, live_dead, crown_position, ohvis, crown_ratio,
     crown_ratio_compacted, height_to_crown, height_to_needle, scorch_height, percent_prefire_crown_green,
     percent_postfire_crown_green, live_crown_class, crown_width_1, crown_width_2, crown_width_allometric,
-    decay_class, damage_1, damage_2, damage_3, damage_4, damage_5, distance_to_pith, distance_to_face, azimuth,
+    decay_class, damage_1, damage_2, damage_3, damage_4, damage_5, distance_to_pith, distance_to_face, azimuth, 
     contributor_tree_id, notes, corrected_error))
 
 ```
-
 
 Export
 ```{r}

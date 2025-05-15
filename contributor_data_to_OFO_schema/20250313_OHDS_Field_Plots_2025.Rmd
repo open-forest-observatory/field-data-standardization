@@ -53,15 +53,15 @@ OHDS_final <- OHDS_df %>%
     includes_damage = TRUE,
     damage_codes_inspected = "90001; 90002; 90004; 90006; 90011", # may need to update if add more codes to trees rmd
     forest_type = case_when(
-      plot_id %in% c("0270", "0273") ~ "201 - Douglas-fir", # added 0273
-      plot_id %in% c("0272", "0271", "0274", "0275") ~ "301 - Western Hemlock", # added 0271, 0274, 0275 
-      plot_id %in% c("0276") ~ "304 - Western Redcedar"), # added this
+      plot_id %in% c("0270", "0273") ~ "201 - Douglas-fir", # classified by most common trees
+      plot_id %in% c("0272", "0271", "0274", "0275") ~ "301 - Western Hemlock",  
+      plot_id %in% c("0276") ~ "304 - Western Redcedar"), 
     canopy_cover = "",
     min_dbh = "5.0",
     min_dbh_live = "",
     min_dbh_ohvis = "",
     min_ht_ohvis = "",
-    min_ht = "1.3",
+    min_ht = "",
     plot_lon = case_when(
       plot_id == "0270" ~ "-124.03456754",
       plot_id == "0271" ~ "-124.21338425",
