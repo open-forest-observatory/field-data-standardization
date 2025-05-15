@@ -1,55 +1,42 @@
 ---
 title: "OHDS_Field_Plots"
-author: "Orenge"
-date: "2025-03-13"
+author: "Orenge + Victoria Mattsson"
+date: "2025-04-14"
 output: html_document
 ---
 
+## NEW VERSION ## Victoria's updates to Oren's code
+
 ```{r}
-# Load necessary libraries
+
+# Load libraries
 library(tidyverse)
 library(readxl)
 library(sf)
 library(pracma)
 library(dplyr)
 
-# Load data
-OHDS <- read_csv("C:\\Users\\Oren\\Nardi_workspace\\Tech\\OFO\\StemMaps\\Data\\OHDS\\OHDS_Check\\OHDS_Final_Export\\Final_StemPoints\\Append\\OHDS_StemPlots.csv")
+# Load data 
+OHDS <- read_csv("/Users/Victoria/Documents/OFO/OHDS_StemPlots.csv")
+unique(OHDS$PLOT)
 
-# DBH is in centimeters and Height is in meters
+OHDS_df <- data.frame(contributor_plot_id = c("Bait_405", "Clavicle_302", "Fresca_202", "Fulton_601", "Rail_103", "Snow_805", "Triton_703"))
 
-# Calculate min_dbh and min_ht per plot
-OHDS_min_max <- OHDS %>%
-  group_by(PLOT) %>%
-  summarise(
-    min_dbh = min(Post_Dbh, na.rm = TRUE),
-    min_ht = min(Ht, na.rm = TRUE)
-  )
-
-# Rename columns
-OHDS_min_max <- OHDS_min_max %>%
-  rename(contributer_plot_id = PLOT)
-
-# Add new fields
-OHDS_final <- OHDS_min_max %>%
-  mutate(
-    project_id = "0014",
+OHDS_final <- OHDS_df %>%
+  mutate(project_id = "0014",
     plot_id = case_when(
-      contributer_plot_id == "Bait_405" ~ "0270",
-      contributer_plot_id == "Clavicle_302" ~ "0271",
-      contributer_plot_id == "Fresca_202" ~ "0272",
-      contributer_plot_id == "Fulton_601" ~ "0273",
-      contributer_plot_id == "Rail_103" ~ "0274",
-      contributer_plot_id == "Snow_805" ~ "0275",
-      contributer_plot_id == "Triton_703" ~ "0276",
-      TRUE ~ "0"
-    ),
+      contributor_plot_id == "Bait_405" ~ "0270",
+      contributor_plot_id == "Clavicle_302" ~ "0271",
+      contributor_plot_id == "Fresca_202" ~ "0272",
+      contributor_plot_id == "Fulton_601" ~ "0273",
+      contributor_plot_id == "Rail_103" ~ "0274",
+      contributor_plot_id == "Snow_805" ~ "0275",
+      contributor_plot_id == "Triton_703" ~ "0276"),
     hyperplot_id = "",
     survey_date_approx = TRUE,
     survey_date = case_when(
       plot_id %in% c("0272", "0274") ~ "2018",  # Fresca and Rail in 2018
-      TRUE ~ "2019"  # All other plots in 2019
-    ),
+      TRUE ~ "2019"),  # All other plots in 2019
     plot_shape = "irregular",
     plot_area = case_when(
       plot_id == "0270" ~ "13429.28063",
@@ -58,24 +45,22 @@ OHDS_final <- OHDS_min_max %>%
       plot_id == "0273" ~ "12478.02888",
       plot_id == "0274" ~ "13557.72142",
       plot_id == "0275" ~ "12878.04766",
-      plot_id == "0276" ~ "13561.97198",
-      TRUE ~ "0"
-    ),
+      plot_id == "0276" ~ "13561.97198"),
     subplots = FALSE,
     subplot_shape = FALSE,
     subplot_area = "",
     includes_snags = TRUE,
     includes_damage = TRUE,
-    damage_codes_inspected = "",
-    forest_type = case_when(
-      plot_id %in% c("0270", "0271", "0274", "0275") ~ "201 - Douglas-fir",
-      plot_id %in% c("0272", "0273", "0276") ~ "301 - Western Hemlock",
-      TRUE ~ "0"
-    ),
+    damage_codes_inspected = "90001; 90002; 90004; 90006; 90011", # may need to update if add more codes to trees rmd
+    forest_type = case_when(   # classified by most common trees
+      plot_id %in% c("0270", "0271", "0272", "0273", "0274", "0275") ~ "301 - Western Hemlock",  # some are almost 50/50 TSHE/PSME
+      plot_id %in% c("0276") ~ "304 - Western Redcedar"), 
     canopy_cover = "",
+    min_dbh = "5.0",
     min_dbh_live = "",
     min_dbh_ohvis = "",
     min_ht_ohvis = "",
+    min_ht = "",
     plot_lon = case_when(
       plot_id == "0270" ~ "-124.03456754",
       plot_id == "0271" ~ "-124.21338425",
@@ -83,9 +68,7 @@ OHDS_final <- OHDS_min_max %>%
       plot_id == "0273" ~ "-122.99062167",
       plot_id == "0274" ~ "-124.06668188",
       plot_id == "0275" ~ "-122.97755636",
-      plot_id == "0276" ~ "-123.01273668",
-      TRUE ~ "0"
-    ),
+      plot_id == "0276" ~ "-123.01273668"),
     plot_lat = case_when(
       plot_id == "0270" ~ "47.5749638",
       plot_id == "0271" ~ "48.0419389",
@@ -93,21 +76,19 @@ OHDS_final <- OHDS_min_max %>%
       plot_id == "0273" ~ "47.64815174",
       plot_id == "0274" ~ "48.06168061",
       plot_id == "0275" ~ "47.93287363",
-      plot_id == "0276" ~ "47.62846183",
-      TRUE ~ "0"
-    ),
+      plot_id == "0276" ~ "47.62846183"),
     num_ohvis_trees_excluded = "",
-    max_dbh_of_primary_trees = ""  # Set blank instead of calculating
+    max_dbh_of_primary_trees = ""  
   ) %>%
   select(
     plot_id, project_id, hyperplot_id, survey_date_approx, survey_date, plot_shape, 
     plot_area, subplots, subplot_shape, subplot_area, includes_snags, includes_damage, 
     damage_codes_inspected, forest_type, canopy_cover, min_dbh, min_dbh_live, 
     max_dbh_of_primary_trees, min_ht, min_dbh_ohvis, min_ht_ohvis, plot_lon, plot_lat, 
-    num_ohvis_trees_excluded, contributer_plot_id
+    num_ohvis_trees_excluded, contributor_plot_id
   )
 
 # Save the modified data
-write_csv(OHDS_final, "C:\\Users\\Oren\\Nardi_workspace\\Tech\\OFO\\StemMaps\\Data\\OHDS\\OHDS_Check\\OHDS_Final_Export\\Final_StemPoints\\Append\\OHDS_Field_Plots.csv")
-
+write_csv(OHDS_final, "/Users/Victoria/Documents/OFO/OHDS_Field_Plots.csv")
 ```
+
