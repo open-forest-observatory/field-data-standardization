@@ -169,7 +169,7 @@ trees <- trees %>% mutate(
 Export
 ```{r}
 
-write.csv(trees, "/Users/Victoria/Documents/OFO/OHDS_trees_OFO.csv")
+write.csv(trees, "/Users/Victoria/Documents/OFO/OHDS_trees_OFO.csv", row.names = FALSE, na = "")
 
 ```
 

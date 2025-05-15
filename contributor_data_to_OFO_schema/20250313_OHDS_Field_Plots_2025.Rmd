@@ -52,9 +52,8 @@ OHDS_final <- OHDS_df %>%
     includes_snags = TRUE,
     includes_damage = TRUE,
     damage_codes_inspected = "90001; 90002; 90004; 90006; 90011", # may need to update if add more codes to trees rmd
-    forest_type = case_when(
-      plot_id %in% c("0270", "0273") ~ "201 - Douglas-fir", # classified by most common trees
-      plot_id %in% c("0272", "0271", "0274", "0275") ~ "301 - Western Hemlock",  
+    forest_type = case_when(   # classified by most common trees
+      plot_id %in% c("0270", "0271", "0272", "0273", "0274", "0275") ~ "301 - Western Hemlock",  # some are almost 50/50 TSHE/PSME
       plot_id %in% c("0276") ~ "304 - Western Redcedar"), 
     canopy_cover = "",
     min_dbh = "5.0",
