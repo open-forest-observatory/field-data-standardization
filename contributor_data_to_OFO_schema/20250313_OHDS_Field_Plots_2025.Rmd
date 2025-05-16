@@ -92,3 +92,35 @@ OHDS_final <- OHDS_df %>%
 write_csv(OHDS_final, "/Users/Victoria/Documents/OFO/OHDS_Field_Plots.csv")
 ```
 
+```{r}
+# standardize plot boundaries / convex hulls
+
+library(sf)
+
+plotnames <- tribble(  # rename id's
+  ~PLOT, ~plot_id,
+  "Bait_405", "0270",
+  "Clavicle_302", "0271",
+  "Fresca_202", "0272",
+  "Fulton_601", "0273",
+  "Rail_103", "0274",
+  "Snow_805", "0275",
+  "Triton_703", "0276")
+
+all <- st_read("/Users/Victoria/Documents/OFO/OHDS_ConvexHull.gpkg") # oren's combined gpkg
+
+all <- st_transform(all, crs = 4326) # WGS84 geographic (EPSG 4326)
+
+all <- all %>%
+  left_join(plotnames, by = "PLOT") %>%
+  select(plot_id, geom)  # keep plot and geometry only (remove area_ha, area_sqm, lon, lat)
+
+output_dir <- "/Users/Victoria/Documents/OFO/OHDS_convexhull_gpkg's"
+
+# separate combined gpkg into seven different gpkg's by plot
+for (pid in unique(all$plot_id)) {
+  plot_data <- all[all$plot_id == pid, ]
+  st_write(plot_data, dsn = file.path(output_dir, paste0(pid, ".gpkg")))}
+
+```
+
