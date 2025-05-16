@@ -62,8 +62,9 @@ trees <- left_join(trees, coords, by = "unique_id")
 Remove downed trees
 ```{r}
 
-# remove downed trees, i.e. damage = uprooted down
-trees <- subset(trees, DamA != "UR" | is.na(DamA)) # removed 1 tree, 6205 trees now
+# remove downed trees, i.e. damage = uprooted down OR tree class = down dead
+trees <- subset(trees, (DamA != "UR" | is.na(DamA)) & (TC != 22 | is.na(TC))) # minus 1 UR tree and 256 down dead trees
+# 5949 rows total now
 
 # Maybe: remove trees with tree_no over 9000? emily says these were logged in her olympic.rmd... not sure where this information came from though
 
