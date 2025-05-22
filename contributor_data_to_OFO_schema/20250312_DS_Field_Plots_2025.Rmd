@@ -1,54 +1,24 @@
 ---
-title: "DS_Field_Plots"
-author: "Orenge"
-date: "2025-03-12"
+title: "DS"
+author: "Orenge + Victoria"
+date: "2025-05-22"
 output: html_document
 ---
 
 ```{r}
-
 # Load necessary libraries
 library(tidyverse)
 library(dplyr)
 
 # Load data
-DS <- read_csv("C:\\Users\\Oren\\Nardi_workspace\\Tech\\OFO\\StemMaps\\Data\\DS\\Checked_DS\\DS_Final_Export\\Final_StemPoints\\DS_StemPlots.csv")
+DS <- read_csv("/Users/Victoria/Documents/OFO/DS_StemPlots.csv")
 
 #DBH_13   = diameter at beast height (1.37 m) in centimeters.
 #HT_13    = total height for year in meters sampled on treatment trees.
+```
 
-# Add the max_dbh_of_primary_trees column with empty or missing values
-DS <- DS %>%
-  mutate(
-    max_dbh_of_primary_trees = ""  # or "" if you prefer empty strings
-  )
-
-# Calculate min_dbh per site
-DS_DBH13 <- DS %>%
-  group_by(PLOT) %>%
-  summarise(
-    min_dbh = min(DBH_13)
-  )
-
-# Calculate min_ht per site
-DS_HT13 <- DS %>%
-  group_by(PLOT) %>%
-  summarise(
-      min_ht = min(HT_13, na.rm = TRUE)  # Ignore NA values
-  ) %>%
-  mutate(
-    min_ht = ifelse(is.infinite(min_ht), "", min_ht)  # Ensure no Inf values
-  )
-
-# Rename columns
-DS_min_max <- DS_HT13 %>%
-  rename(contributer_plot_id = PLOT)
-
-# Join min_dbh with the original data (DS)
-DS <- DS %>%
-  left_join(DS_DBH13, by = c("PLOT" = "PLOT")) %>%
-  left_join(DS_min_max, by = c("PLOT" = "contributer_plot_id"))
-
+# Field-plots standardization
+```{r}
 # Add new fields
 DS <- DS %>%
   mutate(
@@ -80,13 +50,16 @@ DS <- DS %>%
     subplot_area = "",
     includes_snags = FALSE,
     includes_damage = TRUE,
-    damage_codes_inspected = "",
+    damage_codes_inspected = "90001; 90002; 90004",
     forest_type = case_when(
       plot_id %in% c("0286", "0287", "0288", "0289", "0290", "0291") ~ "201 - Douglas-fir",
       TRUE ~ "0"
     ),
     canopy_cover = "",
+    min_dbh = "",
     min_dbh_live = "",
+    max_dbh_of_primary_trees = "",
+    min_ht = "",
     min_dbh_ohvis = "",
     min_ht_ohvis = "",
     plot_lon = case_when(
@@ -151,6 +124,151 @@ DS_one_record_per_plot <- DS %>%
   )
 
 # Save the modified data to a new CSV file
-write_csv(DS_one_record_per_plot, "C:\\Users\\Oren\\Nardi_workspace\\Tech\\OFO\\StemMaps\\Data\\DS\\Checked_DS\\DS_Final_Export\\Final_StemPoints\\DS_Field_Plots.csv")
+write_csv(DS_one_record_per_plot, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
+
+```
+
+# Field-trees standardization
+```{r}
+# notes organization
+
+# Researchers applied treatments to ~ 40% of the trees in this dataset. Preserve these details in the notes col.
+DS <- DS %>% mutate(
+  notes = case_when(
+    TRTID == "B20-1S" ~ "trt: 20% of circumference removed along 1m of bole in spring 2005",
+    TRTID == "B40-1F" ~ "trt: 40% of circumference removed along 1m of bole in fall 2005",
+    TRTID == "B40-1S" ~ "trt: 40% of circumference removed along 1m of bole in spring 2005",
+    TRTID == "B40-2S" ~ "trt: 40% of circumference removed along 2m of bole in spring 2005",
+    TRTID == "B60-1S" ~ "trt: 40% of circumference removed along 1m of bole in fall 2005",
+    # I think there's a major typo in the referenced code csv ^ and it should be 60% and spring
+    TRTID == "B80-1S" ~ "trt: 80% of circumference removed along 1m of bole in spring 2005",
+    TRTID == "B80-2S" ~ "trt: 80% of circumference removed along 2m of bole in spring 2005",
+    TRTID == "B90-1S" ~ "trt: 90% of circumference removed along 1m of bole in spring 2005",
+    TRTID == "R25" ~ "trt: damaged est 25% of root area cross section",
+    TRTID == "R50" ~ "trt: damaged est 50% of root area cross section",
+    TRTID == "R25-B40-1S" ~ "trt: damaged est 25% of root area cross section & 40% of circumference removed along 1m of bole in spring 2005",
+    TRTID == "R50-B40-1S" ~ "trt: damaged est 50% of root area cross section & 40% of circumference removed along 1m of bole in spring 2005",
+    TRTID == "PRUNE" ~ "control trt: branches pruned up to 2m above ground",
+    TRTID == "SOIL" ~ "control trt: soil removed around roots then put back",
+    TRTID == "CONTROL" ~ "trt: no damage or manipulation",
+    TRTID == "EXTRA" ~ "no control or damage treatment but measured initially",
+    TRTID == "INGROWTH" ~ "grew into measurement cutoffs after trt's were applied",
+    TRTID == "MISSED" ~ "initially missed but later realized in stand boundaries",
+    TRTID == "DROPPED" ~ "determined not in stand boundaries",
+    TRTID == "NONE" ~ "(not assigned any other category)"))
+
+# Add comments about tree lean to notes
+test <- DS %>%
+  mutate(
+    lean = case_when(
+     # LEANDOWN_13 == "0" ~ "no lean",
+      LEANDOWN_13 == "1" ~ "slight lean 5-10 deg",
+      LEANDOWN_13 == "2" ~ "major lean",
+      LEANDOWN_13 == "3" ~ "leaning on neighbors",
+      LEANDOWN_13 == "4" ~ "lean: on ground", # this never occurs in the data
+      TRUE ~ NA_character_),
+    notes = if_else(
+      !is.na(lean),
+      str_c(lean, ", ", notes),
+      notes))
+
+```
+
+
+```{r}
+# all other fields
+DStrees <- DS %>% mutate(
+    tree_id = "",
+    plot_id2 = "",
+    subplot_id = "",
+    height_allometric = "",
+    height_above_plot_center = "",
+    species = case_when(
+      SPECIES == "DF" ~ "202", # Douglas-fir
+      SPECIES == "CH" ~ "768", # cherry - NOTE: contributors do not specify species so assuming this is bitter cherry but not confirmed
+      SPECIES == "CA" ~ "RHPU", # cascara, does not have FIA or species-codes sheet code
+      SPECIES == "MD" ~ "361", # madrone
+      SPECIES == "WH" ~ "263", # western hemlock
+      SPECIES == "RA" ~ "351", # red alder
+      SPECIES == "DG" ~ "492", # pacific dogwood
+      SPECIES == "MA" ~ "312"), # bigleaf maple
+    growth_form = "tree", # assuming all are trees
+    live_dead = "L", # live trees only
+    crown_position = "", 
+    ohvis = "",
+    crown_ratio = "",
+    crown_ratio_compacted = "",
+    height_to_needle = "",
+    scorch_height = "",
+    percent_prefire_crown_green = "",
+    percent_postfire_crown_green = "",
+    live_crown_class = "",
+    crown_width_1 = "", 
+    crown_width_2 = "",
+    crown_width_allometric = "",
+    decay_class = "",
+    damage_1 = case_when(
+      HTDAM_13 == "0" ~ "", # none
+      HTDAM_13 == "1" ~ "90004", # fork -> 90004 forked top
+      HTDAM_13 == "2"  ~ "90002", # dead top -> 90002 dead to, never occurred but was inspected
+      HTDAM_13 == "3" ~ "90001", # broken top -> 90001 broken top
+  #   LEANDOWN_13 == "3" ~ "90006", # major lean -> 90006 crook or sweep or excessive lean (OFO def)
+      TRUE ~ ""),
+    damage_2 = "", # contributed dataset only had one column for damage
+    damage_3 = "",
+    damage_4 = "",
+    damage_5 = "",
+    distance_to_pith = "", 
+    distance_to_face = "", 
+    azimuth = "",
+    corrected_error = "") %>% 
+  rename(
+    tree_lat = Y_Lat,
+    tree_lon = X_Long,
+    height = HT_13,
+    dbh = DBH_13,
+    height_to_crown = HLC_13,
+    contributor_tree_id = TREE) %>%  # note that contributor did not use unique id's, TREE nums reset each plot, also ingrowth trees are labeled with TREE num of nearest existing tree (shown in RECRUIT col of original data)
+  subset(select = c(
+    tree_id, plot_id, plot_id2, subplot_id, tree_lat, tree_lon, height, height_allometric,
+    height_above_plot_center, dbh, species, growth_form, live_dead, crown_position, ohvis, crown_ratio,
+    crown_ratio_compacted, height_to_crown, height_to_needle, scorch_height, percent_prefire_crown_green,
+    percent_postfire_crown_green, live_crown_class, crown_width_1, crown_width_2, crown_width_allometric,
+    decay_class, damage_1, damage_2, damage_3, damage_4, damage_5, distance_to_pith, distance_to_face, azimuth, contributor_tree_id, notes, corrected_error))
+
+# export
+write.csv(DStrees, "/Users/Victoria/Documents/OFO/DS_Trees.csv", row.names = FALSE, na = "")
+
+```
+
+# Convex Hull
+```{r}
+# standardize plot boundaries / convex hulls
+
+library(sf)
+
+plotnames <- tribble(  # rename id's
+  ~PLOT, ~plot_id,
+  "DS_1", "0286",
+  "DS_2", "0287",
+  "DS_3", "0288",
+  "DS_4", "0289",
+  "DS_5", "0290",
+  "DS_6", "0291")
+
+all <- st_read("/Users/Victoria/Documents/OFO/DS_ConvexHull.gpkg") # oren's combined gpkg
+
+all <- st_transform(all, crs = 4326) # WGS84 geographic (EPSG 4326)
+
+all <- all %>%
+  left_join(plotnames, by = "PLOT") %>%
+  select(plot_id, geom)  # keep plot and geometry only (remove area_ha, area_sqm, lon, lat)
+
+output_dir <- "/Users/Victoria/Documents/OFO/DS_convexhull_gpkg's"
+
+# separate combined gpkg into six different gpkg's by plot
+for (pid in unique(all$plot_id)) {
+  plot_data <- all[all$plot_id == pid, ]
+  st_write(plot_data, dsn = file.path(output_dir, paste0(pid, ".gpkg")))}
 
 ```
