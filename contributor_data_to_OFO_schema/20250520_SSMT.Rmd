@@ -19,25 +19,24 @@ SSMT <- read_csv("/Users/Victoria/Documents/OFO/Final_SSMT_StemPlots.csv") # 799
 # PDBH Field: Original measurement values recorded in (mm); no conversion
 # DBH21 Field: Original measurement values recorded in (mm); no conversion
 ```
-
 # Field-plots standardization
 ```{r}
-# Add new fields
-SSMT <- SSMT %>%
-  mutate(
-    project_id = "0020",
+unique(SSMT$SITE)
+
+SSMT_df <- data.frame(contributor_plot_id = c("Buckhorn","Doorstop","EvansCreek","Floras","Jammer","Nortons", "SliceButte","Soda","Stone"))
+
+SSMT_final <- SSMT_df %>%
+  mutate(project_id = "0020",
     plot_id = case_when(
-      SITE == "Buckhorn" ~ "0277",
-      SITE == "Doorstop" ~ "0278",
-      SITE == "EvansCreek" ~ "0279",
-      SITE == "Floras" ~ "0280",
-      SITE == "Jammer" ~ "0281",
-      SITE == "Nortons" ~ "0282",
-      SITE == "SliceButte" ~ "0283",
-      SITE == "Soda" ~ "0284",
-      SITE == "Stone" ~ "0285",
-      TRUE ~ "0"
-    ),
+      contributor_plot_id == "Buckhorn" ~ "0277",
+      contributor_plot_id == "Doorstop" ~ "0278",
+      contributor_plot_id == "EvansCreek" ~ "0279",
+      contributor_plot_id == "Floras" ~ "0280",
+      contributor_plot_id == "Jammer" ~ "0281",
+      contributor_plot_id == "Nortons" ~ "0282",
+      contributor_plot_id == "SliceButte" ~ "0283",
+      contributor_plot_id == "Soda" ~ "0284",
+      contributor_plot_id == "Stone" ~ "0285"),
     hyperplot_id = "",
     survey_date_approx = TRUE,
     survey_date = "2021",
@@ -54,18 +53,18 @@ SSMT <- SSMT %>%
       plot_id == "0285" ~ "13073.0421983",
       TRUE ~ "0"
     ),
-    subplots = TRUE,  # unsure if this is accurate
-    subplot_shape = FALSE,
+    subplots = FALSE,  # changed from previous code which was TRUE
+    subplot_shape = "",
     subplot_area = "",
-    includes_snags = FALSE,
+    includes_snags = FALSE, # dead trees were surveyed but not measured, i.e. not included
     includes_damage = TRUE,
     damage_codes_inspected = "90001; 90002; 90004; 90005; 90006",
     forest_type = "201 - Douglas-fir",
     canopy_cover = "",
-    min_dbh = "",
+    min_dbh = "", # no protocol in metadata to specify this
     min_dbh_live = "",
     max_dbh_of_primary_trees = "", 
-    min_ht = "",
+    min_ht = "", # no protocol in metadata to specify this
     min_dbh_ohvis = "",
     min_ht_ohvis = "",
     plot_lon = case_when(
@@ -93,48 +92,18 @@ SSMT <- SSMT %>%
       TRUE ~ "0"
     ),
     num_ohvis_trees_excluded = "",
-    contributer_plot_id = SITE  # Adding contributer_plot_id column based on SITE
-  )
-
-# Pivot the data to get one row per plot with multiple columns for each field
-SSMT_one_record_per_plot <- SSMT %>%
-  group_by(plot_id) %>%
-  summarise(
-    project_id = first(project_id),
-    hyperplot_id = first(hyperplot_id),
-    survey_date_approx = first(survey_date_approx),
-    survey_date = first(survey_date),
-    plot_shape = first(plot_shape),
-    plot_area = first(plot_area),
-    subplots = first(subplots),
-    subplot_shape = first(subplot_shape),
-    subplot_area = first(subplot_area),
-    includes_snags = first(includes_snags),
-    includes_damage = first(includes_damage),
-    damage_codes_inspected = first(damage_codes_inspected),
-    forest_type = first(forest_type),
-    canopy_cover = first(canopy_cover),
-    min_dbh = min(min_dbh),
-    min_dbh_live = first(min_dbh_live),
-    max_dbh_of_primary_trees = first(max_dbh_of_primary_trees),
-    min_ht = min(min_ht),
-    min_dbh_ohvis = first(min_dbh_ohvis),
-    min_ht_ohvis = first(min_ht_ohvis),
-    plot_lon = first(plot_lon),
-    plot_lat = first(plot_lat),
-    num_ohvis_trees_excluded = first(num_ohvis_trees_excluded),
-    contributer_plot_id = first(contributer_plot_id)  # Ensure contributer_plot_id is included as the last column
+    max_dbh_of_primary_trees = ""  
   ) %>%
   select(
     plot_id, project_id, hyperplot_id, survey_date_approx, survey_date, plot_shape, 
     plot_area, subplots, subplot_shape, subplot_area, includes_snags, includes_damage, 
     damage_codes_inspected, forest_type, canopy_cover, min_dbh, min_dbh_live, 
     max_dbh_of_primary_trees, min_ht, min_dbh_ohvis, min_ht_ohvis, plot_lon, plot_lat, 
-    num_ohvis_trees_excluded, contributer_plot_id  # Ensure contributer_plot_id is the last column
+    num_ohvis_trees_excluded, contributor_plot_id
   )
 
 # Save the modified data to a new CSV file
-write_csv(SSMT_one_record_per_plot, "/Users/Victoria/Documents/OFO/SSMT_Field_Plots.csv")
+write_csv(SSMT_final, "/Users/Victoria/Documents/OFO/SSMT_Field_Plots.csv")
 
 ```
 
@@ -144,7 +113,7 @@ Create notes column
 
 # Notes were recorded in a complicated way. There are two columns (COMM21 and CODE21) which both contain comment codes for damage and other notable features of trees. Sometimes there are multiple codes recorded in one column and sometimes they're separated into the two columns. 
 
-# NOTE: I am ignoring PCDOE and PCOMM, which is the same thing but for prior to 2021. It would be complicated to include these because there is redundancy and it is unclear when these were recorded, thus whether the note is still relevant to the trees as of 2021.
+# NOTE: I am ignoring PCODE and PCOMM, which is the same thing but for prior to 2021. It would be complicated to include these because there is redundancy and it is unclear when these were recorded, thus whether the note is still relevant to the trees as of 2021.
 
 # combine CODE21 and COMM21 into a temp column because both contain relevant notes
 SSMT <- SSMT %>%
@@ -231,12 +200,22 @@ Add remaining OFO field-trees columns
 # convert units
 SSMT <- SSMT %>%
   mutate(DBH21_cm = DBH21 / 10, # convert DBH from mm to cm
-         CWA21_m = CWA21 / 100, # CHECK! assuming CW_21 is in cm, converting to m
-         CWB21_m = CWB21 / 100) # CHECK! assuming CW_21 is in cm, converting to m
+         CWA21_m = CWA21 / 100, # assuming CW_21 is in cm, converting to m
+         CWB21_m = CWB21 / 100) # assuming CW_21 is in cm, converting to m
 
 # fill other columns
 SSMTtrees <- SSMT %>%
   mutate(tree_id = "",
+    plot_id = case_when(
+      SITE == "Buckhorn" ~ "0277",
+      SITE == "Doorstop" ~ "0278",
+      SITE == "EvansCreek" ~ "0279",
+      SITE == "Floras" ~ "0280",
+      SITE == "Jammer" ~ "0281",
+      SITE == "Nortons" ~ "0282",
+      SITE == "SliceButte" ~ "0283",
+      SITE == "Soda" ~ "0284",
+      SITE == "Stone" ~ "0285"),
     plot_id2 = "",
     subplot_id = "",
     height_allometric = "",
