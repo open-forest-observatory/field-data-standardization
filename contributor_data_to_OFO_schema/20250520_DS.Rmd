@@ -1,0 +1,311 @@
+---
+title: "DS"
+author: "Orenge + Victoria"
+date: "2025-05-22"
+output: html_document
+---
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(dplyr)
+
+# Load data
+DS <- read_csv("/Users/Victoria/Documents/OFO/DS_StemPlots.csv")
+
+#DBH_13   = diameter at beast height (1.37 m) in centimeters.
+#HT_13    = total height for year in meters sampled on treatment trees.
+```
+
+# Field-plots standardization
+```{r}
+unique(DS$PLOT)
+
+DS_df <- data.frame(contributor_plot_id = c("DS_1","DS_2","DS_3","DS_4","DS_5","DS_6"))
+
+DS_final <- DS_df %>%
+  mutate(project_id = "0021",
+    plot_id = case_when(
+      contributor_plot_id == "DS_1" ~ "0286",
+      contributor_plot_id == "DS_2" ~ "0287",
+      contributor_plot_id == "DS_3" ~ "0288",
+      contributor_plot_id == "DS_4" ~ "0289",
+      contributor_plot_id == "DS_5" ~ "0290",
+      contributor_plot_id == "DS_6" ~ "0291",
+      TRUE ~ "0"),
+    hyperplot_id = "",
+    survey_date_approx = TRUE,
+    survey_date = "2013",
+    plot_shape = "irregular",
+    plot_area = case_when(
+      plot_id == "0286" ~ "6996.32627",
+      plot_id == "0287" ~ "5571.154416",
+      plot_id == "0288" ~ "6359.32351",
+      plot_id == "0289" ~ "6690.590624",
+      plot_id == "0290" ~ "7930.649384",
+      plot_id == "0291" ~ "6551.160075",
+      TRUE ~ "0"),
+    subplots = FALSE,
+    subplot_shape = "",
+    subplot_area = "",
+    includes_snags = FALSE, # change to TRUE if 2015 dead trees data is later
+    includes_damage = TRUE,
+    damage_codes_inspected = "70008; 90001; 90002; 90005; 90006",
+    forest_type = case_when(
+      plot_id %in% c("0286", "0287", "0288", "0289", "0290", "0291") ~ "201 - Douglas-fir",
+      TRUE ~ "0"), # most common tree in each plot is always Douglas-fir
+    canopy_cover = "",
+    min_dbh = "4", # Data contributor believes that the presence of unmapped trees above the 4 cm DBH threshold should be minimal to nonexistent; if present, it is likely only several shrubby hardwoods like cherry and/or vine maple very close to the 4 cm threshold. Note that some trees below the threshold have been included in this dataset.
+    min_dbh_live = "",
+    max_dbh_of_primary_trees = "",
+    min_ht = "", # height was only measured for a subset of treatment trees, there is no minimum height threshold
+    min_dbh_ohvis = "",
+    min_ht_ohvis = "",
+    plot_lon = case_when(
+      plot_id == "0286" ~ "-123.094989",
+      plot_id == "0287" ~ "-123.1076208",
+      plot_id == "0288" ~ "-123.12433738",
+      plot_id == "0289" ~ "-123.18370477",
+      plot_id == "0290" ~ "-123.13663612",
+      plot_id == "0291" ~ "-123.1116346",
+      TRUE ~ "0"),
+    plot_lat = case_when(
+      plot_id == "0286" ~ "46.90502265",
+      plot_id == "0287" ~ "46.93003302",
+      plot_id == "0288" ~ "46.90556957",
+      plot_id == "0289" ~ "46.8621885",
+      plot_id == "0290" ~ "46.86954561",
+      plot_id == "0291" ~ "46.86729638",
+      TRUE ~ "0"),
+    num_ohvis_trees_excluded = "") %>% 
+  dplyr::select(
+    plot_id, project_id, hyperplot_id, survey_date_approx, survey_date, plot_shape, 
+    plot_area, subplots, subplot_shape, subplot_area, includes_snags, includes_damage, 
+    damage_codes_inspected, forest_type, canopy_cover, min_dbh, min_dbh_live, 
+    max_dbh_of_primary_trees, min_ht, min_dbh_ohvis, min_ht_ohvis, plot_lon, plot_lat, 
+    num_ohvis_trees_excluded, contributor_plot_id)
+
+# Save the modified data to a new CSV file
+write_csv(DS_final, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
+```
+
+
+# Field-trees standardization
+```{r}
+# We found more recent data (2015) from the same project than what was originally contributed (2013)
+# Measurements from 2015 are preferred because they're more recent. 
+# This 2015 data also includes dead trees, which seem to have been removed before sharing the 2013 data with us.
+# Oren already converted geospatial data for the contributed data, so want to preserve that here.
+
+# Join updated measurements from 2015 to our received 2013 data, and omitted dead trees:
+tenyeardata <- read_csv("/Users/victoria/Documents/OFO/RDS-2020-0031/Data/CF_Damage_Study_Data_10_year.csv")
+# you can find this csv in box, I got it from here: https://www.fs.usda.gov/rds/archive/catalog/RDS-2020-0031
+
+# unique id's for joining
+data2015 <- tenyeardata %>%
+  mutate(unique_id = paste(Stand, TreeNum, Recruit, sep = "_")) %>% subset(MeasurementYear == "2015")
+
+contributed <- DS %>% mutate(plot_id = case_when(
+      PLOT == "DS_1" ~ "1",
+      PLOT == "DS_2" ~ "2",
+      PLOT == "DS_3" ~ "3",
+      PLOT == "DS_4" ~ "4",
+      PLOT == "DS_5" ~ "5",
+      PLOT == "DS_6" ~ "6")) %>%
+  mutate(unique_id = paste(plot_id, TREE, RECRUIT, sep = "_"))
+
+# join
+combined <- left_join(data2015, contributed, by = "unique_id") %>%
+  dplyr::select(unique_id, MortalityYear, HT_13, HT.m, DBH_13, DBH.cm, HLC_13, HLC.m, HTDAM_13, HeightDamage.code, Lean.code, TrtID, everything()) # you can see that most measurements should be slightly updated
+
+```
+
+
+```{r}
+# notes organization
+
+# Researchers applied treatments to ~ 40% of the trees in this dataset. Preserve these details in the notes col.
+combined <- combined %>% mutate(
+  notes = case_when(
+    TrtID == "B100-1S" ~ "trt: 100% of circumference removed along 1m of bole in spring 2005",
+    TrtID == "B20-1S" ~ "trt: 20% of circumference removed along 1m of bole in spring 2005",
+    TrtID == "B40-1F" ~ "trt: 40% of circumference removed along 1m of bole in fall 2005",
+    TrtID == "B40-1S" ~ "trt: 40% of circumference removed along 1m of bole in spring 2005",
+    TrtID == "B40-2S" ~ "trt: 40% of circumference removed along 2m of bole in spring 2005",
+    TrtID == "B60-1S" ~ "trt: 40% of circumference removed along 1m of bole in fall 2005",
+    # I think there's a major typo in the referenced code csv ^ and it should be 60% and spring
+    TrtID == "B80-1S" ~ "trt: 80% of circumference removed along 1m of bole in spring 2005",
+    TrtID == "B80-2S" ~ "trt: 80% of circumference removed along 2m of bole in spring 2005",
+    TrtID == "B90-1S" ~ "trt: 90% of circumference removed along 1m of bole in spring 2005",
+    TrtID == "R25" ~ "trt: damaged est 25% of root area cross section",
+    TrtID == "R50" ~ "trt: damaged est 50% of root area cross section",
+    TrtID == "R25-B40-1S" ~ "trt: damaged est 25% of root area cross section & 40% of circumference removed along 1m of bole in spring 2005",
+    TrtID == "R50-B40-1S" ~ "trt: damaged est 50% of root area cross section & 40% of circumference removed along 1m of bole in spring 2005",
+    TrtID == "PRUNE" ~ "control trt: branches pruned up to 2m above ground",
+    TrtID == "SOIL" ~ "control trt: soil removed around roots then put back",
+    TrtID == "CONTROL" ~ "trt: no damage or manipulation",
+    TrtID == "EXTRA" ~ "no control or damage treatment but measured initially",
+    TrtID == "INGROWTH" ~ "grew into measurement cutoffs after trt's were applied",
+    TrtID == "MISSED" ~ "initially missed but later realized in stand boundaries",
+    TrtID == "DROPPED" ~ "determined not in stand boundaries",
+    TrtID == "NONE" ~ "(not assigned any other category)"))
+
+# Add comments about tree lean to notes
+combined <- combined %>%
+  mutate(
+    lean = case_when(
+     # Lean.code == "0" ~ "no lean", # same as NA so not necessary to re-code
+      Lean.code == "1" ~ "slight lean 5-10 deg",
+      Lean.code == "2" ~ "major lean",
+      Lean.code == "3" ~ "leaning on neighbors",
+      TRUE ~ NA_character_),
+    notes = if_else(
+      !is.na(lean),
+      str_c(lean, ", ", notes),
+      notes))
+
+```
+
+```{r}
+# damage codes
+
+# designating all treated trees as damage = mechanical, beside the soil disturbance trt
+mechanical_codes <- c("B100-1S", "B20-1S", "B40-1F", "B40-1S", "B40-2S", "B60-1S", "B80-1S", "B80-2S", "B90-1S", "R25", "R50", "R25-B40-1S", "R50-B40-1S", "PRUNE") 
+
+combined <- combined %>%
+  mutate(
+    dmg_ht = case_when(
+      HeightDamage.code == 1 ~ "90005", # fork -> 90005 fork below top # why so many of these trees?
+      HeightDamage.code == 2  ~ "90002", # dead top -> 90002 dead top
+      HeightDamage.code == 3 ~ "90001", # broken top -> 90001 broken top
+      TRUE ~ NA_character_),
+    dmg_trt = ifelse(TrtID %in% mechanical_codes, "70008", NA_character_), 
+    # received experimental treatment -> 70008 mechanical
+    dmg_lean = ifelse(Lean.code == 3, "90006", NA_character_)) %>% 
+  # major lean -> 90006 crook or sweep or excessive lean (OFO def)
+  rowwise() %>%
+  mutate( # fill damage_1, then damage_2, then damage_3 with dam codes if applicable
+    damage_1 = coalesce(dmg_ht, dmg_trt, dmg_lean),
+    damage_2 = coalesce(
+      ifelse(!is.na(dmg_ht) & damage_1 != dmg_ht, dmg_ht, NA_character_),
+      ifelse(!is.na(dmg_trt) & damage_1 != dmg_trt, dmg_trt, NA_character_),
+      ifelse(!is.na(dmg_lean) & damage_1 != dmg_lean, dmg_lean, NA_character_)
+    ),
+    damage_3 = coalesce(
+      ifelse(!is.na(dmg_ht) & damage_1 != dmg_ht & damage_2 != dmg_ht, dmg_ht, NA_character_),
+      ifelse(!is.na(dmg_trt) & damage_1 != dmg_trt & damage_2 != dmg_trt, dmg_trt, NA_character_),
+      ifelse(!is.na(dmg_lean) & damage_1 != dmg_lean & damage_2 != dmg_lean, dmg_lean, NA_character_)
+    )) %>%
+  ungroup() %>%
+  dplyr::select(-dmg_ht, -dmg_trt, -dmg_lean)
+
+# remove 62 downed trees
+combined <- combined %>%
+  filter(is.na(Lean.code) | Lean.code != 4) # Lean.code = 4 means "on the ground"
+
+```
+
+```{r}
+# all other fields
+DStrees <- combined %>% mutate(
+    tree_id = "",
+    plot_id = case_when(
+      Stand == "1" ~ "0286",
+      Stand == "2" ~ "0287",
+      Stand == "3" ~ "0288",
+      Stand == "4" ~ "0289",
+      Stand == "5" ~ "0290",
+      Stand == "6" ~ "0291"),
+    plot_id2 = "",
+    subplot_id = "",
+    height_allometric = "",
+    height_above_plot_center = "",
+    species = case_when(
+      Species.code == "DF" ~ "202", # Douglas-fir
+      Species.code == "CH" ~ "768", # cherry - NOTE: contributors do not specify species so assuming this is bitter cherry but not confirmed
+      Species.code == "CA" ~ "RHPU", # cascara, does not have FIA or species-codes sheet code
+      Species.code == "MD" ~ "361", # madrone
+      Species.code == "WH" ~ "263", # western hemlock
+      Species.code == "RA" ~ "351", # red alder
+      Species.code == "DG" ~ "492", # pacific dogwood
+      Species.code == "MA" ~ "312"), # bigleaf maple
+    growth_form = "tree", # assuming all are trees
+    live_dead = if_else(is.na(MortalityYear), "L", "D"), # if it has a mortality year then tree is dead
+    crown_position = "", 
+    ohvis = "",
+    crown_ratio = "",
+    crown_ratio_compacted = "",
+    height_to_needle = "",
+    scorch_height = "",
+    percent_prefire_crown_green = "",
+    percent_postfire_crown_green = "",
+    live_crown_class = "",
+    crown_width_1 = "", 
+    crown_width_2 = "",
+    crown_width_allometric = "",
+    decay_class = "",
+    damage_4 = "",
+    damage_5 = "",
+    distance_to_pith = "", 
+    distance_to_face = "", 
+    azimuth = "",
+    corrected_error = "") %>% 
+  rename(
+    tree_lat = Y_Lat,
+    tree_lon = X_Long,
+    height = HT.m,
+    dbh = DBH.cm,
+    height_to_crown = HLC.m,
+    contributor_tree_id = TreeNum) %>%  # note that contributor did not use unique id's, TreeNum resets each plot, also ingrowth trees are labeled with TreeNum of nearest existing tree (shown in Recruit col of original data)
+  subset(select = c(
+    tree_id, plot_id, plot_id2, subplot_id, tree_lat, tree_lon, height, height_allometric,
+    height_above_plot_center, dbh, species, growth_form, live_dead, crown_position, ohvis, crown_ratio,
+    crown_ratio_compacted, height_to_crown, height_to_needle, scorch_height, percent_prefire_crown_green,
+    percent_postfire_crown_green, live_crown_class, crown_width_1, crown_width_2, crown_width_allometric,
+    decay_class, damage_1, damage_2, damage_3, damage_4, damage_5, distance_to_pith, distance_to_face, azimuth, contributor_tree_id, notes, corrected_error))
+
+# we now have 615 dead trees, thanks to the 2015 data (note some trees that were in the 2013 contributed data were dead before 2013, but that's only reflected in the new big ten year dataset, so that's why there are a few more dead trees than the num of trees added from the big dataset, i.e. more info revealed more dead)
+
+# unfortunately, these weren't included in the geospatial data cleaning work done before the new dataset was discovered, so we can't include these because they currently lack coords
+# remove these 522 dead trees for now:
+DStrees <- DStrees %>% filter(!is.na(tree_lat))
+
+# re-order trees by plot for cleaner export
+DStrees <- DStrees[order(DStrees$plot_id),]
+
+# export
+write.csv(DStrees, "/Users/Victoria/Documents/OFO/DS_Trees.csv", row.names = FALSE, na = "")
+
+```
+
+# Convex Hull
+```{r}
+# standardize plot boundaries / convex hulls
+
+library(sf)
+
+plotnames <- tribble(  # rename id's
+  ~PLOT, ~plot_id,
+  "DS_1", "0286",
+  "DS_2", "0287",
+  "DS_3", "0288",
+  "DS_4", "0289",
+  "DS_5", "0290",
+  "DS_6", "0291")
+
+all <- st_read("/Users/Victoria/Documents/OFO/DS_ConvexHull.gpkg") # oren's combined gpkg
+
+all <- st_transform(all, crs = 4326) # WGS84 geographic (EPSG 4326)
+
+all <- all %>%
+  left_join(plotnames, by = "PLOT") %>%
+  select(plot_id, geom)  # keep plot and geometry only (remove area_ha, area_sqm, lon, lat)
+
+output_dir <- "/Users/Victoria/Documents/OFO/DS_convexhull_gpkg's"
+
+# separate combined gpkg into six different gpkg's by plot
+for (pid in unique(all$plot_id)) {
+  plot_data <- all[all$plot_id == pid, ]
+  st_write(plot_data, dsn = file.path(output_dir, paste0(pid, ".gpkg")))}
+
+```

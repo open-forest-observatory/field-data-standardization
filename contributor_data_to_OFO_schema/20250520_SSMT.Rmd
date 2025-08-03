@@ -1,0 +1,303 @@
+---
+title: "SSMT"
+author: "Orenge + Victoria"
+date: "2025-05-20"
+output: html_document
+---
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(dplyr)
+library(stringr)
+
+# Load data
+SSMT <- read_csv("/Users/Victoria/Documents/OFO/Final_SSMT_StemPlots.csv") # 7998 rows
+
+# HT21 Field: Original measurement values recorded in (cm) converted to (m) 
+# PHT Field: Original measurement values recorded in (cm); no conversion 
+# PDBH Field: Original measurement values recorded in (mm); no conversion
+# DBH21 Field: Original measurement values recorded in (mm); no conversion
+```
+
+# Field-plots standardization
+```{r}
+unique(SSMT$SITE)
+
+SSMT_df <- data.frame(contributor_plot_id = c("Buckhorn","Doorstop","EvansCreek","Floras","Jammer","Nortons", "SliceButte","Soda","Stone"))
+
+# Find reasonable min dbh threshold
+SSMT[order(SSMT$DBH21),] # set to 0.1 cm below the lowest dbh, which is 0.5
+
+SSMT_final <- SSMT_df %>%
+  mutate(project_id = "0020",
+    plot_id = case_when(
+      contributor_plot_id == "Buckhorn" ~ "0277",
+      contributor_plot_id == "Doorstop" ~ "0278",
+      contributor_plot_id == "EvansCreek" ~ "0279",
+      contributor_plot_id == "Floras" ~ "0280",
+      contributor_plot_id == "Jammer" ~ "0281",
+      contributor_plot_id == "Nortons" ~ "0282",
+      contributor_plot_id == "SliceButte" ~ "0283",
+      contributor_plot_id == "Soda" ~ "0284",
+      contributor_plot_id == "Stone" ~ "0285"),
+    hyperplot_id = "",
+    survey_date_approx = TRUE,
+    survey_date = "2021",
+    plot_shape = "irregular",
+    plot_area = case_when(
+      plot_id == "0277" ~ "14856.214341",
+      plot_id == "0278" ~ "15532.0020034",
+      plot_id == "0279" ~ "13150.547117",
+      plot_id == "0280" ~ "13132.36281",
+      plot_id == "0281" ~ "14734.245714",
+      plot_id == "0282" ~ "12307.1097347",
+      plot_id == "0283" ~ "11799.7807243",
+      plot_id == "0284" ~ "15874.1164316",
+      plot_id == "0285" ~ "13073.0421983",
+      TRUE ~ "0"
+    ),
+    subplots = FALSE,  # changed from previous code which was TRUE
+    subplot_shape = "",
+    subplot_area = "",
+    includes_snags = FALSE, # dead trees were surveyed but not measured, i.e. not included
+    includes_damage = TRUE,
+    damage_codes_inspected = "90001; 90002; 90004; 90005; 90006",
+    forest_type = "201 - Douglas-fir",
+    canopy_cover = "",
+    min_dbh = "0.4", # This study did not have an explicit minimum tally tree size threshold because only experimental trees were mapped. However, the data contributor believes that any trees over the DBH threshold of 0.4 cm should be minimal to nonexistent because "ingrowth" (non-experimental trees) is regularly cleared. It is possible there are a small number of ingrowth trees larger than the threshold that were not measured. 
+    min_dbh_live = "",
+    max_dbh_of_primary_trees = "", 
+    min_ht = "1.37", # See above comment on size thresholds for mapped trees. Note that a few trees < 1.37m tall are included here, but prior year data (PHT column) shows those were previously taller but between that year and 2021 must have broken. 
+    min_dbh_ohvis = "",
+    min_ht_ohvis = "",
+    plot_lon = case_when(
+      plot_id == "0277" ~ "-122.98908189",
+      plot_id == "0278" ~ "-122.00738381",
+      plot_id == "0279" ~ "-123.05217222",
+      plot_id == "0280" ~ "-124.35515556",
+      plot_id == "0281" ~ "-123.70424164",
+      plot_id == "0282" ~ "-123.68850043",
+      plot_id == "0283" ~ "-122.8682236",
+      plot_id == "0284" ~ "-122.24268296",
+      plot_id == "0285" ~ "-122.93815862",
+      TRUE ~ "0"
+    ),
+    plot_lat = case_when(
+      plot_id == "0277" ~ "46.54707577",
+      plot_id == "0278" ~ "46.94822638",
+      plot_id == "0279" ~ "42.62918823",
+      plot_id == "0280" ~ "42.9059617",
+      plot_id == "0281" ~ "46.61718415",
+      plot_id == "0282" ~ "44.66331258",
+      plot_id == "0283" ~ "44.10924544",
+      plot_id == "0284" ~ "44.43354829",
+      plot_id == "0285" ~ "42.34906831",
+      TRUE ~ "0"
+    ),
+    num_ohvis_trees_excluded = "",
+    max_dbh_of_primary_trees = ""  
+  ) %>%
+  select(
+    plot_id, project_id, hyperplot_id, survey_date_approx, survey_date, plot_shape, 
+    plot_area, subplots, subplot_shape, subplot_area, includes_snags, includes_damage, 
+    damage_codes_inspected, forest_type, canopy_cover, min_dbh, min_dbh_live, 
+    max_dbh_of_primary_trees, min_ht, min_dbh_ohvis, min_ht_ohvis, plot_lon, plot_lat, 
+    num_ohvis_trees_excluded, contributor_plot_id
+  )
+
+# Save the modified data to a new CSV file
+write_csv(SSMT_final, "/Users/Victoria/Documents/OFO/SSMT_Field_Plots.csv")
+
+```
+
+# Field-trees standardization
+Create notes column
+```{r}
+
+# Notes were recorded in a complicated way. There are two columns (COMM21 and CODE21) which both contain comment codes for damage and other notable features of trees. Sometimes there are multiple codes recorded in one column and sometimes they're separated into the two columns. 
+
+# NOTE: I am ignoring PCODE and PCOMM, which is the same thing but for prior to 2021. It would be complicated to include these because there is redundancy and it is unclear when these were recorded, thus whether the note is still relevant to the trees as of 2021.
+
+# combine CODE21 and COMM21 into a temp column because both contain relevant notes
+SSMT <- SSMT %>%
+  mutate(combined = case_when(
+    !is.na(CODE21) & !is.na(COMM21) ~ str_c(CODE21, COMM21, sep = " "),
+    !is.na(CODE21) ~ CODE21,
+    !is.na(COMM21) ~ COMM21,
+    TRUE ~ NA_character_)) 
+
+
+# create a notes col
+# paste the original comment code with the definition in parentheses
+# note there is some redundancy with what will be in damage columns, but it's simpler this way
+
+codes <- data.frame(
+  code = c("chl", "cn1", "cn2", "cn3", "ctl", "dyn", "fk1", "fk2", "htv", "ld1", "ld2", "ln2", "ln3", "mlt", "rmc1", "rmc2", "spf", "stk", "tcl", "td1", "td2", "td3"),
+  definition = c("chlorotic, needles yellow-green", "tree has cones: very few, cannot be seen easily", "tree has cones: several can be seen from a distance", "tree has cones: lots of cones, more cones than proportionate to size of tree", "change in terminal leader, a lateral branch or shoot from a side bud is now taller than the old terminal", "expected to be dead within a year", "main stem forked once above 1.3m", "main stem forked 2 or more times above 1.3m", "height measurement verified", "lateral branch dieback, 1 or 2 branches", "lateral branch die-back, 3 or more branches", "tree lean > 10%", "main stem on ground but alive, still rooted", "multiple tops (includes double tops) in last 3 years", "ramicorn branch present on 2021 leader", "ramicorn branch present on leader prior to 2021", "sparse foliage, >25% of needles lost", "tree staked", "top clipped or broken", "top die-back <10cm", "top die-back >10cm and less than 1m", "top die-back >1m"),
+  stringsAsFactors = FALSE
+)
+
+annotate_codes_simple <- function(text, dict) {
+  if (is.na(text)) return(NA_character_)  # keep NA rows as NA
+  words <- strsplit(text, " ")[[1]]
+  notes <- character(length(words))
+  
+  for (i in seq_along(words)) {
+    match_row <- dict[dict$code == words[i], ]
+    if (nrow(match_row) > 0) {
+      notes[i] <- paste0(words[i], " (", match_row$definition, ")")
+    } else {
+      notes[i] <- words[i]}}
+  paste(notes, collapse = " ")}
+
+SSMT <- SSMT %>%
+  mutate(notes = sapply(combined, annotate_codes_simple, dict = codes))
+
+```
+
+Fill damage columns
+```{r}
+
+# Damage codes are included in the general comment codes that were moved to notes col in previous chunk
+# If there are multiple real damage codes for a tree, they are listed out into multiple damage columns and are given FIA dam codes
+
+# these are the only comment codes and phrases that match with FIA damage codes:
+damage_dict <- data.frame(
+  old_code = c("tcl", "broke top", "top broke", "nomaintop", "top gone",
+               "td1", "td2", "td3", "mlt", "fk1", "fk2", "crook", "sweep"),
+  new_code = c("90001", "90001", "90001", "90001", "90001",
+               "90002", "90002", "90002", "90004", "90005", "90005", "90006", "90006"),
+  stringsAsFactors = FALSE)
+
+SSMT <- SSMT %>%
+  mutate(damage_raw = str_c(CODE21, COMM21, sep = " ", na.rm = TRUE))
+
+extract_damages <- function(text, dict) {
+  if (is.na(text)) return(rep(NA, 5))
+  found <- character()
+  for (i in seq_len(nrow(dict))) {
+    if (str_detect(text, fixed(dict$old_code[i], ignore_case = TRUE))) {
+      found <- c(found, dict$new_code[i])}}
+  
+  # keep only unique and first 5 damage codes
+  found <- unique(found)
+  length(found) <- 5  # pads with NAs if < 5
+  found}
+
+# apply function
+damage_matrix <- t(sapply(
+  SSMT$damage_raw, extract_damages, dict = damage_dict))
+
+# turn into data frame and name five damage columns
+damage_df <- as.data.frame(damage_matrix, stringsAsFactors = FALSE)
+colnames(damage_df) <- paste0("damage_", 1:5)
+
+
+SSMT <- bind_cols(SSMT, damage_df)
+
+```
+
+Add remaining OFO field-trees columns
+```{r}
+
+# convert units
+SSMT <- SSMT %>%
+  mutate(DBH21_cm = DBH21 / 10, # convert DBH from mm to cm
+         CWA21_m = CWA21 / 100, # assuming CW_21 is in cm, converting to m
+         CWB21_m = CWB21 / 100) # assuming CW_21 is in cm, converting to m
+
+# fill other columns
+SSMTtrees <- SSMT %>%
+  mutate(tree_id = "",
+    plot_id = case_when(
+      SITE == "Buckhorn" ~ "0277",
+      SITE == "Doorstop" ~ "0278",
+      SITE == "EvansCreek" ~ "0279",
+      SITE == "Floras" ~ "0280",
+      SITE == "Jammer" ~ "0281",
+      SITE == "Nortons" ~ "0282",
+      SITE == "SliceButte" ~ "0283",
+      SITE == "Soda" ~ "0284",
+      SITE == "Stone" ~ "0285"),
+    plot_id2 = "",
+    subplot_id = "",
+    height_allometric = "",
+    height_above_plot_center = "",
+    species = "202", # all are Douglas-fir
+    growth_form = "tree", 
+    live_dead = case_when( 
+      str_detect(CODE21, "dyn") | str_detect(COMM21, "dyn") ~ "M", # expected to be dead within a year -> M
+      str_detect(CODE21, "dying") | str_detect(COMM21, "dying") ~ "M", # dying -> M
+      TRUE ~ "L"), # this dataset can include dead trees, but none were recorded
+    crown_position = "", 
+    ohvis = "",
+    crown_ratio = "",
+    crown_ratio_compacted = "",
+    height_to_crown = "", 
+    height_to_needle = "",
+    scorch_height = "",
+    percent_prefire_crown_green = "",
+    percent_postfire_crown_green = "",
+    live_crown_class = "",
+    crown_width_1 = CWA21_m, # assuming these two are perpendicular to each other, metadata does not say
+    crown_width_2 = CWB21_m, # ^
+    crown_width_allometric = "",
+    decay_class = "",
+    distance_to_pith = "", 
+    distance_to_face = "", 
+    azimuth = "",
+    corrected_error = "") %>% 
+  rename(
+    tree_lat = Y_Lat,
+    tree_lon = X_Long,
+    height = HT21,
+    dbh = DBH21_cm,
+    contributor_tree_id = TAG) %>%  
+  subset(select = c(
+    tree_id, plot_id, plot_id2, subplot_id, tree_lat, tree_lon, height, height_allometric,
+    height_above_plot_center, dbh, species, growth_form, live_dead, crown_position, ohvis, crown_ratio,
+    crown_ratio_compacted, height_to_crown, height_to_needle, scorch_height, percent_prefire_crown_green,
+    percent_postfire_crown_green, live_crown_class, crown_width_1, crown_width_2, crown_width_allometric,
+    decay_class, damage_1, damage_2, damage_3, damage_4, damage_5, distance_to_pith, distance_to_face, azimuth, 
+    contributor_tree_id, notes, corrected_error))
+
+# export trees csv
+write.csv(SSMTtrees, "/Users/Victoria/Documents/OFO/SSMT_Trees.csv", row.names = FALSE, na = "") # replace NA's with empty strings upon export
+
+```
+
+# Convex Hull
+```{r}
+# standardize plot boundaries / convex hulls
+
+library(sf)
+
+plotnames <- tribble(  # rename id's
+  ~PLOT, ~plot_id,
+  "Buckhorn", "0277",
+  "Doorstop", "0278",
+  "EvansCreek", "0279",
+  "Floras", "0280",
+  "Jammer", "0281",
+  "Nortons", "0282",
+  "SliceButte", "0283",
+  "Soda", "0284",
+  "Stone", "0285")
+
+all <- st_read("/Users/Victoria/Documents/OFO/SSMT_ConvexHull.gpkg") # oren's combined gpkg
+
+all <- st_transform(all, crs = 4326) # WGS84 geographic (EPSG 4326)
+
+all <- all %>%
+  left_join(plotnames, by = "PLOT") %>%
+  select(plot_id, geom)  # keep plot and geometry only (remove area_ha, area_sqm, lon, lat)
+
+output_dir <- "/Users/Victoria/Documents/OFO/SSMT_convexhull_gpkg's"
+
+# separate combined gpkg into seven different gpkg's by plot
+for (pid in unique(all$plot_id)) {
+  plot_data <- all[all$plot_id == pid, ]
+  st_write(plot_data, dsn = file.path(output_dir, paste0(pid, ".gpkg")))}
+
+```
