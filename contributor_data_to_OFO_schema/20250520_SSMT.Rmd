@@ -19,11 +19,15 @@ SSMT <- read_csv("/Users/Victoria/Documents/OFO/Final_SSMT_StemPlots.csv") # 799
 # PDBH Field: Original measurement values recorded in (mm); no conversion
 # DBH21 Field: Original measurement values recorded in (mm); no conversion
 ```
+
 # Field-plots standardization
 ```{r}
 unique(SSMT$SITE)
 
 SSMT_df <- data.frame(contributor_plot_id = c("Buckhorn","Doorstop","EvansCreek","Floras","Jammer","Nortons", "SliceButte","Soda","Stone"))
+
+# Find reasonable min dbh threshold
+SSMT[order(SSMT$DBH21),] # set to 0.1 cm below the lowest dbh, which is 0.5
 
 SSMT_final <- SSMT_df %>%
   mutate(project_id = "0020",
@@ -61,10 +65,10 @@ SSMT_final <- SSMT_df %>%
     damage_codes_inspected = "90001; 90002; 90004; 90005; 90006",
     forest_type = "201 - Douglas-fir",
     canopy_cover = "",
-    min_dbh = "", # no protocol in metadata to specify this
+    min_dbh = "0.4", # This study did not have an explicit minimum tally tree size threshold because only experimental trees were mapped. However, the data contributor believes that any trees over the DBH threshold of 0.4 cm should be minimal to nonexistent because "ingrowth" (non-experimental trees) is regularly cleared. It is possible there are a small number of ingrowth trees larger than the threshold that were not measured. 
     min_dbh_live = "",
     max_dbh_of_primary_trees = "", 
-    min_ht = "", # no protocol in metadata to specify this
+    min_ht = "1.37", # See above comment on size thresholds for mapped trees. Note that a few trees < 1.37m tall are included here, but prior year data (PHT column) shows those were previously taller but between that year and 2021 must have broken. 
     min_dbh_ohvis = "",
     min_ht_ohvis = "",
     plot_lon = case_when(

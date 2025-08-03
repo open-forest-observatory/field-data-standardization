@@ -48,17 +48,17 @@ DS_final <- DS_df %>%
     subplots = FALSE,
     subplot_shape = "",
     subplot_area = "",
-    includes_snags = TRUE, # true now that we found 2015 data including dead trees
+    includes_snags = FALSE, # change to TRUE if 2015 dead trees data is later
     includes_damage = TRUE,
     damage_codes_inspected = "70008; 90001; 90002; 90005; 90006",
     forest_type = case_when(
       plot_id %in% c("0286", "0287", "0288", "0289", "0290", "0291") ~ "201 - Douglas-fir",
       TRUE ~ "0"), # most common tree in each plot is always Douglas-fir
     canopy_cover = "",
-    min_dbh = "", # no protocol in metadata to specify this
+    min_dbh = "4", # Data contributor believes that the presence of unmapped trees above the 4 cm DBH threshold should be minimal to nonexistent; if present, it is likely only several shrubby hardwoods like cherry and/or vine maple very close to the 4 cm threshold. Note that some trees below the threshold have been included in this dataset.
     min_dbh_live = "",
     max_dbh_of_primary_trees = "",
-    min_ht = "", # no protocol in metadata to specify this
+    min_ht = "", # height was only measured for a subset of treatment trees, there is no minimum height threshold
     min_dbh_ohvis = "",
     min_ht_ohvis = "",
     plot_lon = case_when(
@@ -78,7 +78,7 @@ DS_final <- DS_df %>%
       plot_id == "0291" ~ "46.86729638",
       TRUE ~ "0"),
     num_ohvis_trees_excluded = "") %>% 
-  select(
+  dplyr::select(
     plot_id, project_id, hyperplot_id, survey_date_approx, survey_date, plot_shape, 
     plot_area, subplots, subplot_shape, subplot_area, includes_snags, includes_damage, 
     damage_codes_inspected, forest_type, canopy_cover, min_dbh, min_dbh_live, 
@@ -98,7 +98,6 @@ write_csv(DS_final, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
 # Oren already converted geospatial data for the contributed data, so want to preserve that here.
 
 # Join updated measurements from 2015 to our received 2013 data, and omitted dead trees:
-
 tenyeardata <- read_csv("/Users/victoria/Documents/OFO/RDS-2020-0031/Data/CF_Damage_Study_Data_10_year.csv")
 # you can find this csv in box, I got it from here: https://www.fs.usda.gov/rds/archive/catalog/RDS-2020-0031
 
@@ -112,12 +111,12 @@ contributed <- DS %>% mutate(plot_id = case_when(
       PLOT == "DS_3" ~ "3",
       PLOT == "DS_4" ~ "4",
       PLOT == "DS_5" ~ "5",
-      PLOT == "DS_6" ~ "6")) %>% 
+      PLOT == "DS_6" ~ "6")) %>%
   mutate(unique_id = paste(plot_id, TREE, RECRUIT, sep = "_"))
 
 # join
-combined <- left_join(data2015, contributed, by = "unique_id") %>% 
-  select(unique_id, MortalityYear, HT_13, HT.m, DBH_13, DBH.cm, HLC_13, HLC.m, HTDAM_13, HeightDamage.code, Lean.code, TrtID, everything()) # you can see that most measurements should be slightly updated
+combined <- left_join(data2015, contributed, by = "unique_id") %>%
+  dplyr::select(unique_id, MortalityYear, HT_13, HT.m, DBH_13, DBH.cm, HLC_13, HLC.m, HTDAM_13, HeightDamage.code, Lean.code, TrtID, everything()) # you can see that most measurements should be slightly updated
 
 ```
 
@@ -170,14 +169,13 @@ combined <- combined %>%
 ```{r}
 # damage codes
 
-# designating all treated trees as damage = mechanical 
-mechanical_codes <- c("B100-1S", "B20-1S", "B40-1F", "B40-1S", "B40-2S", "B60-1S", "B80-1S", "B80-2S", "B90-1S", "R25", "R50", "R25-B40-1S", "R50-B40-1S", "PRUNE", "SOIL") 
-# is soil removal and replacement "mechanical"? I'm calling it that because still human activity damage
+# designating all treated trees as damage = mechanical, beside the soil disturbance trt
+mechanical_codes <- c("B100-1S", "B20-1S", "B40-1F", "B40-1S", "B40-2S", "B60-1S", "B80-1S", "B80-2S", "B90-1S", "R25", "R50", "R25-B40-1S", "R50-B40-1S", "PRUNE") 
 
 combined <- combined %>%
   mutate(
     dmg_ht = case_when(
-      HeightDamage.code == 1 ~ "90005", # fork -> 90005 fork below top ## WHY SO MANY OF THESE TREES?
+      HeightDamage.code == 1 ~ "90005", # fork -> 90005 fork below top # why so many of these trees?
       HeightDamage.code == 2  ~ "90002", # dead top -> 90002 dead top
       HeightDamage.code == 3 ~ "90001", # broken top -> 90001 broken top
       TRUE ~ NA_character_),
@@ -199,7 +197,7 @@ combined <- combined %>%
       ifelse(!is.na(dmg_lean) & damage_1 != dmg_lean & damage_2 != dmg_lean, dmg_lean, NA_character_)
     )) %>%
   ungroup() %>%
-  select(-dmg_ht, -dmg_trt, -dmg_lean)
+  dplyr::select(-dmg_ht, -dmg_trt, -dmg_lean)
 
 # remove 62 downed trees
 combined <- combined %>%
@@ -253,7 +251,7 @@ DStrees <- combined %>% mutate(
     azimuth = "",
     corrected_error = "") %>% 
   rename(
-    tree_lat = Y_Lat, # note for now: newly added dead trees don't have clean xy coordinates yet! 522 trees
+    tree_lat = Y_Lat,
     tree_lon = X_Long,
     height = HT.m,
     dbh = DBH.cm,
@@ -267,6 +265,13 @@ DStrees <- combined %>% mutate(
     decay_class, damage_1, damage_2, damage_3, damage_4, damage_5, distance_to_pith, distance_to_face, azimuth, contributor_tree_id, notes, corrected_error))
 
 # we now have 615 dead trees, thanks to the 2015 data (note some trees that were in the 2013 contributed data were dead before 2013, but that's only reflected in the new big ten year dataset, so that's why there are a few more dead trees than the num of trees added from the big dataset, i.e. more info revealed more dead)
+
+# unfortunately, these weren't included in the geospatial data cleaning work done before the new dataset was discovered, so we can't include these because they currently lack coords
+# remove these 522 dead trees for now:
+DStrees <- DStrees %>% filter(!is.na(tree_lat))
+
+# re-order trees by plot for cleaner export
+DStrees <- DStrees[order(DStrees$plot_id),]
 
 # export
 write.csv(DStrees, "/Users/Victoria/Documents/OFO/DS_Trees.csv", row.names = FALSE, na = "")
