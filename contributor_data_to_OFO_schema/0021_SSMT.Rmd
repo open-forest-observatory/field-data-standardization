@@ -12,7 +12,8 @@ library(dplyr)
 library(stringr)
 
 # Load data
-SSMT <- read_csv("/Users/Victoria/Documents/OFO/Final_SSMT_StemPlots.csv") # 7998 rows
+# SSMT <- read_csv("/Users/Victoria/Documents/OFO/Final_SSMT_StemPlots.csv") # 7998 rows
+SSMT <- read_csv("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0020/data/Final_Cleaned_Geospatial/All_Plots_Merged/StemPoints_Merged/WGS84_UTM_10N/Final_SSMT_StemPlots.csv")
 
 # HT21 Field: Original measurement values recorded in (cm) converted to (m) 
 # PHT Field: Original measurement values recorded in (cm); no conversion 
@@ -107,7 +108,7 @@ SSMT_final <- SSMT_df %>%
   )
 
 # Save the modified data to a new CSV file
-write_csv(SSMT_final, "/Users/Victoria/Documents/OFO/SSMT_Field_Plots.csv")
+# write_csv(SSMT_final, "/Users/Victoria/Documents/OFO/SSMT_Field_Plots.csv")
 
 ```
 
@@ -263,7 +264,7 @@ SSMTtrees <- SSMT %>%
     contributor_tree_id, notes, corrected_error))
 
 # export trees csv
-write.csv(SSMTtrees, "/Users/Victoria/Documents/OFO/SSMT_Trees.csv", row.names = FALSE, na = "") # replace NA's with empty strings upon export
+# write.csv(SSMTtrees, "/Users/Victoria/Documents/OFO/SSMT_Trees.csv", row.names = FALSE, na = "") # replace NA's with empty strings upon export
 
 ```
 
