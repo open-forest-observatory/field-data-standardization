@@ -428,6 +428,8 @@ combined_dead_291 = combined_dead_291 %>%
 
 # step 4: add the rotation calculated in step 2 to the azimuth calculated in step 3 and compute the rotated x and y in UTMs from the plot (0,0). first add the (0,0) point in UTMs to the data.frame for the calculations. 
 
+# update: no rotation! I made an incorrect assumption from the info I received. also need to subtract some offset coordinates that are found in the metadata files for each plot (the same ones referenced above). SUBTRACT the offset coordinates, don't add them. 
+
 # plot 0286
 
 combined_dead_286$plot_easting_X_long_UTM10N <- 492754.8
@@ -437,14 +439,14 @@ combined_dead_286$plot_northing_Y_lat_UTM10N <- 5194545.6
 combined_dead_286$X_Long <- ""
 
 combined_dead_286$X_Long <- 
-  ((combined_dead_286$plot_easting_X_long_UTM10N) + 
-  ((combined_dead_286$HD_computed) * (sin(combined_dead_286$atanxy + deg2rad(combined_dead_286$rotation)))))
+  ((combined_dead_286$plot_easting_X_long_UTM10N) - 37.03 +
+  ((combined_dead_286$HD_computed) * (sin(combined_dead_286$atanxy))))
 
 combined_dead_286$Y_Lat <- ""
 
 combined_dead_286$Y_Lat <-  
-  ((combined_dead_286$plot_northing_Y_lat_UTM10N) + 
-  ((combined_dead_286$HD_computed) * (cos(combined_dead_286$atanxy + deg2rad(combined_dead_286$rotation)))))
+  ((combined_dead_286$plot_northing_Y_lat_UTM10N) - 0.29 +
+  ((combined_dead_286$HD_computed) * (cos(combined_dead_286$atanxy))))
 
 # plot 0287
 
@@ -455,14 +457,14 @@ combined_dead_287$plot_northing_Y_lat_UTM10N <- 5197347.3
 combined_dead_287$X_Long <- ""
 
 combined_dead_287$X_Long <- 
-  ((combined_dead_287$plot_easting_X_long_UTM10N) + 
-  ((combined_dead_287$HD_computed) * (sin(combined_dead_287$atanxy + deg2rad(combined_dead_287$rotation)))))
+  ((combined_dead_287$plot_easting_X_long_UTM10N) - 21.01 +
+  ((combined_dead_287$HD_computed) * (sin(combined_dead_287$atanxy))))
 
 combined_dead_287$Y_Lat <- ""
 
 combined_dead_287$Y_Lat <-  
-  ((combined_dead_287$plot_northing_Y_lat_UTM10N) + 
-  ((combined_dead_287$HD_computed) * (cos(combined_dead_287$atanxy + deg2rad(combined_dead_287$rotation)))))
+  ((combined_dead_287$plot_northing_Y_lat_UTM10N) - 4.11 +
+  ((combined_dead_287$HD_computed) * (cos(combined_dead_287$atanxy))))
 
 # plot 0288
 
@@ -472,19 +474,11 @@ combined_dead_288$plot_northing_Y_lat_UTM10N <- 5194623
 
 combined_dead_288$X_Long <- ""
 
-# combined_dead_288$X_Long <- 
-#   ((combined_dead_288$plot_easting_X_long_UTM10N) + 
-#   ((combined_dead_288$HD_computed) * (sin(combined_dead_288$atanxy + deg2rad(combined_dead_288$rotation)))))
-
 combined_dead_288$X_Long <- 
   ((combined_dead_288$plot_easting_X_long_UTM10N) - 27.64 +
   ((combined_dead_288$HD_computed) * (sin(combined_dead_288$atanxy))))
 
 combined_dead_288$Y_Lat <- ""
-
-# combined_dead_288$Y_Lat <-  
-#   ((combined_dead_288$plot_northing_Y_lat_UTM10N) + 
-#   ((combined_dead_288$HD_computed) * (cos(combined_dead_288$atanxy + deg2rad(combined_dead_288$rotation)))))
 
 combined_dead_288$Y_Lat <-  
   ((combined_dead_288$plot_northing_Y_lat_UTM10N) + 3.01 +
@@ -499,14 +493,14 @@ combined_dead_289$plot_northing_Y_lat_UTM10N <- 5189817
 combined_dead_289$X_Long <- ""
 
 combined_dead_289$X_Long <- 
-  ((combined_dead_289$plot_easting_X_long_UTM10N) + 
-  ((combined_dead_289$HD_computed) * (sin(combined_dead_289$atanxy + deg2rad(combined_dead_289$rotation)))))
+  ((combined_dead_289$plot_easting_X_long_UTM10N) - 7.95 +
+  ((combined_dead_289$HD_computed) * (sin(combined_dead_289$atanxy))))
 
 combined_dead_289$Y_Lat <- ""
 
 combined_dead_289$Y_Lat <-  
-  ((combined_dead_289$plot_northing_Y_lat_UTM10N) + 
-  ((combined_dead_289$HD_computed) * (cos(combined_dead_289$atanxy + deg2rad(combined_dead_289$rotation)))))
+  ((combined_dead_289$plot_northing_Y_lat_UTM10N) + 0.68 +
+  ((combined_dead_289$HD_computed) * (cos(combined_dead_289$atanxy))))
 
 # plot 0290
 
@@ -517,14 +511,14 @@ combined_dead_290$plot_northing_Y_lat_UTM10N <- 5190601.6
 combined_dead_290$X_Long <- ""
 
 combined_dead_290$X_Long <- 
-  ((combined_dead_290$plot_easting_X_long_UTM10N) + 
-  ((combined_dead_290$HD_computed) * (sin(combined_dead_290$atanxy + deg2rad(combined_dead_290$rotation)))))
+  ((combined_dead_290$plot_easting_X_long_UTM10N) +
+  ((combined_dead_290$HD_computed) * (sin(combined_dead_290$atanxy))))
 
 combined_dead_290$Y_Lat <- ""
 
 combined_dead_290$Y_Lat <-  
-  ((combined_dead_290$plot_northing_Y_lat_UTM10N) + 
-  ((combined_dead_290$HD_computed) * (cos(combined_dead_290$atanxy + deg2rad(combined_dead_290$rotation)))))
+  ((combined_dead_290$plot_northing_Y_lat_UTM10N) + 2.1 +
+  ((combined_dead_290$HD_computed) * (cos(combined_dead_290$atanxy))))
 
 # plot 0291
 
@@ -535,33 +529,43 @@ combined_dead_291$plot_northing_Y_lat_UTM10N <- 5190375
 combined_dead_291$X_Long <- ""
 
 combined_dead_291$X_Long <- 
-  ((combined_dead_291$plot_easting_X_long_UTM10N) + 
-  ((combined_dead_291$HD_computed) * (sin(combined_dead_291$atanxy + deg2rad(combined_dead_291$rotation)))))
+  ((combined_dead_291$plot_easting_X_long_UTM10N) +
+  ((combined_dead_291$HD_computed) * (sin(combined_dead_291$atanxy))))
 
 combined_dead_291$Y_Lat <- ""
 
 combined_dead_291$Y_Lat <-  
-  ((combined_dead_291$plot_northing_Y_lat_UTM10N) + 
-  ((combined_dead_291$HD_computed) * (cos(combined_dead_291$atanxy + deg2rad(combined_dead_291$rotation)))))
+  ((combined_dead_291$plot_northing_Y_lat_UTM10N) +
+  ((combined_dead_291$HD_computed) * (cos(combined_dead_291$atanxy))))
 
-# export just the dead trees for examination/comparison to canopy height models or drone footage or something. for the two plots we have drone coverage for: 288 and 289. then if everything looks okay, will combine with the live trees, reprocess, re-export, and put into the google sheet. 
+# export just the dead trees for examination/comparison to tree points detected from drone footage. I'm not sure how I feel about it so I'm going to export the points and hold off on adding them back into the bigger dataset until I hear from Derek. 
 
-# need to remove trees that still don't have lat/lon. then convert data.frame to sf object and export. 
+# combine all dead tree datasets. need to remove trees that still don't have lat/lon. then convert data.frame to sf object and export.
 
-# plot 288- removed 1 tree
+all_dead <- full_join(combined_dead_286, combined_dead_287)
 
-combined_dead_288_coords <- combined_dead_288 %>% filter(!is.na(X_Long))
+all_dead <- full_join(all_dead, combined_dead_288)
 
-combined_dead_288_coords <- st_as_sf(
-  combined_dead_288_coords, 
+all_dead <- full_join(all_dead, combined_dead_289)
+
+all_dead <- full_join(all_dead, combined_dead_290)
+
+all_dead <- full_join(all_dead, combined_dead_291)
+
+all_dead_coords <- all_dead %>% filter(!is.na(X_Long)) # drop trees without coordinates (43 of them out of 522- happens for trees that don't have local coordinates)
+
+all_dead_coords <- st_as_sf( # make into sf object with point geometry
+  all_dead_coords, 
   coords = c("X_Long", "Y_Lat"),
   crs = 26910)
 
-combined_dead_288_export <- combined_dead_288_coords[, c("unique_id")]
+all_dead_export <- all_dead_coords[, c("unique_id")]
 
-st_write(combined_dead_288_export, "C:/Users/empurvis/Desktop/DS_plot_288_dead_test5.gpkg", driver = "GPKG", delete_dsn = TRUE)
+st_write(all_dead_export, "C:/Users/empurvis/Desktop/DS_deadtrees_allplots.gpkg", driver = "GPKG", delete_dsn = TRUE)
 
-# as good as I could get: remove rotation altogether, open the metadata files for each plot, add the negative of the x,y coords. copy what was done for 288 for the other plots. 
+
+
+
 
 
 
