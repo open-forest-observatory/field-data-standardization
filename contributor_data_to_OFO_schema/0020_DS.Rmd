@@ -9,11 +9,13 @@ output: html_document
 # Load necessary libraries
 library(tidyverse)
 library(dplyr)
+library(sf)
+library(pracma)
 
 # Load data
 # DS <- read_csv("/Users/Victoria/Documents/OFO/DS_StemPlots.csv")
 
-DS <- read_csv("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0021/data/Final_Cleaned_Geospatial/All_Plots_Merged/StemPoints_Merged/WGS84_UTM_10N/DS_StemPlots.csv")
+DS <- read_csv("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0021/data/OFO_Final_Cleaned_Geospatial/All_Plots_Merged/StemPoints_Merged/WGS84_UTM_10N/DS_StemPlots.csv")
 
 #DBH_13   = diameter at beast height (1.37 m) in centimeters.
 #HT_13    = total height for year in meters sampled on treatment trees.
@@ -88,11 +90,13 @@ DS_final <- DS_df %>%
     num_ohvis_trees_excluded, contributor_plot_id)
 
 # Save the modified data to a new CSV file
-write_csv(DS_final, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
+# write_csv(DS_final, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
 ```
 
 
 # Field-trees standardization
+
+Join datasets from 2013 and 2015
 ```{r}
 # We found more recent data (2015) from the same project than what was originally contributed (2013)
 # Measurements from 2015 are preferred because they're more recent. 
@@ -100,7 +104,7 @@ write_csv(DS_final, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
 # Oren already converted geospatial data for the contributed data, so want to preserve that here.
 
 # Join updated measurements from 2015 to our received 2013 data, and omitted dead trees:
-tenyeardata <- read_csv("/Users/victoria/Documents/OFO/RDS-2020-0031/Data/CF_Damage_Study_Data_10_year.csv")
+# tenyeardata <- read_csv("/Users/victoria/Documents/OFO/RDS-2020-0031/Data/CF_Damage_Study_Data_10_year.csv")
 
 tenyeardata <- read_csv("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0021/data/TenYearData+Codes+Metadata/Data/CF_Damage_Study_Data_10_year.csv")
 # you can find this csv in box, I got it from here: https://www.fs.usda.gov/rds/archive/catalog/RDS-2020-0031
@@ -272,9 +276,314 @@ DStrees <- combined %>% mutate(
 
 # unfortunately, these weren't included in the geospatial data cleaning work done before the new dataset was discovered, so we can't include these because they currently lack coords
 # remove these 522 dead trees for now:
-DStrees <- DStrees %>% filter(!is.na(tree_lat))
+#DStrees <- DStrees %>% filter(!is.na(tree_lat))
 
-DStrees_dead <- DStrees %>% filter(is.na(tree_lat))
+#DStrees_dead <- DStrees %>% filter(is.na(tree_lat))
+
+# going to see if we can finagle the coordinates for these 522 dead trees. the plan: 1. extract these trees into data.frames by plot. 2. use the measure bearing tool in QGIS to estimate an approximate rotation angle for the plot grid relative to N-S. 3. use the local x and y coordinates to compute the distance (sqrt(x^2 + y^2)) and azimuth (atan(x/y)) of each tree from the reference corner (0,0 on the local x,y axis). 4. for each tree, add the rotation calculated in step 2 to the azimuth calculated in step 3 and compute the rotated x and y as though it was a normal distance-azimuth plot
+
+# make a data.frame of all the dead trees
+
+combined_dead <- combined %>% filter(is.na(Y_Lat))
+
+# step 1: create data.frames for all the individual plots
+
+combined_dead_286 <- combined_dead %>% subset(Stand == "1")
+
+combined_dead_287 <- combined_dead %>% subset(Stand == "2")
+
+combined_dead_288 <- combined_dead %>% subset(Stand == "3")
+
+combined_dead_289 <- combined_dead %>% subset(Stand == "4")
+
+combined_dead_290 <- combined_dead %>% subset(Stand == "5")
+
+combined_dead_291 <- combined_dead %>% subset(Stand == "6")
+
+# step 2: estimate an approximate rotation angle for the plot grid relative to N-S
+
+# these angle estimates are pretty rough. the plots don't have an internal grid so I'm eyeballing their alignment compared to a N-S UTM grid I generated in QGIS using the rotation tool and the alignment of the polygons with a straightedge. Oren's metadata files for each plot are also helpful to ensure the (0,0) local points are where I think they are (e.g. "Box/FOCAL/ofo-field-data/1_received-data/0021/data/OFO_Final_Cleaned_Geospatial/DS_4/DS_4_Metadata.docx"). made sure the projection and grids were in the same CRS, UTM 10N. 
+
+# plot 0286 (DS_1): rotation of about 41 degrees clockwise
+
+combined_dead_286$rotation <- 41
+
+# plot 0287 (DS_2): rotation of about 19 degrees clockwise (more of a guess than the other plots due to the irregularity of the polygon shape)
+
+combined_dead_287$rotation <- 19
+
+# plot 0288 (DS_3): rotation of about 29 degrees clockwise
+
+combined_dead_288$rotation <- 29
+
+# plot 0289 (DS_4): rotation of about 7 degrees clockwise
+
+combined_dead_289$rotation <- 7
+
+# plot 0290 (DS_5): rotation of about 28 degrees clockwise (also more of a guess than the other plots due to the irregularity of the polygon)
+
+combined_dead_290$rotation <- 28
+
+# plot 0291 (DS_6): rotation of about 5 degrees clockwise
+
+combined_dead_291$rotation <- 5
+
+# step 3: use the local x and y coordinates to compute the distance (sqrt(x^2 + y^2)) and azimuth (atan(x/y)) of each tree from the reference corner
+
+# plot 0286
+
+# distance calculation
+
+combined_dead_286$HD_computed <- ""
+
+combined_dead_286 = combined_dead_286 %>%
+  mutate(HD_computed = (sqrt(((combined_dead_286$'x.cordinate.m')^2) + ((combined_dead_286$'y.cordinate.m')^2))))
+
+# azimuth calculation
+
+combined_dead_286$atanxy <- ""
+
+combined_dead_286 = combined_dead_286 %>%
+  mutate(atanxy = atan((combined_dead_286$'x.cordinate.m')/(combined_dead_286$'y.cordinate.m')))
+
+# plot 0287
+
+# distance calculation
+
+combined_dead_287$HD_computed <- ""
+
+combined_dead_287 = combined_dead_287 %>%
+  mutate(HD_computed = (sqrt(((combined_dead_287$'x.cordinate.m')^2) + ((combined_dead_287$'y.cordinate.m')^2))))
+
+# azimuth calculation
+
+combined_dead_287$atanxy <- ""
+
+combined_dead_287 = combined_dead_287 %>%
+  mutate(atanxy = atan((combined_dead_287$'x.cordinate.m')/(combined_dead_287$'y.cordinate.m')))
+
+# plot 0288
+
+# distance calculation
+
+combined_dead_288$HD_computed <- ""
+
+combined_dead_288 = combined_dead_288 %>%
+  mutate(HD_computed = (sqrt(((combined_dead_288$'x.cordinate.m')^2) + ((combined_dead_288$'y.cordinate.m')^2))))
+
+# azimuth calculation
+
+combined_dead_288$azimuth <- ""
+
+combined_dead_288 = combined_dead_288 %>%
+  mutate(atanxy = atan((combined_dead_288$'x.cordinate.m')/(combined_dead_288$'y.cordinate.m')))
+
+# plot 0289
+
+# distance calculation
+
+combined_dead_289$HD_computed <- ""
+
+combined_dead_289 = combined_dead_289 %>%
+  mutate(HD_computed = (sqrt(((combined_dead_289$'x.cordinate.m')^2) + ((combined_dead_289$'y.cordinate.m')^2))))
+
+# azimuth calculation
+
+combined_dead_289$atanxy <- ""
+
+combined_dead_289 = combined_dead_289 %>%
+  mutate(atanxy = atan((combined_dead_289$'x.cordinate.m')/(combined_dead_289$'y.cordinate.m')))
+
+# plot 0290
+
+# distance calculation
+
+combined_dead_290$HD_computed <- ""
+
+combined_dead_290 = combined_dead_290 %>%
+  mutate(HD_computed = (sqrt(((combined_dead_290$'x.cordinate.m')^2) + ((combined_dead_290$'y.cordinate.m')^2))))
+
+# azimuth calculation
+
+combined_dead_290$atanxy <- ""
+
+combined_dead_290 = combined_dead_290 %>%
+  mutate(atanxy = atan((combined_dead_290$'x.cordinate.m')/(combined_dead_290$'y.cordinate.m')))
+
+# plot 0291
+
+# distance calculation
+
+combined_dead_291$HD_computed <- ""
+
+combined_dead_291 = combined_dead_291 %>%
+  mutate(HD_computed = (sqrt(((combined_dead_291$'x.cordinate.m')^2) + ((combined_dead_291$'y.cordinate.m')^2))))
+
+# azimuth calculation
+
+combined_dead_291$atanxy <- ""
+
+combined_dead_291 = combined_dead_291 %>%
+  mutate(atanxy = atan((combined_dead_291$'x.cordinate.m')/(combined_dead_291$'y.cordinate.m')))
+
+# step 4: add the rotation calculated in step 2 to the azimuth calculated in step 3 and compute the rotated x and y in UTMs from the plot (0,0). first add the (0,0) point in UTMs to the data.frame for the calculations. 
+
+# plot 0286
+
+combined_dead_286$plot_easting_X_long_UTM10N <- 492754.8
+
+combined_dead_286$plot_northing_Y_lat_UTM10N <- 5194545.6
+
+combined_dead_286$X_Long <- ""
+
+combined_dead_286$X_Long <- 
+  ((combined_dead_286$plot_easting_X_long_UTM10N) + 
+  ((combined_dead_286$HD_computed) * (sin(combined_dead_286$atanxy + deg2rad(combined_dead_286$rotation)))))
+
+combined_dead_286$Y_Lat <- ""
+
+combined_dead_286$Y_Lat <-  
+  ((combined_dead_286$plot_northing_Y_lat_UTM10N) + 
+  ((combined_dead_286$HD_computed) * (cos(combined_dead_286$atanxy + deg2rad(combined_dead_286$rotation)))))
+
+# plot 0287
+
+combined_dead_287$plot_easting_X_long_UTM10N <- 491786.8
+
+combined_dead_287$plot_northing_Y_lat_UTM10N <- 5197347.3
+
+combined_dead_287$X_Long <- ""
+
+combined_dead_287$X_Long <- 
+  ((combined_dead_287$plot_easting_X_long_UTM10N) + 
+  ((combined_dead_287$HD_computed) * (sin(combined_dead_287$atanxy + deg2rad(combined_dead_287$rotation)))))
+
+combined_dead_287$Y_Lat <- ""
+
+combined_dead_287$Y_Lat <-  
+  ((combined_dead_287$plot_northing_Y_lat_UTM10N) + 
+  ((combined_dead_287$HD_computed) * (cos(combined_dead_287$atanxy + deg2rad(combined_dead_287$rotation)))))
+
+# plot 0288
+
+combined_dead_288$plot_easting_X_long_UTM10N <- 490502.7
+
+combined_dead_288$plot_northing_Y_lat_UTM10N <- 5194623
+
+combined_dead_288$X_Long <- ""
+
+# combined_dead_288$X_Long <- 
+#   ((combined_dead_288$plot_easting_X_long_UTM10N) + 
+#   ((combined_dead_288$HD_computed) * (sin(combined_dead_288$atanxy + deg2rad(combined_dead_288$rotation)))))
+
+combined_dead_288$X_Long <- 
+  ((combined_dead_288$plot_easting_X_long_UTM10N) - 27.64 +
+  ((combined_dead_288$HD_computed) * (sin(combined_dead_288$atanxy))))
+
+combined_dead_288$Y_Lat <- ""
+
+# combined_dead_288$Y_Lat <-  
+#   ((combined_dead_288$plot_northing_Y_lat_UTM10N) + 
+#   ((combined_dead_288$HD_computed) * (cos(combined_dead_288$atanxy + deg2rad(combined_dead_288$rotation)))))
+
+combined_dead_288$Y_Lat <-  
+  ((combined_dead_288$plot_northing_Y_lat_UTM10N) + 3.01 +
+  ((combined_dead_288$HD_computed) * (cos(combined_dead_288$atanxy))))
+
+# plot 0289
+
+combined_dead_289$plot_easting_X_long_UTM10N <- 485965.5
+
+combined_dead_289$plot_northing_Y_lat_UTM10N <- 5189817
+
+combined_dead_289$X_Long <- ""
+
+combined_dead_289$X_Long <- 
+  ((combined_dead_289$plot_easting_X_long_UTM10N) + 
+  ((combined_dead_289$HD_computed) * (sin(combined_dead_289$atanxy + deg2rad(combined_dead_289$rotation)))))
+
+combined_dead_289$Y_Lat <- ""
+
+combined_dead_289$Y_Lat <-  
+  ((combined_dead_289$plot_northing_Y_lat_UTM10N) + 
+  ((combined_dead_289$HD_computed) * (cos(combined_dead_289$atanxy + deg2rad(combined_dead_289$rotation)))))
+
+# plot 0290
+
+combined_dead_290$plot_easting_X_long_UTM10N <- 489548.6
+
+combined_dead_290$plot_northing_Y_lat_UTM10N <- 5190601.6
+
+combined_dead_290$X_Long <- ""
+
+combined_dead_290$X_Long <- 
+  ((combined_dead_290$plot_easting_X_long_UTM10N) + 
+  ((combined_dead_290$HD_computed) * (sin(combined_dead_290$atanxy + deg2rad(combined_dead_290$rotation)))))
+
+combined_dead_290$Y_Lat <- ""
+
+combined_dead_290$Y_Lat <-  
+  ((combined_dead_290$plot_northing_Y_lat_UTM10N) + 
+  ((combined_dead_290$HD_computed) * (cos(combined_dead_290$atanxy + deg2rad(combined_dead_290$rotation)))))
+
+# plot 0291
+
+combined_dead_291$plot_easting_X_long_UTM10N <- 491448.7
+
+combined_dead_291$plot_northing_Y_lat_UTM10N <- 5190375
+
+combined_dead_291$X_Long <- ""
+
+combined_dead_291$X_Long <- 
+  ((combined_dead_291$plot_easting_X_long_UTM10N) + 
+  ((combined_dead_291$HD_computed) * (sin(combined_dead_291$atanxy + deg2rad(combined_dead_291$rotation)))))
+
+combined_dead_291$Y_Lat <- ""
+
+combined_dead_291$Y_Lat <-  
+  ((combined_dead_291$plot_northing_Y_lat_UTM10N) + 
+  ((combined_dead_291$HD_computed) * (cos(combined_dead_291$atanxy + deg2rad(combined_dead_291$rotation)))))
+
+# export just the dead trees for examination/comparison to canopy height models or drone footage or something. for the two plots we have drone coverage for: 288 and 289. then if everything looks okay, will combine with the live trees, reprocess, re-export, and put into the google sheet. 
+
+# need to remove trees that still don't have lat/lon. then convert data.frame to sf object and export. 
+
+# plot 288- removed 1 tree
+
+combined_dead_288_coords <- combined_dead_288 %>% filter(!is.na(X_Long))
+
+combined_dead_288_coords <- st_as_sf(
+  combined_dead_288_coords, 
+  coords = c("X_Long", "Y_Lat"),
+  crs = 26910)
+
+combined_dead_288_export <- combined_dead_288_coords[, c("unique_id")]
+
+st_write(combined_dead_288_export, "C:/Users/empurvis/Desktop/DS_plot_288_dead_test5.gpkg", driver = "GPKG", delete_dsn = TRUE)
+
+# as good as I could get: remove rotation altogether, open the metadata files for each plot, add the negative of the x,y coords. copy what was done for 288 for the other plots. 
+
+
+
+DStrees_coords <- DStrees %>% filter(!is.na(tree_lon))
+
+DStrees_coords <- st_as_sf(
+  DStrees_coords, 
+  coords = c("tree_lon", "tree_lat"),
+  crs = 4326)
+
+DStrees_export <- DStrees_coords["geometry"]
+
+st_write(DStrees_export, "C:/Users/empurvis/Desktop/DStrees_live.gpkg", driver = "GPKG", delete_dsn = TRUE)
+
+
+
+
+
+
+
+
+
 
 # re-order trees by plot for cleaner export
 DStrees <- DStrees[order(DStrees$plot_id),]
