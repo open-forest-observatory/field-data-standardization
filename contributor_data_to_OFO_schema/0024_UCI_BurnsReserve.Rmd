@@ -1,0 +1,263 @@
+---
+title: "0024_UCI_BurnsReserve"
+author: "Emily Marie Purvis"
+date: "2026-08-10"
+output: html_document
+---
+
+```{r}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+
+```
+
+Import data
+
+```{r}
+
+# import data
+
+data <- st_read("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0024/data/S123_69d33483b88146e5a856a7c2df9dcabe_SHP/survey.shp") 
+
+
+```
+
+Plot polygons
+
+```{r}
+
+data_utm <- st_transform(data, 32611) # convert to utm
+
+union <- st_union(st_geometry(data_utm)) # union
+
+singular_poly <- st_convex_hull(union) # convex hull
+
+singular_poly <- st_sf(geometry = singular_poly) # make into sf object
+
+singular_poly$OFO_plot_ID <- 0296 # add OFO plot ID number
+
+for(i in 1:nrow(singular_poly)) {
+  polygon_current <- singular_poly[i, ]
+  plot_id_current = polygon_current$OFO_plot_ID
+  st_write(polygon_current, paste0("C:/Users/empurvis/Box/FOCAL/ofo-field-data/2_standardized-data/field-plot-boundaries/", plot_id_current, ".gpkg"))
+} # export
+
+```
+
+Plot data
+
+```{r}
+
+singular_poly$survey_date_approx <- "TRUE"
+
+singular_poly$survey_date <- 20240710
+
+singular_poly$plot_shape <- "irregular"
+
+singular_poly <- st_transform(singular_poly, crs = 32611) # convert to UTMs if needed to calculate area
+
+singular_poly$plot_area <- as.numeric(st_area(singular_poly))
+
+singular_poly$subplots <- "FALSE" # maybe? or maybe we're counting the grid cells as subplots? if so, can use the area functions above to find subplot areas. however, there's only one cell for subplot area in the google sheet- it assumes all subplots in a plot have the same area, which is not true here. 
+
+singular_poly$subplot_shape <- ""
+
+singular_poly$subplot_area <- ""
+
+singular_poly$includes_snags <- "TRUE"
+
+singular_poly$includes_damage <- "FALSE"
+
+singular_poly$damage_codes_inspected <- ""
+
+singular_poly$forest_type <- "185 – Pinyon juniper woodland"
+
+singular_poly$canopy_cover <- ""
+
+singular_poly$min_dbh <- ""
+
+singular_poly$min_dbh_live <- ""
+
+singular_poly$max_dbh_of_primary_trees <- ""
+
+singular_poly$min_ht <- ""
+
+singular_poly$min_dbh_ohvis <- ""
+
+singular_poly$min_ht_ohvis <- ""
+
+singular_poly <- st_transform(singular_poly, crs = 4326) # convert to WGS84 if needed to calculate plot latitude and longitude
+
+poly_centroid <- st_centroid(singular_poly) # find centroid point
+
+centroid_coords <- st_coordinates(poly_centroid) # extract centroid coordinates
+
+singular_poly$plot_longitude <- centroid_coords[, "X"]
+
+singular_poly$plot_latitude <- centroid_coords[, "Y"]
+
+singular_poly$num_ohvis_trees_excluded <- "" 
+
+singular_poly$contributor_plot_id <- "" # just one plot in the dataset, no plot ID number
+
+# export to paste into google sheet field-plots tab
+
+plot_export <- st_drop_geometry(singular_poly)
+
+write.csv(plot_export, "C:/Users/empurvis/Box/FOCAL/field-data-standardization/UCI_Burns_Reserve/plots.csv")
+
+```
+
+Tree data
+
+```{r}
+
+trees <- data
+
+# OFO plot ID numbers
+
+trees$OFO_plot_ID <- "0296"
+
+# tree latitude and tree longitude
+
+# extract the geometry features into columns of lat and long, then merge back into the spatial data frame
+
+trees_coords <- data.frame(trees$'globalid', st_coordinates(trees[,1], st_coordinates(trees[,2]))) %>% rename (tree_lon=X, tree_lat=Y, globalid=trees.globalid)
+
+trees <- full_join(trees, trees_coords, by="globalid")
+
+# tree species
+
+# according to the UCI Burns Reserve website (https://burns.ucnature.org/species-lists/), the only juniper species on the site is the California juniper (Juniperus californica), the pinon pine species on the site is the singleleaf pinon pine (Pinus monophylla), and the only oak species on the site is the desert scrub oak (Quercus cornelius-mulleri)
+
+# FIA codes: 982 = joshua tree, 62 = juniper, 133 = pinon. Despite lots of searching I can't track down a code for the desert scrub oak, so I'll substitute the USDA plant code: QUCO7
+
+trees$species <- ""
+
+trees <- trees %>% mutate(
+    species = case_when(
+      tree_speci == "Pinon Pine" ~ "133",
+      tree_speci == "Joshua Tree" ~ "982",
+      tree_speci == "Juniper" ~ "62",
+      tree_speci == "Oak" ~ "QUCO7"))
+
+trees$species[trees$tree_spe_1 =="Dead shrub"] <- "0" # code for unknown species
+
+trees$species[trees$tree_spe_1 =="Juniper"] <- "62"
+
+trees$species[trees$tree_spe_1 =="Oak"] <- "QUCO7"
+
+# growth form (all trees except 1 shrub in dataset)
+
+trees$growth_form <- "tree"
+
+trees$growth_form[trees$tree_spe_1 =="Dead shrub"] <- "shrub"
+
+# live/dead
+
+trees$live_dead <- ""
+
+trees <- trees %>% mutate(
+    live_dead = case_when(
+      tree_statu == "Alive" ~ "L",
+      tree_statu == "Alive,Dead" ~ "M",
+      tree_statu == "Alive,Unhealthy" ~ "M",
+      tree_statu == "Dead" ~ "D",
+      tree_statu == "Unhealthy" ~ "M",
+      tree_statu == "Unhealthy,Alive" ~ "M",
+      tree_statu == "Unsure" ~ "M"))
+
+# notes
+
+trees$notes <- trees$other_note
+
+trees$notes[is.na(trees$notes)] <- ""
+
+# remove downed trees, we only want live and dead standing trees
+
+trees <- trees[trees$tree_struc != "Downed", ] # went from 266 trees to 208 trees. there are still some marginal cases in here (e.g. clumps of trees with one standing and one downed). 
+
+# contributor tree ID
+
+trees$contributor_tree_id <- trees$globalid
+
+# OFO columns that are empty in our dataset
+
+trees$plotid2 <- ""
+
+trees$subplotid <- "" # only if we don't make the grid cells into subplots
+
+trees$height <- ""
+
+trees$height_allometric <- ""
+
+trees$height_above_plot <- ""
+
+trees$dbh <- ""
+
+trees$crown_position <- ""
+
+trees$ohvis <- ""
+
+trees$crown_ratio <- ""
+
+trees$crown_ratio_compacted <- ""
+
+trees$height_to_crown <- ""
+
+trees$height_to_needle <- ""
+
+trees$scorch_height <- ""
+
+trees$percent_prefire_crown_green <- ""
+
+trees$percent_postfire_crown_green <- ""
+
+trees$live_crown_class <- ""
+
+trees$crown_width_1 <- ""
+
+trees$crown_width_2 <- ""
+
+trees$crown_width_allometric <- ""
+
+trees$decay_class <- ""
+
+trees$damage1 <- ""
+
+trees$damage2 <- ""
+
+trees$damage3 <- ""
+
+trees$damage4 <- ""
+
+trees$damage5 <- ""
+
+trees$distance_to_pith <- ""
+
+trees$distance_to_face <- ""
+
+trees$azimuth <- ""
+
+# drop trees without coordinates
+
+trees <- trees[!st_is_empty(trees), ]
+
+# make a new data.frame from sf object
+
+trees_for_export <- st_drop_geometry(trees)
+
+# select columns and put them in order
+
+trees_for_export <- trees_for_export[, c("OFO_plot_ID", "plotid2", "subplotid", "tree_lat", "tree_lon", "height", "height_allometric", "height_above_plot", "dbh", "species", "growth_form", "live_dead", "crown_position", "ohvis", "crown_ratio", "crown_ratio_compacted", "height_to_crown", "height_to_needle", "scorch_height", "percent_prefire_crown_green", "percent_postfire_crown_green", "live_crown_class", "crown_width_1", "crown_width_2", "crown_width_allometric", "decay_class", "damage1", "damage2", "damage3", "damage4", "damage5", "distance_to_pith", "distance_to_face", "azimuth", "contributor_tree_id", "notes" )]
+
+# export
+
+write.csv(trees_for_export, "C:/Users/empurvis/Box/FOCAL/field-data-standardization/UCI_Burns_Reserve/UCIBurns_trees_processed_for_OFO.csv", row.names = FALSE, na = "")
+
+```
+
+

@@ -9,9 +9,13 @@ output: html_document
 # Load necessary libraries
 library(tidyverse)
 library(dplyr)
+library(sf)
+library(pracma)
 
 # Load data
-DS <- read_csv("/Users/Victoria/Documents/OFO/DS_StemPlots.csv")
+# DS <- read_csv("/Users/Victoria/Documents/OFO/DS_StemPlots.csv")
+
+DS <- read_csv("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0021/data/OFO_Final_Cleaned_Geospatial/All_Plots_Merged/StemPoints_Merged/WGS84_UTM_10N/DS_StemPlots.csv")
 
 #DBH_13   = diameter at beast height (1.37 m) in centimeters.
 #HT_13    = total height for year in meters sampled on treatment trees.
@@ -86,11 +90,13 @@ DS_final <- DS_df %>%
     num_ohvis_trees_excluded, contributor_plot_id)
 
 # Save the modified data to a new CSV file
-write_csv(DS_final, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
+# write_csv(DS_final, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
 ```
 
 
 # Field-trees standardization
+
+Join datasets from 2013 and 2015
 ```{r}
 # We found more recent data (2015) from the same project than what was originally contributed (2013)
 # Measurements from 2015 are preferred because they're more recent. 
@@ -98,7 +104,9 @@ write_csv(DS_final, "/Users/Victoria/Documents/OFO/DS_Field_Plots.csv")
 # Oren already converted geospatial data for the contributed data, so want to preserve that here.
 
 # Join updated measurements from 2015 to our received 2013 data, and omitted dead trees:
-tenyeardata <- read_csv("/Users/victoria/Documents/OFO/RDS-2020-0031/Data/CF_Damage_Study_Data_10_year.csv")
+# tenyeardata <- read_csv("/Users/victoria/Documents/OFO/RDS-2020-0031/Data/CF_Damage_Study_Data_10_year.csv")
+
+tenyeardata <- read_csv("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0021/data/TenYearData+Codes+Metadata/Data/CF_Damage_Study_Data_10_year.csv")
 # you can find this csv in box, I got it from here: https://www.fs.usda.gov/rds/archive/catalog/RDS-2020-0031
 
 # unique id's for joining
@@ -268,7 +276,12 @@ DStrees <- combined %>% mutate(
 
 # unfortunately, these weren't included in the geospatial data cleaning work done before the new dataset was discovered, so we can't include these because they currently lack coords
 # remove these 522 dead trees for now:
+
 DStrees <- DStrees %>% filter(!is.na(tree_lat))
+
+DStrees_dead <- DStrees %>% filter(is.na(tree_lat))
+
+# we tried multiple methods to calculate the coordinates for these dead trees, but nothing lined up well enough with the drone footage to consider keeping. a record of these methods is on github.
 
 # re-order trees by plot for cleaner export
 DStrees <- DStrees[order(DStrees$plot_id),]
@@ -309,3 +322,19 @@ for (pid in unique(all$plot_id)) {
   st_write(plot_data, dsn = file.path(output_dir, paste0(pid, ".gpkg")))}
 
 ```
+
+Let's see if we can get those eliminated dead trees into the final dataset
+
+```{r}
+
+library(sf)
+
+DS3 <- st_read("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0021/data/Final_Cleaned_Geospatial/DS_3/DS_3_ConvexHull/NAD83_UTM_Zone10N/shp/shp/DS_3_NAD83_ConvexHull.shp")
+
+DS3_stempoints <- st_read("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0021/data/Final_Cleaned_Geospatial/DS_3/DS_3_StemPoints/WGS84/shp/shp/DS_3_WGS84_StemPoints.shp")
+
+DS3_stempoints_alt <- st_read("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0021/data/Final_Cleaned_Geospatial/DS_3/DS_3_StemPoints/NAD83_UTM_Zone10N/shp/shp/DS_3_NAD83_StemPoints.shp")
+
+```
+
+

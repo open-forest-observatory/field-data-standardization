@@ -3,7 +3,7 @@
 # Goal: Write code that creates polygons around plot centers and exports them to .gpkg files
 
 #### Set working directory ####
-setwd("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data")
+setwd("C:/Users/empurvis/Box/FOCAL/ofo-field-data")
 
 #### Load libraries ####
 library(sf)
@@ -1125,5 +1125,44 @@ for(i in 1:nrow(plots)) {
   polygon_current <- plots[i, ]
   plot_id_current = polygon_current$ofo_plot_id
   st_write(polygon_current, paste0("C:\\Users\\emily\\Box\\FOCAL\\ofo-field-data\\2_standardized-data\\field-plot-boundaries\\", plot_id_current, ".gpkg"))
+}
+
+#### FOCAL 2025 opportunistic stem mapping (project ID 0022) ####
+
+#import data
+
+treedata <- read.csv("C:/Users/empurvis/Box/FOCAL/field-data-standardization/FOCAL_opportunistic_stem_mapping_projectID0022/standardized_FOCALopportunisticstemmapping.csv", header = TRUE)
+
+# we don't want all of these columns, just plot ID and spatial attributes
+
+treedata = subset(treedata, select = c('ofo_plot_id','centerpoint_latitude', 'centerpoint_longitude') )
+
+# and we don't need all of these rows, just one row per plot
+
+treedata <- treedata[c(1, 178, 245, 314), ]
+
+# convert to sf
+
+treedata_sf <- st_as_sf(treedata, coords = c("centerpoint_longitude", "centerpoint_latitude"), crs = 4326)
+
+# These are circular plots! Buffer circles by 40 meters-- this is the plot radius
+
+# First project to a projected (meters) coordinate system with equal x and y distances
+# CONUS Albers Equal Area (EPSG: 5070) covers the CONUS, but will need a different one for any future plots outside the CONUS
+
+treedata_sf = st_transform(treedata_sf, crs = 5070)
+
+treedata_circles <- st_buffer(treedata_sf, dist = c(40, 40, 40, 40), nQuadSegs = 10) # all plots have 40 m radius
+
+# Then back to WGS84
+
+treedata_circles <- st_transform(treedata_circles, crs = 4326)
+
+# export plot polygons
+
+for(i in 1:nrow(treedata_circles)) {
+  polygon_current <- treedata_circles[i, ]
+  plot_id_current = polygon_current$ofo_plot_id
+  st_write(polygon_current, paste0("C:/Users/empurvis/Box/FOCAL/ofo-field-data/2_standardized-data/field-plot-boundaries/", plot_id_current, ".gpkg"))
 }
 

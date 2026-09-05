@@ -1,0 +1,293 @@
+---
+title: "FOCAL_opportunistic_stem_mapping"
+author: "Emily Marie Purvis"
+date: "2026-05-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DATA MANIPULATED IN R
+
+```{r, echo=FALSE}
+
+# Load libraries
+
+library(tidyverse)
+library(sf)
+# library(stringr)
+library(pracma)
+```
+
+Load data
+
+```{r}
+
+# set working directory
+
+setwd("C:/Users/empurvis/Box/FOCAL/ofo-field-data")
+
+#import data
+
+treedata <- read.csv("C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0022/data/dispersal-data-entry-2025-stemmap_tree.csv", header = TRUE)
+
+```
+
+Plot ID
+
+```{r}
+
+treedata$`ofo_plot_id` <- ""
+
+for(i in 1:nrow(treedata)) {
+  if(treedata$stem_map_id[i] == '203') {
+    treedata[i,]$ofo_plot_id = '0292'
+  }
+  else if (treedata$stem_map_id[i] == '201') {
+    treedata[i,]$ofo_plot_id = '0293'
+  }
+  else if (treedata$stem_map_id[i] == '204') {
+    treedata[i,]$ofo_plot_id = '0294'
+  }
+  else if (treedata$stem_map_id[i] == '200') {
+    treedata[i,]$ofo_plot_id = '0295'
+  }
+}
+
+```
+
+Project ID
+
+```{r}
+
+treedata$`ofo_project_id` <- "0022"
+
+```
+
+Survey dates
+
+```{r}
+
+treedata$`survey_date_approx` <- "TRUE"
+
+treedata$`survey_date` <- ""
+
+for(i in 1:nrow(treedata)) {
+  if(treedata$stem_map_id[i] == '203') {
+    treedata[i,]$survey_date = '20250831'
+  }
+  else if (treedata$stem_map_id[i] == '201') {
+    treedata[i,]$survey_date = '20250721'
+  }
+  else if (treedata$stem_map_id[i] == '204') {
+    treedata[i,]$survey_date = '20250901'
+  }
+  else if (treedata$stem_map_id[i] == '200') {
+    treedata[i,]$survey_date = '20250621'
+  }
+}
+
+```
+
+Plot characteristics
+
+```{r}
+
+treedata$`plot_shape` <- "circular"
+
+treedata$`plot_area_squarem` <- pi*40*40
+
+# all plots appear to have 40 m radii based on farthest tree away from plot center. one tree in one plot falls beyond this boundary so I'm removing it
+
+treedata <- treedata[-270, ]
+
+treedata$`subplots` <- "FALSE"
+
+treedata$`includes_snags` <- "TRUE"
+
+treedata$`includes_damage` <- "TRUE"
+
+treedata$`damage_codes_inspected` <- "90004; 90006; 90001; 90002" #(F)ork: 90004, (C)rook: 90006, (B)roken top (90001), (D)ead top (90002), (L)ean (where the top of the tree is > 1 m horizontal offset from the base), (S)weep (where the sweep in the stem is > 1 m horizontal offset from the base): 90006
+
+treedata$`forest_type` <- "371 – California mixed conifer"
+
+treedata$`min_dbh` <- ""
+
+treedata$`min_ht` <- "8"
+
+treedata$`min_ht_ohvis` <- "5"
+
+```
+
+Tree lat and lon
+
+```{r}
+
+#### give trees ID numbers ####
+
+treedata = treedata %>% mutate(ofo_tree_id = 1:nrow(treedata))
+
+#### Convert plot center coordinates to UTMs ####
+
+# convert to spatial dataframe with plot center lat and long
+
+treedata_spatial <- st_as_sf(treedata, coords = c("centerpoint_longitude", "centerpoint_latitude"), crs = 4326, remove=F)
+
+# convert to UTMs
+
+treedata_spatial <- treedata_spatial %>% st_transform(32610)
+
+# create new dataframe with UTM coordinates
+
+treedata_spatial_coordinates <- data.frame(treedata_spatial$ofo_tree_id, st_coordinates(treedata_spatial[,1], st_coordinates(treedata_spatial[,2]))) 
+
+# rename new columns
+
+treedata_spatial_coordinates <- treedata_spatial_coordinates %>% rename (`ofo_tree_id`=treedata_spatial.ofo_tree_id, PlotLongitudeUTM=X, PlotLatitudeUTM=Y)
+
+# merge into tree data frame
+
+treedata <- full_join(treedata, treedata_spatial_coordinates, by="ofo_tree_id")
+
+#### calculate tree coordinates ####
+
+# Make new columns for tree coordinates
+
+treedata$`TreeLongitudeUTM10N` <- 0
+
+treedata$`TreeLatitudeUTM10N` <- 0
+
+# Calculate tree coordinates in UTMs 
+
+# Longitude UTM10N
+
+for(i in 1:nrow(treedata)) {
+    treedata[i,]$`TreeLongitudeUTM10N` = 
+      (treedata[i,]$`PlotLongitudeUTM`) + 
+      ((sin(pracma::deg2rad(treedata[i,]$`azimuth`))) * ((treedata[i,]$`distance`)))
+}
+
+# Latitude UTM10N
+
+for(i in 1:nrow(treedata)) {
+    treedata[i,]$`TreeLatitudeUTM10N` = 
+      (treedata[i,]$`PlotLatitudeUTM`) + 
+      ((cos(pracma::deg2rad(treedata[i,]$`azimuth`))) * ((treedata[i,]$`distance`)))
+}
+
+# Convert tree coordinates to WGS84
+
+# make a spatial data frame
+
+treecoordinatesconversion <- data.frame(treedata$ofo_tree_id, treedata$TreeLongitudeUTM10N, treedata$TreeLatitudeUTM10N) 
+
+treecoordinatesconversion <- treecoordinatesconversion %>% rename (ofo_tree_id=treedata.ofo_tree_id, TreeLongitudeUTM10N=treedata.TreeLongitudeUTM10N, TreeLatitudeUTM10N=treedata.TreeLatitudeUTM10N)
+
+treecoordinatesconversion <- st_as_sf(treecoordinatesconversion, coords = c("TreeLongitudeUTM10N", "TreeLatitudeUTM10N"), crs = 32610, remove=F)
+
+# change the CRS
+
+treecoordinatesconversion <- treecoordinatesconversion %>% st_transform(4326)
+
+# extract the geometry features into columns of lat and long WGS84, then merge back into the tree data frame
+
+treecoordinatesconversionWGS84 <- data.frame(treecoordinatesconversion$ofo_tree_id, st_coordinates(treecoordinatesconversion[,1], st_coordinates(treecoordinatesconversion[,2]))) 
+
+treecoordinatesconversionWGS84 <- treecoordinatesconversionWGS84 %>% rename (ofo_tree_id=treecoordinatesconversion.ofo_tree_id, TreeLongitudeWGS84=X, TreeLatitudeWGS84=Y)
+
+treedata <- full_join (treedata, treecoordinatesconversionWGS84, by="ofo_tree_id")
+
+```
+
+Other tree characteristics
+
+```{r}
+
+# Tree height is already recorded in meters, DBH in centimeters
+
+# Species FIA codes
+
+treedata$`species`[treedata$`species` == 'abco'] <- '15' 
+treedata$`species`[treedata$`species` == 'baco'] <- '15' # suspected typo for abco
+treedata$`species`[treedata$`species` == 'anco'] <- '15' # suspected typo for abco
+treedata$`species`[treedata$`species` == 'cade'] <- '81' 
+treedata$`species`[treedata$`species` == 'pila'] <- '117'
+treedata$`species`[treedata$`species` == 'piola'] <- '117' # suspected typo for pila
+treedata$`species`[treedata$`species` == 'piila'] <- '117' # suspected typo for pila
+treedata$`species`[treedata$`species` == 'pipj'] <- '150' # a code we made up for "either PIPO or PIJE", not an official FIA species code number either
+treedata$`species`[treedata$`species` == 'pipo'] <- '122'
+treedata$`species`[treedata$`species` == 'psme'] <- '202'
+treedata$`species`[treedata$`species` == 'unk'] <- '000'
+treedata$`species`[treedata$`species` == 'umk'] <- '000' # suspected typo for unk
+
+# Growth form- only trees were recorded in this dataset
+
+treedata$`growth_form` <- 'tree'
+
+# Live/dead - already recorded, 1 entry appears to have a typo
+
+treedata$`Status..Live.or.Dead.`[treedata$`Status..Live.or.Dead.` == 'LK'] <- 'L'
+
+# crown position
+
+treedata$`can_pos`[treedata$`can_pos` == 'I'] <- '4' 
+treedata$`can_pos`[treedata$`can_pos` == 'D'] <- '2' 
+treedata$`can_pos`[treedata$`can_pos` == 'C'] <- '3' 
+treedata$`can_pos`[treedata$`can_pos` == 'S'] <- '5' 
+treedata$`can_pos`[treedata$`can_pos` == 'L'] <- '' # typo- unfortunately I don't know what it's supposed to be 
+
+# overhead visibility
+
+# add a new column for ohvis
+
+treedata <- treedata %>%
+  add_column(ohvis = "")
+
+treedata$can_pos <- as.numeric(treedata$can_pos)
+
+# calculate ohvis from canopy position
+
+treedata$ohvis <- case_match(
+  treedata$can_pos,
+  c(1, 2, 3) ~ "TRUE",
+  c(4, 5) ~ "FALSE",
+  .default = ""
+)
+
+# Damage codes
+
+treedata$defects <- str_replace(treedata$defects, "B", "90001") # broken top
+treedata$defects <- str_replace(treedata$defects, "F", "90004") # forked top
+treedata$defects <- str_replace(treedata$defects, "C", "90006") # crook/sweep
+treedata$defects <- str_replace(treedata$defects, "D", "90002") # dead top
+treedata$defects <- str_replace(treedata$defects, "L", "90006") # lean, there isn't a code for lean but it's pretty close to crook/sweep
+treedata$defects <- str_replace(treedata$defects, "S", "90006") # crook/sweep
+
+# distance already in meters, azmuth already in degrees
+
+# distance to face is the same as distance column already in dataset
+
+# distance to pith: distance to face + tree radius
+
+treedata <- treedata %>%
+  add_column(horiz_distance_pith = "")
+
+# calculate
+
+treedata$horiz_distance_pith = treedata$'distance' + (0.5 * 0.01 * treedata$'dbh')
+
+```
+
+Export CSV
+
+```{r}
+
+write.csv(treedata, "C:/Users/empurvis/Box/FOCAL/ofo-field-data/1_received-data/0022/data/standardized_FOCALopportunisticstemmapping.csv")
+
+```
+
+## DATA MANIPULATED IN EXCEL
+
+Damage codes manually seperated into new columns
